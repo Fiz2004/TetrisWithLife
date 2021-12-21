@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".GameActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="520dp"
+        android:orientation="horizontal">
+
+        <SurfaceView
+            android:id="@+id/game_game_surfaceview"
+            android:layout_width="0dp"
+            android:layout_height="520dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <SurfaceView
+                android:id="@+id/nextfigure_game_surfaceview"
+                android:layout_width="150dp"
+                android:layout_height="150dp" />
+
+            <Button
+                android:id="@+id/new_game_game_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/new_game_game_button" />
+
+            <Button
+                android:id="@+id/pause_game_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pause_game_button" />
+
+            <Button
+                android:id="@+id/exit_game_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/exit_game_button" />
+
+            <TextView
+                android:id="@+id/scores_game_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/scores_game_textview" />
+
+            <TextView
+                android:id="@+id/record_game_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/record_game_textview" />
+
+            <TextView
+                android:id="@+id/infobreath_game_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/infobreath_game_textview" />
+
+            <TextView
+                android:id="@+id/breath_game_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/left_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/left_game_button" />
+
+        <Button
+            android:id="@+id/right_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/right_game_button" />
+
+        <Button
+            android:id="@+id/down_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/down_game_button" />
+
+        <Button
+            android:id="@+id/rotate_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rotate_game_button" />
+    </LinearLayout>
+</LinearLayout>
