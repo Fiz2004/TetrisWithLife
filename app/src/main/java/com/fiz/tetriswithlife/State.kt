@@ -1,9 +1,11 @@
 package com.fiz.tetriswithlife
 
-const val NUMBER_FRAMES_ELEMENTS = 4
+import android.service.controls.Control
+
+private const val NUMBER_FRAMES_ELEMENTS = 4
 
 // Время без дыхания для проигрыша
-const val TIMES_BREATH_LOSE = 60
+private const val TIMES_BREATH_LOSE = 60
 
 class State(val width:Int, val height:Int) {
     val grid = Grid(width, height)
@@ -14,7 +16,7 @@ class State(val width:Int, val height:Int) {
     //val record = localStorage.getItem('Record') || 0
     var status = "playing"
 
-    val pauseTime: Double? = null
+    val pauseTime: Float? = null
 
     var nextFigure: Figure = Figure()
     var currentFigure:CurrentFigure = CurrentFigure(grid, nextFigure)
@@ -25,7 +27,7 @@ class State(val width:Int, val height:Int) {
         nextFigure = Figure()
     }
 
-    fun update(deltaTime:Double, controller:Boolean=false):Boolean
+    fun update(deltaTime:Float, controller:Controller):Boolean
     {
         if (actionsControl(controller) === false
 //            || (!character.isBreath(this.grid) && (checkLose() || isCrushedBeetle()))
@@ -47,10 +49,9 @@ class State(val width:Int, val height:Int) {
         return true
     }
 
-    fun actionsControl(controller:Boolean):Boolean
+    fun actionsControl(controller:Controller):Boolean
     {
-//        val status = currentFigure.moves(controller.pressed);
-        val status = currentFigure.moves()
+        val status = currentFigure.moves(controller)
         if (status === "endGame"
             // Фигура достигла препятствия
             || (status === "fall" && isCrushedBeetle())

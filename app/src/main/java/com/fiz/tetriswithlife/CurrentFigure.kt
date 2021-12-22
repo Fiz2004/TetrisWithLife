@@ -1,9 +1,9 @@
 package com.fiz.tetriswithlife
 
-const val START_STEP_MOVE_AUTO = 0.03
-const val  ADD_STEP_MOVE_AUTO = 0.1
-const val  STEP_MOVE_KEY_X = 1
-const val  STEP_MOVE_KEY_Y = 4
+private const val START_STEP_MOVE_AUTO = 0.03
+private const val  ADD_STEP_MOVE_AUTO = 0.1
+private const val  STEP_MOVE_KEY_X = 1
+private const val  STEP_MOVE_KEY_Y = 4
 
 class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
     var stepMoveAuto = START_STEP_MOVE_AUTO
@@ -15,26 +15,26 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
     fun createStartPosition():Point {
         val width = cells.reduce{a, b -> if (a.x > b.x ) a else b}.x
         val height = cells.reduce{a, b -> if (a.y > b.y)  a else b}.y
-        return Point(Math.floor(Math.random() * (grid.width - 1 - width)), -1 - height)
+        return Point((0 until (grid.width - width.toInt())).shuffled().first().toInt(), -1 - height.toInt())
     }
 
-    fun getPositionTile(x: Double = position.x, y: Double = position.y): Array<Point> {
-        return cells.map { cell-> Point(cell.x + Math.ceil(x), cell.y + Math.ceil(y))}.toTypedArray()
+    fun getPositionTile(x: Float = position.x, y: Float = position.y): Array<Point> {
+        return cells.map { cell-> Point(cell.x + x.toInt(), cell.y + y.toInt())}.toTypedArray()
     }
 
     fun fixation(scores:Int) {
         val scoresForLevel = 300
         stepMoveAuto = ADD_STEP_MOVE_AUTO
-        + ADD_STEP_MOVE_AUTO * (scores / scoresForLevel.toDouble())
+        + ADD_STEP_MOVE_AUTO * (scores / scoresForLevel.toFloat())
     }
 
     fun isCollission(x:Int, y:Int):Boolean {
-        if (getPositionTile(x.toDouble(), y.toDouble()).any { p ->
+        if (getPositionTile(x.toFloat(), y.toFloat()).any { p ->
                 p.x < 0 || p.x > this.grid.width - 1 || p.y > this.grid.height - 1
             } )
             return true
 
-        if (getPositionTile(x.toDouble(), y.toDouble())
+        if (getPositionTile(x.toFloat(), y.toFloat())
                 .any { point ->
                     grid.isInside(point) && grid.space[point.y.toInt()][point.x.toInt()].block !== 0
                 })
@@ -50,11 +50,11 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
             cells = oldCells
     }
 
-    fun moves( left:Boolean=false, right:Boolean=false, up:Boolean=false, down:Boolean=false ):String {
-        if (left) moveLeft()
-        if (right) moveRight()
-        if (up) rotate()
-        val step:Double=if (down) STEP_MOVE_KEY_Y.toDouble() else stepMoveAuto
+    fun moves( controller: Controller ):String {
+        if (controller.Left) moveLeft()
+        if (controller.Right) moveRight()
+        if (controller.Up) rotate()
+        val step:Float=if (controller.Down) STEP_MOVE_KEY_Y.toFloat() else stepMoveAuto.toFloat()
         return moveDown(step)
     }
 
@@ -68,21 +68,21 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
             position.x += STEP_MOVE_KEY_X
     }
 
-    fun moveDown(stepY:Double):String {
-        val yStart = Math.ceil(position.y)
-        val yEnd = Math.ceil(position.y + stepY)
+    fun moveDown(stepY:Float):String {
+        val yStart = Math.ceil(position.y.toDouble())
+        val yEnd = Math.ceil(position.y + stepY.toDouble())
         val yMax = getYMax(yStart.toInt(), yEnd.toInt())
 
         if (isCheckCollisionIfMoveDown(yStart.toInt(), yEnd.toInt())) {
-            if (getPositionTile(position.x, yMax.toDouble())
+            if (getPositionTile(position.x, yMax.toFloat())
                     .any{ p -> (p.y - 1) < 0})
             return "endGame"
-            position.y = yMax.toDouble()
+            position.y = yMax.toFloat()
 
             return "fixation"
         }
 
-        this.position.y += if (stepY < 1 ) stepY else yMax - yStart
+        position.y += (if (stepY < 1 ) stepY else yMax - yStart).toFloat()
         return "fall"
     }
 
