@@ -13,11 +13,11 @@ open class Character(grid: Grid) {
     val height = 24
 
     val position = Point((0..grid.width).shuffled().first(), grid.height.toInt() - 1)
-    val speed = Speed(0F, 0F)
+    var speed = Speed(0F, 0F)
     var angle = 90F
 
     var moves: Array<Point>? = null
-    val move = Point(0, 0)
+    val move:Point? = Point(0, 0)
     val lastDirection = 1
 
     var deleteRow = 0
@@ -38,13 +38,13 @@ open class Character(grid: Grid) {
         get() = Math.round(Math.sin(this.angle * (Math.PI / 180)))
 
 
-    fun update(grid: Grid): Boolean {
+    open fun update(grid: Grid): String {
         changePosition();
 
         if (isNewFrame())
             return updateNewFrame(grid);
 
-        return true;
+        return "true"
     }
 
     fun changePosition() {
@@ -68,7 +68,7 @@ open class Character(grid: Grid) {
                 || (angle / CHARACTER_SPEED_ROTATE) % 2 > 1.99)
     }
 
-    fun updateNewFrame(grid: Grid): Boolean {
+    fun updateNewFrame(grid: Grid): String {
         moves = getDirection(grid)
 
         if (move.x == moves[0].x && move.y == moves[0].y) {
@@ -80,50 +80,28 @@ open class Character(grid: Grid) {
 
         speed = getSpeedAngle()
 
-        return true
+        return "true"
     }
 
     fun isMoveStraight(): Boolean {
         return directionX.toFloat() == move.x && directionY.toFloat() == move.y
     }
 
-    fun getSpeedAngle() {
-        val angle = Math.atan2(move.y, move.x) * (180 / Math.PI)
-        val sign = 1
-        if ((this.angle - angle) > 0 && (this.angle - angle) < 180)
+    fun getSpeedAngle():Speed {
+        val tempAngle = Math.atan2(move.y.toDouble(), move.x.toDouble()) * (180 / Math.PI)
+        var sign = 1
+        if ((angle - tempAngle) > 0 && (angle - tempAngle) < 180)
             sign = -1
 
-        if (Math.round(Math.cos(this.angle * (Math.PI / 180))) === move.x
-            && Math.round(Math.sin(this.angle * (Math.PI / 180))) === move.y
+        if (Math.round(Math.cos(angle * (Math.PI / 180))).toFloat() == move.x
+            && Math.round(Math.sin(angle * (Math.PI / 180))).toFloat() == move.y
         )
             return Speed((1 / 10).toFloat(), 0F)
 
-        if (this.angle === angle)
+        if (angle== tempAngle.toFloat())
             return Speed(0F, 0F)
 
         return Speed(0F, (sign * CHARACTER_SPEED_ROTATE).toFloat())
-    }
-
-    getDirectionMovement()
-    {
-        val direction = Point(directionX.toFloat(), directionY.toFloat())
-        if (directionX === -1 && directionY === 1) {
-            direction.x = -1;
-            direction.y = 0;
-        }
-        if (directionX === -1 && directionY === -1) {
-            direction.x = 0;
-            direction.y = -1;
-        }
-        if (directionX === 1 && directionY === 1) {
-            direction.x = 0;
-            direction.y = 1;
-        }
-        if (directionX === 1 && directionY === -1) {
-            direction.x = 1;
-            direction.y = 0;
-        }
-        return `${[this.direction.x, this.direction.y, this.move.x, this.move.y].join('')}`;
     }
 
     fun getDirection(grid: Grid): Array<Point> {
@@ -136,7 +114,7 @@ open class Character(grid: Grid) {
         if (moves.size == 0 || deleteRow == 1)
             return getNewDirection(grid);
 
-        return moves;
+        return moves
     }
 
     fun getNewDirection(grid:Grid):Array<Point>    {
@@ -166,12 +144,12 @@ open class Character(grid: Grid) {
         return isCanMove([...[DIRECTION['0D']], ...DIRECTION.RIGHT, ...DIRECTION.LEFT], grid);
     }
 
-    fun isCanMove(arrayDirectionses:Array<Array<Point>>, grid: Grid): Array<Point> {
+    open fun isCanMove(arrayDirectionses:Array<Array<Point>>, grid: Grid): Array<Point> {
         for (directions in arrayDirectionses)
             if (isCanDirections(directions, grid))
                 return directions;
 
-        return arrayOf(Point(0, 0));
+        return arrayOf(Point(0, 0))
     }
 
     fun isCanDirections(directions: Array<Point>, grid: Grid): Boolean {
@@ -187,7 +165,7 @@ open class Character(grid: Grid) {
     }
 
     // Исходя из данных определяет спрайт для рисования
-    fun getSprite():Point {
+    open fun getSprite():Point {
         if (angle == 0F && speed.line != 0F && getframe(position.x) == -1)
             return Point( 2,  0)
         if (angle == 0F && speed.line != 0F)
