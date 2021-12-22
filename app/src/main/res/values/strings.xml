@@ -3,4 +3,8 @@
     <string name="new_game_main_button">New game</string>
     <string name="options_main_button">Options</string>
     <string name="exit_main_button">Exit</string>
+
+    <string name="name_options_textview">Name^</string>
+    <string name="name_options_editview">Enter name</string>
+    <string name="exit_options_button">Exit</string>
 </resources>
