@@ -1,8 +1,8 @@
 package com.fiz.tetriswithlife
 
-private const val NUMBER_FRAMES_BEEATLE_MOVE = 5;
-private const val CHARACTER_SPEED_LINE = 30;
-private const val CHARACTER_SPEED_ROTATE = 45;
+private const val NUMBER_FRAMES_BEEATLE_MOVE = 5
+private const val CHARACTER_SPEED_LINE = 30.0
+private const val CHARACTER_SPEED_ROTATE = 45
 
 data class Speed(var line: Float, var rotate: Float)
 
@@ -12,13 +12,13 @@ open class Character(grid: Grid) {
     val width = 24
     val height = 24
 
-    val position = Point((0..grid.width).shuffled().first(), grid.height.toInt() - 1)
+    val position = Point((0..grid.width).shuffled().first(), grid.height - 1)
     var speed = Speed(0F, 0F)
     var angle = 90F
 
-    var moves: Array<Point>? = null
-    val move:Point? = Point(0, 0)
-    val lastDirection = 1
+    var moves: MutableList<Point> = mutableListOf()
+    var move: Point = Point(0, 0)
+    var lastDirection = 1
 
     var deleteRow = 0
 
@@ -39,10 +39,10 @@ open class Character(grid: Grid) {
 
 
     open fun update(grid: Grid): String {
-        changePosition();
+        changePosition()
 
         if (isNewFrame())
-            return updateNewFrame(grid);
+            return updateNewFrame(grid)
 
         return "true"
     }
@@ -73,9 +73,9 @@ open class Character(grid: Grid) {
 
         if (move.x == moves[0].x && move.y == moves[0].y) {
             if (isMoveStraight())
-                move = moves.toMutableList().removeAt(0)
+                move = moves.removeAt(0)
         } else {
-            [move] = moves;
+            move = moves.first()
         }
 
         speed = getSpeedAngle()
@@ -87,7 +87,7 @@ open class Character(grid: Grid) {
         return directionX.toFloat() == move.x && directionY.toFloat() == move.y
     }
 
-    fun getSpeedAngle():Speed {
+    fun getSpeedAngle(): Speed {
         val tempAngle = Math.atan2(move.y.toDouble(), move.x.toDouble()) * (180 / Math.PI)
         var sign = 1
         if ((angle - tempAngle) > 0 && (angle - tempAngle) < 180)
@@ -96,58 +96,61 @@ open class Character(grid: Grid) {
         if (Math.round(Math.cos(angle * (Math.PI / 180))).toFloat() == move.x
             && Math.round(Math.sin(angle * (Math.PI / 180))).toFloat() == move.y
         )
-            return Speed((1 / 10).toFloat(), 0F)
+            return Speed((1 / 10.0).toFloat(), 0F)
 
-        if (angle== tempAngle.toFloat())
+        if (angle == tempAngle.toFloat())
             return Speed(0F, 0F)
 
         return Speed(0F, (sign * CHARACTER_SPEED_ROTATE).toFloat())
     }
 
-    fun getDirection(grid: Grid): Array<Point> {
+    fun getDirection(grid: Grid): MutableList<Point> {
         // Проверяем свободен ли выбранный путь при фиксации фигуры
         if (deleteRow == 1
-            && moves == isCanMove(*moves, grid)
+            && moves == isCanMove(arrayOf(moves.toTypedArray()), grid)
         )
-            deleteRow = 0;
+            deleteRow = 0
 
-        if (moves.size == 0 || deleteRow == 1)
-            return getNewDirection(grid);
+        if (moves.isEmpty() || deleteRow == 1)
+            return getNewDirection(grid)
 
         return moves
     }
 
-    fun getNewDirection(grid:Grid):Array<Point>    {
-        val direction = DIRECTION();
+    fun getNewDirection(grid: Grid): MutableList<Point> {
+        val direction = DIRECTION()
         deleteRow = 0
         // Если двигаемся вправо
-        if ((
-                    (speed.line == 0F && speed.rotate == 0F)
-                            && move.x == 1F
-                    ) || move.x == 1F
-        ) {
-            lastDirection = 1;
-            return isCanMove([... DIRECTION . RIGHTDOWN, ...DIRECTION.RIGHT, ...DIRECTION.LEFT], grid);
+        if (((speed.line == 0F && speed.rotate == 0F) && move.x == 1F) || move.x == 1F) {
+            lastDirection = 1
+            return isCanMove(
+                arrayOf(*direction.RIGHTDOWN, *direction.RIGHT, *direction.LEFT), grid
+            ).toMutableList()
         }
         // Если двигаемся влево
-        if (((speed.line == 0F && speed.rotate == 0F)
-                    && move.x == -1F
-                    ) || move.x == -1F
-        ) {
-            lastDirection = -1;
-            return isCanMove([... DIRECTION . LEFTDOWN, ...DIRECTION.LEFT, ...DIRECTION.RIGHT], grid);
+        if (((speed.line == 0F && speed.rotate == 0F) && move.x == -1F) || move.x == -1F) {
+            lastDirection = -1
+            return isCanMove(arrayOf(*direction.LEFTDOWN, *direction.LEFT, *direction.RIGHT), grid)
+                .toMutableList()
         }
 
         if (lastDirection == -1)
-            return isCanMove(arrayOf(*direction._0D, *direction.LEFT, *direction.RIGHT), grid);
+            return isCanMove(
+                arrayOf(direction._0D, *direction.LEFT, *direction.RIGHT),
+                grid
+            ).toMutableList()
 
-        return isCanMove([...[DIRECTION['0D']], ...DIRECTION.RIGHT, ...DIRECTION.LEFT], grid);
+        return isCanMove(
+            arrayOf(direction._0D, *direction.RIGHT, *direction.LEFT),
+            grid
+        )
+            .toMutableList()
     }
 
-    open fun isCanMove(arrayDirectionses:Array<Array<Point>>, grid: Grid): Array<Point> {
+    open fun isCanMove(arrayDirectionses: Array<Array<Point>>, grid: Grid): Array<Point> {
         for (directions in arrayDirectionses)
             if (isCanDirections(directions, grid))
-                return directions;
+                return directions
 
         return arrayOf(Point(0, 0))
     }
@@ -165,45 +168,45 @@ open class Character(grid: Grid) {
     }
 
     // Исходя из данных определяет спрайт для рисования
-    open fun getSprite():Point {
+    open fun getSprite(): Point {
         if (angle == 0F && speed.line != 0F && getframe(position.x) == -1)
-            return Point( 2,  0)
+            return Point(2, 0)
         if (angle == 0F && speed.line != 0F)
-            return Point(getframe(position.x), 1 )
+            return Point(getframe(position.x), 1)
 
         if (angle == 180F && speed.line != 0F && getframe(position.x) == -1)
-            return Point ( 6, 0 )
+            return Point(6, 0)
         if (angle == 180F && speed.line != 0F)
-            return Point( 4-getframe(position.x),  2 )
+            return Point(4 - getframe(position.x), 2)
 
         if (angle == 90F && speed.line != 0F && getframe(position.y) == -1)
-            return Point ( 0, 0 )
+            return Point(0, 0)
         if (angle == 90F && speed.line != 0F)
-            return Point( getframe(position.y),  4 )
+            return Point(getframe(position.y), 4)
 
         if (angle == 270F && speed.line != 0F && getframe(position.y) == -1)
-            return Point ( 4, 0 )
+            return Point(4, 0)
         if (angle == 270F && speed.line != 0F)
-            return Point(getframe(position.y), 3 )
+            return Point(getframe(position.y), 3)
 
         if (speed.rotate != 0F && angle == 0F)
-            return Point ( 2, 0 )
+            return Point(2, 0)
         if (speed.rotate != 0F && angle == 45F)
-            return Point ( 1, 0 )
+            return Point(1, 0)
         if (speed.rotate != 0F && angle == 90F)
-            return Point ( 0, 0 )
+            return Point(0, 0)
         if (speed.rotate != 0F && angle == 135F)
-            return Point ( 7, 0 )
+            return Point(7, 0)
         if (speed.rotate != 0F && angle == 180F)
-            return Point ( 6, 0 )
+            return Point(6, 0)
         if (speed.rotate != 0F && angle == 225F)
-            return Point ( 5, 0 )
+            return Point(5, 0)
         if (speed.rotate != 0F && angle == 270F)
-            return Point ( 4, 0 )
+            return Point(4, 0)
         if (speed.rotate != 0F && angle == 315F)
-            return Point ( 3, 0 )
+            return Point(3, 0)
 
-        return Point ( 0, 0 )
+        return Point(0, 0)
     }
 }
 
@@ -222,15 +225,15 @@ data class DIRECTION(
     val LU: Array<Point> = arrayOf(U, L),
     val RUU: Array<Point> = arrayOf(U, U, R),
     val LUU: Array<Point> = arrayOf(U, U, L),
-    val LEFTDOWN: Array<Point> = arrayOf(*_0D, *LD, *RD),
-    val RIGHTDOWN: Array<Point> = arrayOf(*_0D, *RD, *LD),
-    val LEFT: Array<Point> = arrayOf(*L0, *LU, *LUU),
-    val RIGHT: Array<Point> = arrayOf(*R0, *RU, *RUU),
+    val LEFTDOWN: Array<Array<Point>> = arrayOf(_0D, LD, RD),
+    val RIGHTDOWN: Array<Array<Point>> = arrayOf(_0D, RD, LD),
+    val LEFT: Array<Array<Point>> = arrayOf(L0, LU, LUU),
+    val RIGHT: Array<Array<Point>> = arrayOf(R0, RU, RUU),
 )
 
 fun getframe(coor: Float): Int {
     if (coor % 1 > 0.01 && coor % 1 < 0.99)
         return Math.floor((coor.toDouble() % 1) * NUMBER_FRAMES_BEEATLE_MOVE).toInt()
 
-    return -1;
+    return -1
 }

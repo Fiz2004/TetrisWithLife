@@ -49,7 +49,6 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         for (directions in arrayDirectionses)
             if (isCanDirections(directions, grid, (0..100).shuffled().first() < PROBABILITY_EAT))
                 return directions
-
         return arrayOf(Point(0, 0))
     }
 

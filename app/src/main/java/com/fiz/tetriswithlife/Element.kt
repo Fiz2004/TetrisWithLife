@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife
 
-data class Status(val L:Int,val R:Int, val U:Int)
+data class Status(var L:Int, var R:Int, var U:Int)
 
 class Element (val background:Int,var block:Int=0,var status: Status =Status(0,0,0)){
     fun getSpaceStatus():Char {

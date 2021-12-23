@@ -85,38 +85,9 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
     }
 
     fun render(state: State, canvas: Canvas) {
-//        val tile = bmpFon.width / 4
-//        val newTile = (tile / 1.5).toInt()
-//        for (y in 0..heightCanvas)
-//            for (x in 0..widthCanvas)
-//                canvas.drawBitmap(
-//                    bmpFon,
-//                    Rect(0, 0, tile, tile),
-//                    Rect(x * newTile, y * newTile, (x + 1) * newTile, (y + 1) * newTile),
-//                    paint
-//                )
-//
-//        for (cell in state.currentFigure.cells) {
-//            val screenX = (cell.x + state.currentFigure.position.x) * newTile
-//            val screenY = (cell.y + state.currentFigure.position.y) * newTile
-//            canvas.drawBitmap(
-//                bmpKv[cell.view - 1],
-//                Rect(0, 0, tile, tile),
-//                Rect(
-//                    screenX.toInt(),
-//                    screenY.toInt(),
-//                    (screenX + newTile).toInt(),
-//                    (screenY + newTile).toInt()
-//                ),
-//                paint
-//            )
-//        }
-
-
-
         drawGridElements(state.grid, canvas)
         drawCurrentFigure(state.currentFigure, canvas)
-//        drawCharacter(character);
+        drawCharacter(state.character, canvas);
 //        drawNextFigure(nextFigure);
 //
 //        txtScores.textContent = String(scores).padStart(6, '0');
@@ -156,7 +127,7 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
 
     fun drawGridElements(grid: Grid, canvas: Canvas) {
         val tile = bmpFon.width / 4
-        val newTile = (tile / 1.5).toInt()
+        val newTile = (tile / 1.5).toFloat()
         for (y in 0 until grid.height)
             for (x in 0 until grid.width) {
                 val screenX = x * newTile
@@ -169,14 +140,14 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
                 canvas.drawBitmap(
                     bmpFon,
                     Rect(offsetX, offsetY, offsetX + tile, offsetY + tile),
-                    Rect(screenX, screenY, screenX + newTile, screenY + newTile),
+                    RectF(screenX, screenY, screenX + newTile, screenY + newTile),
                     paint
                 )
             }
 
         for (y in 0 until grid.height)
             for (x in 0 until grid.width)
-                if (grid.space[y][x].block !== 0) {
+                if (grid.space[y][x].block != 0) {
                     val screenX = x * newTile
                     val screenY = y * newTile
                     val offset: Point = getOffset(grid.space[y][x])
@@ -188,7 +159,7 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
                             offset.x.toInt() * tile + tile,
                             offset.y.toInt() * tile + tile
                         ),
-                        Rect(screenX, screenY, screenX + newTile, screenY + newTile),
+                        RectF(screenX, screenY, screenX + newTile, screenY + newTile),
                         paint
                     )
                 }
@@ -196,8 +167,7 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
 
     fun drawCurrentFigure(currentFigure: CurrentFigure, canvas: Canvas) {
         val tile = bmpFon.width / 4
-        val newTile = (tile / 1.5).toInt()
-        Log.d("Display",currentFigure.position.y.toString())
+        val newTile = (tile / 1.5).toFloat()
         for (cell in currentFigure.cells) {
             val screenX = (cell.x + currentFigure.position.x) * newTile
             val screenY = (cell.y + currentFigure.position.y) * newTile
@@ -210,19 +180,25 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
         }
     }
 
-    fun drawCharacter(/*character:Charecter*/) {
-//        let { x: offsetX, y: offsetY } = character.getSprite();
-//        offsetX *= SIZE_TILES;
-//        offsetY *= SIZE_TILES;
-//        const screenX = character . position . x * SIZE_TILES;
-//        const screenY = character . position . y * SIZE_TILES;
-//        this.ctx.drawImage(
-//            this.imgBeetle,
-//            offsetX, offsetY,
-//            SIZE_TILES, SIZE_TILES,
-//            screenX, screenY,
-//            SIZE_TILES, SIZE_TILES,
-//        )
+    fun drawCharacter(character:Character, canvas: Canvas) {
+        val tile = bmpFon.width / 4
+        val newTile = (tile / 1.5).toFloat()
+        val offset = character.getSprite();
+        offset.x *=tile
+        offset.y *= tile
+        val screenX = character.position.x * newTile
+        val screenY = character.position.y * newTile
+        canvas.drawBitmap(
+            bmpCharacter,
+            Rect(
+                offset.x.toInt(),
+                offset.y.toInt() ,
+                offset.x.toInt()  + tile,
+                offset.y.toInt()  + tile
+            ),
+            RectF(screenX, screenY, screenX + newTile, screenY + newTile),
+            paint
+        )
     }
 }
 
@@ -232,10 +208,10 @@ fun getOffset(element: Element): Point {
         return Point((element.status.R - 1).toFloat(), 1.0F)
 
     if (element.getSpaceStatus() == 'L')
-        return com.fiz.tetriswithlife.Point((element.status.L - 1).toFloat(), 2.0F)
+        return Point((element.status.L - 1).toFloat(), 2.0F)
 
     if (element.getSpaceStatus() == 'U')
-        return com.fiz.tetriswithlife.Point((element.status.U - 1).toFloat(), 3.0F)
+        return Point((element.status.U - 1).toFloat(), 3.0F)
 
-    return com.fiz.tetriswithlife.Point(0.0F, 0.0F)
+    return Point(0.0F, 0.0F)
 }
