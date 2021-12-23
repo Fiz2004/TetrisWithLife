@@ -18,7 +18,7 @@ class DrawThread(private val surfaceHolder: SurfaceHolder, resources: Resources)
     private val widthCanvas: Int = 13
     private val heightCanvas: Int = 25
     private var prevTime = System.currentTimeMillis()
-    private val state = State(widthCanvas, heightCanvas)
+    private var state = State(widthCanvas, heightCanvas)
     private val display = Display(resources, widthCanvas, heightCanvas)
 
     val controller = Controller()
@@ -42,12 +42,13 @@ class DrawThread(private val surfaceHolder: SurfaceHolder, resources: Resources)
                 canvas = surfaceHolder.lockCanvas(null)
                 if (canvas == null) continue
                 synchronized(surfaceHolder) {
-                    Log.d("DrawThread", deltaTime.toString())
+                    var status=true
                     if (deltaTime > TIME_UPDATE_CONTROLLER) {
-                        state.update(deltaTime.toFloat(), controller)
+                        status=state.update(deltaTime.toFloat(), controller)
                     }
                     display.render(state, canvas)
-
+                    if (!status)
+                        state = State(widthCanvas, heightCanvas)
                 }
             } finally {
                 if (canvas != null) {
