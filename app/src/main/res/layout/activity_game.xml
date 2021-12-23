@@ -1,10 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".GameActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/scores_game_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/record_game_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TextView" />
+    </LinearLayout>
+
+    <SurfaceView
+        android:id="@+id/gamesurface_game_surfaceView"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/rotate_game_button"
+            android:layout_width="match_parent"
+            android:layout_height="29dp"
+            android:insetLeft="150dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Rotate"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
+        <Button
+            android:id="@+id/left_game_button"
+            android:layout_width="match_parent"
+            android:layout_height="29dp"
+            android:insetLeft="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Left"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+
+        <Button
+            android:id="@+id/down_game_button"
+            android:layout_width="match_parent"
+            android:layout_height="29dp"
+            android:insetLeft="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Down"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+
+        <Button
+            android:id="@+id/right_game_button"
+            android:layout_width="match_parent"
+            android:layout_height="29dp"
+            android:insetLeft="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Right"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/new_game_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="29dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="New Game"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+
+        <Button
+            android:id="@+id/pause_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="29dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Pause"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+
+        <Button
+            android:id="@+id/exit_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="29dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Exit"
+            app:cornerRadius="15dp"
+            app:iconPadding="0dp" />
+    </LinearLayout>
+
+
+</LinearLayout>

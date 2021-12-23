@@ -91,8 +91,8 @@ class State(val width: Int, val height: Int) {
         currentFigure.fixation(scores)
         ifRecord()
 
-        character.deleteRow = 1;
-        character.isBreath(grid);
+        character.deleteRow = 1
+        character.isBreath(grid)
     }
 
     fun ifRecord() {

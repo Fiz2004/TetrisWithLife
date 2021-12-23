@@ -53,7 +53,7 @@ class Grid(val width:Int,val height:Int) {
     }
 
     fun deleteRow(rowIndex:Int) {
-        for (i in rowIndex until 0)
+        for (i in rowIndex downTo 1)
         for (j in 0 until width)
             space[i][j].setElement(this.space[i - 1][j])
     }
