@@ -1,23 +1,29 @@
 package com.fiz.tetriswithlife
 
-data class Status(var L:Int, var R:Int, var U:Int)
+class Element(
+    val background: Int,
+    var block: Int = 0,
+    var status: MutableMap<Char, Int?> =
+        mutableMapOf('L' to 0, 'R' to 0, 'U' to 0)
+) {
+    fun getSpaceStatus(): Char {
+        for ((key, value) in status)
+            if (value != 0) return key
 
-class Element (val background:Int,var block:Int=0,var status: Status =Status(0,0,0)){
-    fun getSpaceStatus():Char {
-        if (status.L !== 0) return 'L';
-        if (status.R !== 0) return 'R';
-        if (status.U !== 0) return 'U';
-
-        return '0';
+        return '0'
     }
 
     fun setZero() {
-        block = 0;
-        status = Status(0,0,0);
+        block = 0
+        status = mutableMapOf('L' to 0, 'R' to 0, 'U' to 0)
     }
 
-    fun setElement(element:Element) {
-        block = element.block;
-        status = Status(element.status.L, element.status.R, element.status.U );
+    fun setElement(element: Element) {
+        block = element.block
+        status = mutableMapOf(
+            'L' to element.status['L'],
+            'R' to element.status['R'],
+            'U' to element.status['U']
+        )
     }
 }

@@ -15,7 +15,7 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
     }
 
     fun findWay(tile: Point, TempCash: Array<Point>, grid: Grid): Boolean {
-        if (tile.y == 0F)
+        if (tile.y == 0)
             return true
 
         var cash: Array<Point> = TempCash.clone()

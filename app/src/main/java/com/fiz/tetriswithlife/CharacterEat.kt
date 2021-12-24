@@ -28,13 +28,13 @@ open class CharacterEat(grid: Grid) : Character(grid) {
     }
 
     fun getDirectionEat(): Char {
-        if (move.x == -1F && move.y == 0F)
+        if (move.x == -1 && move.y == 0)
             return 'R'
 
-        if (move.x == 1F && move.y == 0F)
+        if (move.x == 1 && move.y == 0)
             return 'L'
 
-        if (move.x == 0F && move.y == 1F)
+        if (move.x == 0 && move.y == 1)
             return 'U'
 
         throw Exception("Error: incorrect value function getDirectionEat")
@@ -65,7 +65,7 @@ open class CharacterEat(grid: Grid) : Character(grid) {
             result+=direction
 
             if (grid.isNotFree(point)) {
-                if (addPoint.y == 0F && isDestoy) {
+                if (addPoint.y == 0 && isDestoy) {
                     eat = 1
                     return true
                 }

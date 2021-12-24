@@ -12,13 +12,14 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
         cells = figure.cells.clone()
     }
 
-    fun createStartPosition():Point {
+    fun createStartPosition():Coordinate {
         val width = cells.reduce{a, b -> if (a.x > b.x ) a else b}.x
         val height = cells.reduce{a, b -> if (a.y > b.y)  a else b}.y
-        return Point((0 until (grid.width - width.toInt())).shuffled().first().toInt(), -1 - height.toInt())
+        return Coordinate((0 until (grid.width - width)).shuffled().first().toDouble(),
+            (-1 - height).toDouble())
     }
 
-    fun getPositionTile(x: Float = position.x, y: Float = position.y): Array<Point> {
+    fun getPositionTile(x: Double = position.x, y: Double = position.y): Array<Point> {
         return cells.map { cell-> Point(cell.x + x.toInt(), cell.y + y.toInt())}.toTypedArray()
     }
 
@@ -28,15 +29,15 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
         + ADD_STEP_MOVE_AUTO * (scores / scoresForLevel.toFloat())
     }
 
-    fun isCollission(x:Int, y:Int):Boolean {
-        if (getPositionTile(x.toFloat(), y.toFloat()).any { p ->
+    fun isCollission(x:Double, y:Double):Boolean {
+        if (getPositionTile(x, y).any { p ->
                 p.x < 0 || p.x > this.grid.width - 1 || p.y > this.grid.height - 1
             } )
             return true
 
-        if (getPositionTile(x.toFloat(), y.toFloat())
+        if (getPositionTile(x, y)
                 .any { point ->
-                    grid.isInside(point) && grid.space[point.y.toInt()][point.x.toInt()].block !== 0
+                    grid.isInside(point) && grid.space[point.y][point.x].block != 0
                 })
         return true
 
@@ -46,7 +47,7 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
     fun rotate() {
         val oldCells = cells
         cells = cells.map{ cell-> Cell(3 - cell.y, cell.x,cell.view)}.toTypedArray()
-        if (isCollission(position.x.toInt(), position.y.toInt()))
+        if (isCollission(position.x, position.y))
             cells = oldCells
     }
 
@@ -59,25 +60,25 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
     }
 
     fun moveLeft() {
-        if (!isCollission((position.x - STEP_MOVE_KEY_X).toInt(), position.y.toInt()))
+        if (!isCollission((position.x - STEP_MOVE_KEY_X), position.y))
             position.x -= STEP_MOVE_KEY_X
     }
 
     fun moveRight() {
-        if (!isCollission((position.x + STEP_MOVE_KEY_X).toInt(), position.y.toInt()))
+        if (!isCollission((position.x + STEP_MOVE_KEY_X), position.y))
             position.x += STEP_MOVE_KEY_X
     }
 
     fun moveDown(stepY:Float):String {
-        val yStart = Math.ceil(position.y.toDouble())
+        val yStart = Math.ceil(position.y)
         val yEnd = Math.ceil(position.y + stepY.toDouble())
         val yMax = getYMax(yStart.toInt(), yEnd.toInt())
 
         if (isCheckCollisionIfMoveDown(yStart.toInt(), yEnd.toInt())) {
-            if (getPositionTile(position.x, yMax.toFloat())
+            if (getPositionTile(position.x, yMax.toDouble())
                     .any{ p -> (p.y - 1) < 0})
             return "endGame"
-            position.y = yMax.toFloat()
+            position.y = yMax.toDouble()
 
             return "fixation"
         }
@@ -88,7 +89,7 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
 
     fun getYMax (yStart:Int, yEnd:Int) :Int {
         for ( y in yStart..yEnd)
-        if (isCollission(position.x.toInt(), y))
+        if (isCollission(position.x, y.toDouble()))
             return y - 1
 
         return yEnd
@@ -96,7 +97,7 @@ class CurrentFigure(val grid:Grid, val figure:Figure):Figure() {
 
     fun isCheckCollisionIfMoveDown (yStart:Int, yEnd:Int):Boolean{
         for ( y in yStart..yEnd)
-        if (isCollission(position.x.toInt(), y))
+        if (isCollission(position.x, y.toDouble()))
             return true
 
         return false

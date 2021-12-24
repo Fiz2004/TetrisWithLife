@@ -12,7 +12,10 @@ open class Character(grid: Grid) {
     val width = 24
     val height = 24
 
-    val position = Point((0..grid.width).shuffled().first(), grid.height - 1)
+    var position = Coordinate(
+        (0..grid.width).shuffled().first().toDouble(), (grid.height - 1)
+            .toDouble()
+    )
     var speed = Speed(0F, 0F)
     var angle = 90F
 
@@ -22,20 +25,20 @@ open class Character(grid: Grid) {
 
     var deleteRow = 0
 
-    val posTileX
-        get() = Math.round(position.x)
+    val posTileX: Int
+        get() = Math.round(position.x).toInt()
 
-    val posTileY
-        get() = Math.round(position.y)
+    val posTileY: Int
+        get() = Math.round(position.y).toInt()
 
     val posTile
         get() = Point(posTileX, posTileY)
 
     val directionX
-        get() = Math.round(Math.cos(this.angle * (Math.PI / 180)))
+        get() = Math.round(Math.cos(this.angle * (Math.PI / 180))).toInt()
 
     val directionY
-        get() = Math.round(Math.sin(this.angle * (Math.PI / 180)))
+        get() = Math.round(Math.sin(this.angle * (Math.PI / 180))).toInt()
 
 
     open fun update(grid: Grid): String {
@@ -49,8 +52,12 @@ open class Character(grid: Grid) {
 
     fun changePosition() {
         if (speed.rotate == 0F) {
-            position.x += speed.line * directionX
-            position.y += speed.line * directionY
+            position = position.plus(
+                Coordinate(
+                    speed.line * directionX.toDouble(),
+                    speed.line * directionY.toDouble()
+                )
+            )
         } else {
             angle += speed.rotate
             angle %= 360
@@ -84,7 +91,7 @@ open class Character(grid: Grid) {
     }
 
     fun isMoveStraight(): Boolean {
-        return directionX.toFloat() == move.x && directionY.toFloat() == move.y
+        return directionX == move.x && directionY== move.y
     }
 
     fun getSpeedAngle(): Speed {
@@ -93,8 +100,8 @@ open class Character(grid: Grid) {
         if ((angle - tempAngle) > 0 && (angle - tempAngle) < 180)
             sign = -1
 
-        if (Math.round(Math.cos(angle * (Math.PI / 180))).toFloat() == move.x
-            && Math.round(Math.sin(angle * (Math.PI / 180))).toFloat() == move.y
+        if (Math.round(Math.cos(angle * (Math.PI / 180))).toInt() == move.x
+            && Math.round(Math.sin(angle * (Math.PI / 180))).toInt() == move.y
         )
             return Speed((1 / 10.0).toFloat(), 0F)
 
@@ -121,14 +128,14 @@ open class Character(grid: Grid) {
         val direction = DIRECTION()
         deleteRow = 0
         // Если двигаемся вправо
-        if (((speed.line == 0F && speed.rotate == 0F) && move.x == 1F) || move.x == 1F) {
+        if (((speed.line == 0F && speed.rotate == 0F) && move.x == 1) || move.x == 1) {
             lastDirection = 1
             return isCanMove(
                 arrayOf(*direction.RIGHTDOWN, *direction.RIGHT, *direction.LEFT), grid
             ).toMutableList()
         }
         // Если двигаемся влево
-        if (((speed.line == 0F && speed.rotate == 0F) && move.x == -1F) || move.x == -1F) {
+        if (((speed.line == 0F && speed.rotate == 0F) && move.x == -1) || move.x == -1) {
             lastDirection = -1
             return isCanMove(arrayOf(*direction.LEFTDOWN, *direction.LEFT, *direction.RIGHT), grid)
                 .toMutableList()
@@ -216,7 +223,7 @@ data class DIRECTION(
     val D: Point = Point(0, 1),
     val U: Point = Point(0, -1),
     val _0: Point = Point(0, 0),
-    val _0D: Array<Point> = arrayOf(Point(0, 1)),
+    val _0D: Array<Point> = arrayOf(D),
     val RD: Array<Point> = arrayOf(D, R),
     val LD: Array<Point> = arrayOf(D, L),
     val R0: Array<Point> = arrayOf(R),
@@ -231,9 +238,9 @@ data class DIRECTION(
     val RIGHT: Array<Array<Point>> = arrayOf(R0, RU, RUU),
 )
 
-fun getframe(coor: Float): Int {
+fun getframe(coor: Double): Int {
     if (coor % 1 > 0.01 && coor % 1 < 0.99)
-        return Math.floor((coor.toDouble() % 1) * NUMBER_FRAMES_BEEATLE_MOVE).toInt()
+        return Math.floor((coor % 1) * NUMBER_FRAMES_BEEATLE_MOVE).toInt()
 
     return -1
 }
