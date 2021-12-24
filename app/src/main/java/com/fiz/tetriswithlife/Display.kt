@@ -1,15 +1,35 @@
 package com.fiz.tetriswithlife
 
+import android.app.PendingIntent.getActivity
+import android.bluetooth.BluetoothClass
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.*
-import android.util.Log
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 
 
 private const val NUMBER_IMAGES_FIGURE = 4
 private const val SIZE_TILES = 30
+private const val TIMES_BREATH_LOSE = 60
+private const val NUMBER_COLUMNS_IMAGES_FON = 4
+private const val NUMBER_ROWS_IMAGES_FON = 4
 
-// Объект рисования
-class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int) {
+class Display(
+    val resources: Resources, widthCanvas: Int, heightCanvas: Int,
+    val scoresTextView: TextView,
+    val settings: SharedPreferences,
+    val recordTextView: TextView,
+    val infoBreathTextview: TextView,
+    val breathTextview: TextView,
+    val pauseButton: Button,
+    val context: Context
+) {
+
     private val paint: Paint = Paint()
 
     private val bmpFon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.fon)
@@ -22,108 +42,78 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
         BitmapFactory.decodeResource(resources, R.drawable.kvadrat4),
         BitmapFactory.decodeResource(resources, R.drawable.kvadrat5)
     )
-//    private val canvas = document.querySelector("#canvasId")
-//    private val ctx = canvas.getContext("2d")
-//    private val canvasNextFigure = document.querySelector("#canvasNextFigureId")
-//    private val ctxNextFigure = canvasNextFigure.getContext("2d")
-//
-//    private val txtScores = document.querySelector("#scores")
-//    private val txtRecord = document.querySelector("#record")
-//    private val elementTimeBreath = document.querySelector("#Breath")
-//    private val elementDivBreath = document.querySelector("#infoID")
 
-//    val width
-//        get() = canvas.width / SIZE_TILES
-//
-//    val height
-//        get() = canvas.height / SIZE_TILES
-
-    fun load() {
-        // Переменные для отслеживания загрузки изображений
-        val numberImg = NUMBER_IMAGES_FIGURE + 1;
-        var currentImg = 0;
-
-        // Формируем картинки для фигур
-//        imgKv = Array(NUMBER_IMAGES_FIGURE, {})
-//        for (i in 0 until imgKv.size)
-//        imgKv[i] = Image()
-
-//        imgFon = Image()
-//        imgBeetle = Image()
-
-//        return new Promise ((resolve) => {
-//        const loadImage =() => { currentImg < numberImg ? currentImg += 1 : resolve(); };
-//
-//        for (let i = 0; i < this.imgKv.length; i++) {
-//        this.imgKv[i].src = `${DIRECTORY_IMG}Kvadrat${i + 1}.png`;
-//        this.imgKv[i].onload = loadImage;
-//    }
-//
-//        this.imgFon.src = `${DIRECTORY_IMG}Fon.png`;
-//        this.imgFon.onload = loadImage;
-//
-//        this.imgBeetle.src = `${DIRECTORY_IMG}Beetle.png`;
-//        this.imgBeetle.onload = loadImage;
-//    })
+    fun drawNextFigure(nextFigure: Figure, canvas: Canvas) {
+        canvas.drawColor(Color.BLACK)
+        val tile = bmpFon.width / 4
+        val newTile = (tile / 1.5).toFloat()
+        for (cell in nextFigure.cells) {
+            val screenX = (cell.x) * newTile
+            val screenY = (cell.y) * newTile
+            canvas.drawBitmap(
+                bmpKv[cell.view - 1],
+                Rect(0, 0, tile, tile),
+                RectF(screenX, screenY, screenX + newTile, screenY + newTile),
+                paint
+            )
+        }
     }
 
-    fun drawNextFigure(nextFigure: Figure) {
-//        ctxNextFigure.clearRect(
-//            0,
-//            0,
-//            this.canvasNextFigure.width,
-//            this.canvasNextFigure.height
-//        );
-//        for (const cell of nextFigure.cells)
-//        ctxNextFigure.drawImage(
-//            this.imgKv[cell.view - 1],
-//            0, 0,
-//            SIZE_TILES, SIZE_TILES,
-//            cell.x * SIZE_TILES, cell.y * SIZE_TILES,
-//            SIZE_TILES, SIZE_TILES,
-//        );
-    }
-
-    fun render(state: State, canvas: Canvas) {
+    fun render(state: State, canvas: Canvas, nextFigureCanvas: Canvas) {
         drawGridElements(state.grid, canvas)
         drawCurrentFigure(state.currentFigure, canvas)
-        drawCharacter(state.character, canvas);
-//        drawNextFigure(nextFigure);
-//
-//        txtScores.textContent = String(scores).padStart(6, '0');
-//        txtRecord.textContent = String(record).padStart(6, '0');
-//
-//        if (status === 'pause')
-//            document.getElementById('pause').textContent = 'Продолжить';
-//        else
-//            document.getElementById('pause').textContent = 'Пауза';
-//
-//        if (status !== 'pause') {
-//            let sec;
-//            if (!character.breath)
-//                sec = Math.max(
-//                    TIMES_BREATH_LOSE - Math.ceil((Date.now() - character.timeBreath) / 1000),
-//                    0
-//                );
-//            else
-//                sec = TIMES_BREATH_LOSE;
-//            if (!character.breath) {
-//                if (!this.elementTimeBreath) {
-//                    const element = document . createElement ('h1');
-//                    element.id = 'Breath';
-//                    document.querySelector('#infoID').append(element);
-//                    this.elementTimeBreath = document.querySelector('#Breath');
-//                }
-//                this.elementTimeBreath.innerHTML = `Задыхаемся<br/>Осталось секунд: ${sec}`;
-//            } else if (this.elementTimeBreath) {
-//                this.elementTimeBreath.parentNode.removeChild(this.elementTimeBreath);
-//                this.elementTimeBreath = null;
-//            }
-//
-//            const int =(Math.floor(sec) * 255) / TIMES_BREATH_LOSE;
-//            document.querySelector('#infoID').style.backgroundColor = `rgb(255, ${int}, ${int})`;
-//        }
+        drawCharacter(state.character, canvas)
+        drawNextFigure(state.nextFigure, nextFigureCanvas);
+
+        scoresTextView.text = "${resources.getString(R.string.scores_game_textview)}: ${
+            state.scores.toString().padStart(6, '0')
+        }"
+        recordTextView.text = "${resources.getString(R.string.record_game_textview)}: ${
+            state.record.toString().padStart(6, '0')
+        }"
+
+        if (state.status == "pause")
+            pauseButton.text = resources.getString(R.string.resume_game_button)
+        else
+            pauseButton.text = resources.getString(R.string.pause_game_button)
+
+        if (state.status != "pause") {
+            val sec: Int
+            if (!state.character.breath)
+                sec = Math.max(
+                    TIMES_BREATH_LOSE - Math.ceil(
+                        (System.currentTimeMillis().toDouble() - state.character
+                            .timeBreath) / 1000
+                    ),
+                    0.0
+                ).toInt()
+            else
+                sec = TIMES_BREATH_LOSE
+
+            val executor = ContextCompat.getMainExecutor(context)
+
+            if (!state.character.breath) {
+                if (!breathTextview.isVisible) {
+                    executor.execute(Runnable {
+                        infoBreathTextview.visibility = View.VISIBLE
+                        breathTextview.visibility = View.VISIBLE
+                    })
+                }
+                executor.execute(Runnable {
+                    breathTextview.text = "$sec"
+                })
+            } else if (breathTextview.isVisible) {
+                executor.execute(Runnable {
+                    infoBreathTextview.visibility = View.INVISIBLE
+                    breathTextview.visibility = View.INVISIBLE
+                })
+            }
+            val cl = ((Math.floor(sec.toDouble()) * 255) / TIMES_BREATH_LOSE).toInt()
+            executor.execute(Runnable { breathTextview.setBackgroundColor(Color.rgb(255, cl, cl)) })
+
+        }
     }
+
 
     fun drawGridElements(grid: Grid, canvas: Canvas) {
         val tile = bmpFon.width / 4
@@ -132,10 +122,8 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
             for (x in 0 until grid.width) {
                 val screenX = x * newTile
                 val screenY = y * newTile
-                val NUMBER_COLUMNS_IMAGES_FON = 4
-                val NUMBER_ROWS_IMAGES_FON = 4
-                val offsetX = (grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile;
-                val offsetY = (grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile;
+                val offsetX = (grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
+                val offsetY = (grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
 
                 canvas.drawBitmap(
                     bmpFon,
@@ -154,10 +142,10 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
                     canvas.drawBitmap(
                         bmpKv[grid.space[y][x].block - 1],
                         Rect(
-                            offset.x.toInt() * tile,
-                            offset.y.toInt() * tile,
-                            offset.x.toInt() * tile + tile,
-                            offset.y.toInt() * tile + tile
+                            offset.x * tile,
+                            offset.y * tile,
+                            offset.x * tile + tile,
+                            offset.y * tile + tile
                         ),
                         RectF(screenX, screenY, screenX + newTile, screenY + newTile),
                         paint
@@ -169,32 +157,32 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
         val tile = bmpFon.width / 4
         val newTile = (tile / 1.5).toFloat()
         for (cell in currentFigure.cells) {
-            val screenX = (cell.x + currentFigure.position.x) * newTile
-            val screenY = (cell.y + currentFigure.position.y) * newTile
+            val screenX = ((cell.x + currentFigure.position.x) * newTile).toFloat()
+            val screenY = ((cell.y + currentFigure.position.y) * newTile).toFloat()
             canvas.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),
                 RectF(screenX, screenY, screenX + newTile, screenY + newTile),
                 paint
-            );
+            )
         }
     }
 
-    fun drawCharacter(character:Character, canvas: Canvas) {
+    fun drawCharacter(character: Character, canvas: Canvas) {
         val tile = bmpFon.width / 4
         val newTile = (tile / 1.5).toFloat()
-        val offset = character.getSprite();
-        offset.x *=tile
+        val offset = character.getSprite()
+        offset.x *= tile
         offset.y *= tile
-        val screenX = character.position.x * newTile
-        val screenY = character.position.y * newTile
+        val screenX = (character.position.x * newTile).toFloat()
+        val screenY = (character.position.y * newTile).toFloat()
         canvas.drawBitmap(
             bmpCharacter,
             Rect(
-                offset.x.toInt(),
-                offset.y.toInt() ,
-                offset.x.toInt()  + tile,
-                offset.y.toInt()  + tile
+                offset.x,
+                offset.y,
+                offset.x + tile,
+                offset.y + tile
             ),
             RectF(screenX, screenY, screenX + newTile, screenY + newTile),
             paint
@@ -205,13 +193,13 @@ class Display(resources: Resources, val widthCanvas: Int, val heightCanvas: Int)
 // Получить смещение по тайлам в зависимости от статуса элемента
 fun getOffset(element: Element): Point {
     if (element.getSpaceStatus() == 'R')
-        return Point((element.status.R - 1).toFloat(), 1.0F)
+        return Point((element.status['R'] ?: 0 - 1), 1)
 
     if (element.getSpaceStatus() == 'L')
-        return Point((element.status.L - 1).toFloat(), 2.0F)
+        return Point((element.status['L'] ?: 0 - 1), 2)
 
     if (element.getSpaceStatus() == 'U')
-        return Point((element.status.U - 1).toFloat(), 3.0F)
+        return Point((element.status['U'] ?: 0 - 1), 3)
 
-    return Point(0.0F, 0.0F)
+    return Point(0, 0)
 }

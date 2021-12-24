@@ -29,7 +29,7 @@ open class Figure {
         cells=emptyArray()
         for (p in FIGURE[(0 until FIGURE.size).shuffled().first()]) {
             val view = (1..NUMBER_IMAGES_FIGURE).shuffled().first()
-            cells += Cell(p[0].toFloat(), p[1].toFloat(), view)
+            cells += Cell(p[0], p[1], view)
         }
     }
 }
