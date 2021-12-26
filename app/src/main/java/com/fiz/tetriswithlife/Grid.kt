@@ -11,16 +11,16 @@ class Grid(val width: Int, val height: Int) {
     }
 
     fun isInside(p: Point): Boolean {
-        return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height
+        return p.x in 0 until width && p.y in 0 until height
     }
 
     fun isOutside(p: Point): Boolean {
-        return p.x < 0 || p.x >= width || p.y < 0 || p.y >= height
+        return p.x !in 0 until width || p.y !in 0 until height
     }
 
-    fun isCanMove(p: Point): Boolean {
-        return isOutside(p) || isNotFree(p)
-    }
+//    fun isCanMove(p: Point): Boolean {
+//        return isOutside(p) || isNotFree(p)
+//    }
 
     fun isFree(p: Point): Boolean {
         return this.space[p.y][p.x].block == 0
@@ -42,17 +42,17 @@ class Grid(val width: Int, val height: Int) {
     }
 
     fun deleteRows() {
-        for (rowIndex in space.indices) {
-            if (space[rowIndex].all { element ->
+        for ((index,value) in space.withIndex()) {
+            if (value.all { element ->
                     element.block != 0
                 }) {
-                deleteRow(rowIndex)
+                deleteRow(index)
                 space[0].forEach { element -> element.setZero() }
             }
         }
     }
 
-    fun deleteRow(rowIndex: Int) {
+    private fun deleteRow(rowIndex: Int) {
         for (i in rowIndex downTo 1)
             for (j in 0 until width)
                 space[i][j].setElement(this.space[i - 1][j])

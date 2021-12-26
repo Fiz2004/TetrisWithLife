@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var exitButton:Button
     private lateinit var nameTextView:TextView
 
-    val mStartForResult = registerForActivityResult(
+    private val mStartForResult = registerForActivityResult(
         StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         val arguments = intent.extras
         if (arguments != null) {
             val name = arguments["name"].toString()
-            nameTextView.setText("Name: $name")
+            nameTextView.text = "Name: $name"
         }
 
         newGameButton.setOnClickListener { view: View ->

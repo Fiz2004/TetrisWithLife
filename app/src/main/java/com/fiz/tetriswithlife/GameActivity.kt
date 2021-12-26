@@ -1,19 +1,13 @@
 package com.fiz.tetriswithlife
 
 import android.content.Context
-import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-
-private const val TIMES_BREATH_LOSE = 60
-private const val DIRECTORY_IMG = "Resurs/v1/"
+import androidx.appcompat.app.AppCompatActivity
 
 class GameActivity : AppCompatActivity() {
     private var drawThread: DrawThread? = null
@@ -52,8 +46,8 @@ class GameActivity : AppCompatActivity() {
         gameSurfaceView=findViewById(R.id.game_game_surfaceview)
         nextFigureSurfaceView=findViewById(R.id.nextfigure_game_surfaceview)
 
-        drawThread = DrawThread(gameSurfaceView.getHolder(),nextFigureSurfaceView.getHolder(),
-            getResources(),scoresTextView,
+        drawThread = DrawThread(gameSurfaceView.holder,nextFigureSurfaceView.holder,
+            resources,scoresTextView,
             getSharedPreferences("data", Context.MODE_PRIVATE),recordTextView,infoBreathTextview,
             breathTextview,pauseButton,this)
         drawThread!!.setRunning(true)
@@ -152,10 +146,6 @@ class GameActivity : AppCompatActivity() {
         exitButton.setOnClickListener {
             finish()
         }
-    }
-
-    fun asd(){
-
     }
 
     override fun onDestroy() {

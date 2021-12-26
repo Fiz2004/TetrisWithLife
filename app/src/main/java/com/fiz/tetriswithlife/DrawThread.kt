@@ -7,6 +7,7 @@ import android.graphics.*
 import android.view.SurfaceHolder
 import android.widget.Button
 import android.widget.TextView
+import kotlin.math.min
 
 private const val TIME_UPDATE_CONTROLLER = 80
 private const val widthCanvas: Int = 13
@@ -23,10 +24,10 @@ class DrawThread(
     private val surfaceHolder: SurfaceHolder,
     private val nextFigureSurfaceHolder: SurfaceHolder,
     resources: Resources,
-    val scoresTextView: TextView,
-    val settings: SharedPreferences, val recordTextView: TextView,
-    val infoBreathTextview: TextView, val breathTextview: TextView,
-    val pauseButton: Button,
+    private val scoresTextView: TextView,
+    private val settings: SharedPreferences, private val recordTextView: TextView,
+    private val infoBreathTextview: TextView, private val breathTextview: TextView,
+    pauseButton: Button,
     context: Context
 ) : Thread() {
     private var prevTime = System.currentTimeMillis()
@@ -34,13 +35,12 @@ class DrawThread(
     private var ending = 1000
 
     private val display = Display(
-        resources, widthCanvas, heightCanvas, scoresTextView,
-        settings, recordTextView, infoBreathTextview, breathTextview, pauseButton, context
+        resources, scoresTextView,
+        recordTextView, infoBreathTextview, breathTextview, pauseButton, context
     )
 
     var state = State(
-        widthCanvas, heightCanvas, scoresTextView,
-        settings, recordTextView, infoBreathTextview, breathTextview
+        widthCanvas, heightCanvas, settings
     )
 
     val controller = Controller()
@@ -56,7 +56,7 @@ class DrawThread(
         var nextFigureCanvas: Canvas?
         while (running) {
             val now = System.currentTimeMillis()
-            deltaTime += Math.min(now - prevTime, 100).toInt()
+            deltaTime += min(now - prevTime, 100).toInt()
             val tempDeltaTime = deltaTime
             canvas = null
             nextFigureCanvas = null
@@ -82,8 +82,7 @@ class DrawThread(
                         }
                         if (ending < 0 || state.status == "new game") {
                             state = State(
-                                widthCanvas, heightCanvas, scoresTextView,
-                                settings, recordTextView, infoBreathTextview, breathTextview
+                                widthCanvas, heightCanvas, settings
                             )
                             ending = 1000
                             deltaTime = 0

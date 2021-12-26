@@ -14,7 +14,7 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
         return breath
     }
 
-    fun findWay(tile: Point, TempCash: Array<Point>, grid: Grid): Boolean {
+    private fun findWay(tile: Point, TempCash: Array<Point>, grid: Grid): Boolean {
         if (tile.y == 0)
             return true
 

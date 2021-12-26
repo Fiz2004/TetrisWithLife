@@ -62,7 +62,8 @@
                 android:id="@+id/infobreath_game_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/infobreath_game_textview" />
+                android:text="@string/infobreath_game_textview"
+                android:visibility="invisible" />
 
             <TextView
                 android:id="@+id/breath_game_textview"
