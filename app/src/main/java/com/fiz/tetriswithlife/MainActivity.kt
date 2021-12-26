@@ -2,28 +2,25 @@ package com.fiz.tetriswithlife
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var newGameButton: Button
     private lateinit var optionsButton: Button
     private lateinit var exitButton: Button
     private lateinit var nameTextView: TextView
-
-    val mStartForResult = registerForActivityResult(
+    private val mStartForResult = registerForActivityResult(
         StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val intent = result.data
             val name = intent!!.getStringExtra("name")
-            nameTextView.text = "Name: $name"
+            nameTextView.text = resources.getString(R.string.name, name)
         } else {
-            nameTextView.text = "Name: "
+            nameTextView.text = resources.getString(R.string.name, "")
         }
     }
 
@@ -39,15 +36,17 @@ class MainActivity : AppCompatActivity() {
         val arguments = intent.extras
         if (arguments != null) {
             val name = arguments["name"].toString()
-            nameTextView.text = "Name: $name"
+            nameTextView.text = resources.getString(R.string.name, name)
+        } else {
+            nameTextView.text = resources.getString(R.string.name, "")
         }
 
-        newGameButton.setOnClickListener { view: View ->
+        newGameButton.setOnClickListener {
             val intent = Intent(this, GameActivity::class.java)
             startActivity(intent)
         }
 
-        optionsButton.setOnClickListener { view: View ->
+        optionsButton.setOnClickListener {
             val intent = Intent(this, OptionsActivity::class.java)
 
             mStartForResult.launch(intent)
