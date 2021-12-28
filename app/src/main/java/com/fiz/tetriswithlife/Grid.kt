@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife
 
-
 private const val NUMBER_IMAGES_BACKGROUND = 16
 
 class Grid(val width: Int, val height: Int) {
@@ -17,10 +16,6 @@ class Grid(val width: Int, val height: Int) {
     fun isOutside(p: Point): Boolean {
         return p.x !in 0 until width || p.y !in 0 until height
     }
-
-//    fun isCanMove(p: Point): Boolean {
-//        return isOutside(p) || isNotFree(p)
-//    }
 
     fun isFree(p: Point): Boolean {
         return this.space[p.y][p.x].block == 0
