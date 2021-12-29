@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife
 
+import com.fiz.tetriswithlife.grid.Element
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -7,11 +8,11 @@ import org.junit.jupiter.api.DisplayName
 
 @DisplayName("ElementTest")
 class ElementTest {
-    var element=Element(0,0,mutableMapOf('L' to 1, 'R' to 2, 'U' to 3))
+    var element= Element(0,0,mutableMapOf('L' to 1, 'R' to 2, 'U' to 3))
 
     @BeforeEach
     fun init() {
-        element=Element(0,0,mutableMapOf('L' to 1, 'R' to 2, 'U' to 3))
+        element= Element(0,0,mutableMapOf('L' to 1, 'R' to 2, 'U' to 3))
     }
 
     @Test

@@ -1,5 +1,8 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.character
 
+import com.fiz.tetriswithlife.grid.Coordinate
+import com.fiz.tetriswithlife.grid.Grid
+import com.fiz.tetriswithlife.grid.Point
 import kotlin.math.*
 
 private const val NUMBER_FRAMES_CHARACTER_MOVE = 5
@@ -54,12 +57,11 @@ open class Character(grid: Grid) {
 
     private fun changePosition() {
         if (speed.rotate == 0F) {
-            position = position.plus(
+            position = position+
                 Coordinate(
                     speed.line * directionX.toDouble(),
                     speed.line * directionY.toDouble()
                 )
-            )
         } else {
             angle += speed.rotate
             angle %= 360
@@ -167,8 +169,8 @@ open class Character(grid: Grid) {
     private fun isCanDirections(directions: Array<Point>, grid: Grid): Boolean {
         var addPoint = Point(0, 0)
         for (direction in directions) {
-            addPoint = addPoint.plus(direction)
-            val point = posTile.plus(addPoint)
+            addPoint += direction
+            val point = posTile + addPoint
             if (grid.isOutside(point) || grid.isNotFree(point))
                 return false
         }

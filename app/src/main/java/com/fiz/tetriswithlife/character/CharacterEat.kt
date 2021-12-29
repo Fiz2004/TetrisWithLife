@@ -1,4 +1,7 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.character
+
+import com.fiz.tetriswithlife.grid.Grid
+import com.fiz.tetriswithlife.grid.Point
 
 private const val PROBABILITY_EAT = 20
 
@@ -55,8 +58,8 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         var result = emptyArray<Point>()
         var addPoint = Point(0, 0)
         for (direction in directions) {
-            addPoint = addPoint.plus(direction)
-            val point = posTile.plus(addPoint)
+            addPoint += direction
+            val point = posTile+addPoint
 
             if (grid.isOutside(point))
                 return false
@@ -75,7 +78,7 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         return true
     }
 
-    override fun getSprite():Point {
+    override fun getSprite(): Point {
         if (eat==0)
             return super.getSprite()
 
@@ -87,7 +90,7 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         if (angle == 180F && speed.line != 0F && getFrame(position.x) == -1)
             return Point ( 6, 0 )
         if (angle == 180F && speed.line != 0F)
-            return Point (4-getFrame(position.x),  6 )
+            return Point (4- getFrame(position.x),  6 )
 
         if (angle == 90F && speed.line != 0F && getFrame(position.y) == -1)
             return Point ( 0, 0 )

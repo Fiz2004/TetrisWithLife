@@ -8,6 +8,12 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.fiz.tetriswithlife.character.Character
+import com.fiz.tetriswithlife.figure.CurrentFigure
+import com.fiz.tetriswithlife.figure.Figure
+import com.fiz.tetriswithlife.grid.Element
+import com.fiz.tetriswithlife.grid.Grid
+import com.fiz.tetriswithlife.grid.Point
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max

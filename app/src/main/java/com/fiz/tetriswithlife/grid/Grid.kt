@@ -1,11 +1,12 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.grid
 
 private const val NUMBER_IMAGES_BACKGROUND = 16
 
-class Grid(val width: Int, val height: Int) {
+class Grid(val width: Int, val height: Int,
+           valueFon:()->Int={(0 until NUMBER_IMAGES_BACKGROUND).shuffled().first()}) {
     val space: Array<Array<Element>> = Array(height) {
         Array(width) {
-            Element((0 until NUMBER_IMAGES_BACKGROUND).shuffled().first())
+            Element(valueFon())
         }
     }
 
