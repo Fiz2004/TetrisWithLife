@@ -24,11 +24,10 @@ class DrawThread(
     private val surfaceHolder: SurfaceHolder,
     private val nextFigureSurfaceHolder: SurfaceHolder,
     resources: Resources,
-    private val scoresTextView: TextView,
-    private val settings: SharedPreferences, private val recordTextView: TextView,
-    private val infoBreathTextview: TextView, private val breathTextview: TextView,
+    scoresTextView: TextView,
+    private val settings: SharedPreferences, recordTextView: TextView,
+    infoBreathTextview: TextView, breathTextview: TextView,
     pauseButton: Button,
-    context: Context
 ) : Thread() {
     private var prevTime = System.currentTimeMillis()
     private var deltaTime = 0
@@ -36,7 +35,7 @@ class DrawThread(
 
     private val display = Display(
         resources, scoresTextView,
-        recordTextView, infoBreathTextview, breathTextview, pauseButton, context
+        recordTextView, infoBreathTextview, breathTextview, pauseButton
     )
 
     var state = State(
