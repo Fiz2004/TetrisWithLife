@@ -7,8 +7,6 @@ import kotlin.math.*
 
 //TODO Проверить когда персонажа запирают в одной клетке, игра начинается заново до того как он
 // задохнется
-//TODO Отследить почему то иногда игра прерывается так как идет обращение к ГРИД за границей по Х,
-// мне кажется из за персонажа поставил ловушку
 
 private const val NUMBER_FRAMES_CHARACTER_MOVE = 5
 private const val CHARACTER_SPEED_LINE = 30.0
@@ -22,7 +20,7 @@ open class Character(grid: Grid) {
     val height = 24
 
     var position = Coordinate(
-        (0..grid.width).shuffled().first().toDouble(), (grid.height - 1)
+        (0 until grid.width).shuffled().first().toDouble(), (grid.height - 1)
             .toDouble()
     )
     var speed = Speed(0F, 0F)
@@ -66,7 +64,6 @@ open class Character(grid: Grid) {
                 speed.line * directionX.toDouble(),
                 speed.line * directionY.toDouble()
             )
-            if (position.x>12.5) throw Exception("Выход за границы стакана")
         } else {
             angle += speed.rotate
             angle %= 360
