@@ -27,7 +27,7 @@ class DrawThread(
     scoresTextView: TextView,
     private val settings: SharedPreferences, recordTextView: TextView,
     infoBreathTextview: TextView, breathTextview: TextView,
-    pauseButton: Button,
+    pauseButton: Button, context:Context
 ) : Thread() {
     private var prevTime = System.currentTimeMillis()
     private var deltaTime = 0
@@ -35,7 +35,8 @@ class DrawThread(
 
     private val display = Display(
         resources, scoresTextView,
-        recordTextView, infoBreathTextview, breathTextview, pauseButton
+        recordTextView, infoBreathTextview, breathTextview, pauseButton,
+        context
     )
 
     var state = State(

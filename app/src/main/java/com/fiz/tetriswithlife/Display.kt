@@ -1,12 +1,12 @@
 package com.fiz.tetriswithlife
 
+import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.fiz.tetriswithlife.character.Character
 import com.fiz.tetriswithlife.figure.CurrentFigure
@@ -31,18 +31,20 @@ class Display(
   private val infoBreathTextview: TextView,
   private val breathTextview: TextView,
   private val pauseButton: Button,
+  private val context: Context
 ) {
   private val paint: Paint = Paint()
   private val bmpFon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.fon)
   private val bmpCharacter: Bitmap =
     BitmapFactory.decodeResource(resources, R.drawable.character)
-  private val bmpKv: Array<Bitmap> = arrayOf(
-    BitmapFactory.decodeResource(resources, R.drawable.kvadrat1),
-    BitmapFactory.decodeResource(resources, R.drawable.kvadrat2),
-    BitmapFactory.decodeResource(resources, R.drawable.kvadrat3),
-    BitmapFactory.decodeResource(resources, R.drawable.kvadrat4),
-    BitmapFactory.decodeResource(resources, R.drawable.kvadrat5)
-  )
+  private var bmpKv: Array<Bitmap> = emptyArray()
+
+  init {
+    for (i in 1..NUMBER_IMAGES_FIGURE)
+      bmpKv+= BitmapFactory.decodeResource(resources, resources.getIdentifier("kvadrat$i",
+        "drawable", context.packageName))
+
+  }
   private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
   private val newTile = (tile / 1.5).toFloat()
 

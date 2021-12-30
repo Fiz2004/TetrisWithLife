@@ -5,6 +5,11 @@ import com.fiz.tetriswithlife.grid.Grid
 import com.fiz.tetriswithlife.grid.Point
 import kotlin.math.*
 
+//TODO Проверить когда персонажа запирают в одной клетке, игра начинается заново до того как он
+// задохнется
+//TODO Отследить почему то иногда игра прерывается так как идет обращение к ГРИД за границей по Х,
+// мне кажется из за персонажа поставил ловушку
+
 private const val NUMBER_FRAMES_CHARACTER_MOVE = 5
 private const val CHARACTER_SPEED_LINE = 30.0
 private const val CHARACTER_SPEED_ROTATE = 45
@@ -57,11 +62,11 @@ open class Character(grid: Grid) {
 
     private fun changePosition() {
         if (speed.rotate == 0F) {
-            position = position+
-                Coordinate(
-                    speed.line * directionX.toDouble(),
-                    speed.line * directionY.toDouble()
-                )
+            position += Coordinate(
+                speed.line * directionX.toDouble(),
+                speed.line * directionY.toDouble()
+            )
+            if (position.x>12.5) throw Exception("Выход за границы стакана")
         } else {
             angle += speed.rotate
             angle %= 360

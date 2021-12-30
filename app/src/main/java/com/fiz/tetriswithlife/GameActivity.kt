@@ -49,7 +49,7 @@ class GameActivity : AppCompatActivity() {
         drawThread = DrawThread(gameSurfaceView.holder,nextFigureSurfaceView.holder,
             resources,scoresTextView,
             getSharedPreferences("data", Context.MODE_PRIVATE),recordTextView,infoBreathTextview,
-            breathTextview,pauseButton)
+            breathTextview,pauseButton, this.applicationContext)
         drawThread!!.setRunning(true)
         drawThread!!.start()
 
