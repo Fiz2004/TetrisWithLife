@@ -57,13 +57,6 @@ class CurrentFigure(
     return false
   }
 
-  private fun rotate() {
-    val oldCells = cells
-    cells = cells.map { cell -> Cell(3 - cell.y, cell.x, cell.view) }.toTypedArray()
-    if (isCollission(Coordinate(position.x, position.y)))
-      cells = oldCells
-  }
-
   fun moves(controller: Controller): String {
     if (controller.Left) moveLeft()
     if (controller.Right) moveRight()
@@ -80,6 +73,13 @@ class CurrentFigure(
   private fun moveRight() {
     if (!isCollission(Coordinate((position.x + STEP_MOVE_KEY_X), position.y)))
       position.x += STEP_MOVE_KEY_X
+  }
+
+  private fun rotate() {
+    val oldCells = cells
+    cells = cells.map { cell -> Cell(3 - cell.y, cell.x, cell.view) }.toTypedArray()
+    if (isCollission(Coordinate(position.x, position.y)))
+      cells = oldCells
   }
 
   private fun moveDown(stepY: Float): String {

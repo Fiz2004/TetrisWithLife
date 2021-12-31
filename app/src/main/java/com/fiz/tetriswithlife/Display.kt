@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife
 
-import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
@@ -17,7 +16,6 @@ import com.fiz.tetriswithlife.grid.Point
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
-
 
 private const val NUMBER_IMAGES_FIGURE = 5
 private const val TIMES_BREATH_LOSE = 60
@@ -37,16 +35,17 @@ class Display(
   private val bmpFon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.fon)
   private val bmpCharacter: Bitmap =
     BitmapFactory.decodeResource(resources, R.drawable.character)
-  private var bmpKv: Array<Bitmap> = emptyArray()
-
-  init {
-    for (i in 1..NUMBER_IMAGES_FIGURE)
-      bmpKv+= BitmapFactory.decodeResource(resources, resources.getIdentifier("kvadrat$i",
-        "drawable", context.packageName))
-
-  }
+  private val bmpKv: Array<Bitmap> by lazy(::initBmpKv)
   private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
   private val newTile = (tile / 1.5).toFloat()
+
+  private fun initBmpKv():Array<Bitmap> {
+    var result:Array<Bitmap> = emptyArray()
+    for (i in 1..NUMBER_IMAGES_FIGURE)
+      result+= BitmapFactory.decodeResource(resources, resources.getIdentifier("kvadrat$i",
+        "drawable", context.packageName))
+    return result
+  }
 
   private fun drawNextFigure(nextFigure: Figure, canvas: Canvas) {
     canvas.drawColor(Color.BLACK)
@@ -178,7 +177,6 @@ class Display(
   }
 }
 
-// Получить смещение по тайлам в зависимости от статуса элемента
 fun getOffset(element: Element): Point {
   if (element.getSpaceStatus() == 'R')
     return Point((element.status['R'] ?: 0 - 1), 1)
