@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("GridTest")
 internal class GridTest {
-    private var grid= Grid(5,10) { 0 }
+    private lateinit var grid:Grid
 
     @BeforeEach
     fun setUp() {

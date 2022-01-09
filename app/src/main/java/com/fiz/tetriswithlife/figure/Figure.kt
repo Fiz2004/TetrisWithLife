@@ -25,19 +25,19 @@ open class Figure(
     numberFigure: () -> Int
   ): Array<Cell> {
     var result: Array<Cell> = emptyArray()
-    for (p in FIGURE[numberFigure()]) {
+    for (cell in FIGURE[numberFigure()]) {
       val view = (1..NUMBER_IMAGES_FIGURE).shuffled().first()
-      result += Cell(p.x, p.y, view)
+      result += Cell(cell.x, cell.y, view)
     }
     return result
   }
 
   fun getWidth(): Int {
-    return cells.reduce { a, b -> if (a.x > b.x) a else b }.x
+    return cells.maxByOrNull { it.x }?.x?:0
   }
 
   fun getHeight(): Int {
-    return cells.reduce { a, b -> if (a.y > b.y) a else b }.y
+    return cells.maxByOrNull { it.y }?.y?:0
   }
 }
 

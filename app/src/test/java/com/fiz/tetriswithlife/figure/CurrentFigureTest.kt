@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("CurrentFigureTest")
 internal class CurrentFigureTest {
-  var grid= Grid(5,10) { 0 }
-  var figure=Figure{0}
-  var currentFigure=CurrentFigure(grid,figure) { 0 }
+  private lateinit var grid:Grid
+  private lateinit var figure:Figure
+  private lateinit var currentFigure:CurrentFigure
 
   @BeforeEach
   fun setUp() {

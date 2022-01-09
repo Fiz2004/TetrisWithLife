@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName
 
 @DisplayName("ElementTest")
 class ElementTest {
-    var element= Element(0,0,mutableMapOf('L' to 1, 'R' to 2, 'U' to 3))
+    private lateinit var element:Element
 
     @BeforeEach
     fun init() {

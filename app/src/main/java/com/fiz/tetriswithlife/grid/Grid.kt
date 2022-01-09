@@ -30,24 +30,19 @@ class Grid(
 
   fun getCountRowFull(): Int {
     var result = 0
-    for (row in space) {
-      if (row.all { element ->
-          element.block != 0
-        })
+    for (row in space)
+      if (row.all { it.block != 0 })
         result += 1
-    }
+
     return result
   }
 
   fun deleteRows() {
-    for ((index, value) in space.withIndex()) {
-      if (value.all { element ->
-          element.block != 0
-        }) {
+    for ((index, value) in space.withIndex())
+      if (value.all { it.block != 0 }) {
         deleteRow(index)
-        space[0].forEach { element -> element.setZero() }
+        space[0].forEach { it.setZero() }
       }
-    }
   }
 
   private fun deleteRow(rowIndex: Int) {

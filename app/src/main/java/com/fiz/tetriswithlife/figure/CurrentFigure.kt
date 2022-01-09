@@ -32,7 +32,7 @@ class CurrentFigure(
   }
 
   fun getPositionTile(p: Coordinate = Coordinate(position.x, position.y)): Array<Point> {
-    return cells.map { cell -> Point(cell.x + p.x.toInt(), cell.y + p.y.toInt()) }.toTypedArray()
+    return cells.map { it+p.toPoint() }.toTypedArray()
   }
 
   fun fixation(scores: Int) {
@@ -89,7 +89,7 @@ class CurrentFigure(
 
     if (isCheckCollisionIfMoveDown(yStart.toInt(), yEnd.toInt())) {
       if (getPositionTile(Coordinate(position.x, yMax.toDouble()))
-          .any { p -> (p.y - 1) < 0 }
+          .any { (it.y - 1) < 0 }
       )
         return "endGame"
       position.y = yMax.toDouble()
