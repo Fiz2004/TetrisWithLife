@@ -18,33 +18,30 @@ data class Controller(
     var Up: Boolean = false,
     var Left: Boolean = false,
     var Right: Boolean = false,
+    var timeLast: Int = 0
 )
 
-class DrawThread(
+class GameThread(
     private val surfaceHolder: SurfaceHolder,
     private val nextFigureSurfaceHolder: SurfaceHolder,
     resources: Resources,
     scoresTextView: TextView,
     private val settings: SharedPreferences, recordTextView: TextView,
     infoBreathTextview: TextView, breathTextview: TextView,
-    pauseButton: Button, context:Context
+    pauseButton: Button, context: Context
 ) : Thread() {
     private var prevTime = System.currentTimeMillis()
     private var deltaTime = 0
     private var ending = 1000
-
     private val display = Display(
         resources, scoresTextView,
         recordTextView, infoBreathTextview, breathTextview, pauseButton,
         context
     )
-
     var state = State(
         widthCanvas, heightCanvas, settings
     )
-
     val controller = Controller()
-
     private var running = false
 
     fun setRunning(running: Boolean) {
@@ -55,47 +52,52 @@ class DrawThread(
         var canvas: Canvas?
         var nextFigureCanvas: Canvas?
         while (running) {
-            val now = System.currentTimeMillis()
-            deltaTime += min(now - prevTime, 100).toInt()
-            val tempDeltaTime = deltaTime
+            stateUpdate()
+
             canvas = null
             nextFigureCanvas = null
             try {
                 canvas = surfaceHolder.lockCanvas(null)
-                nextFigureCanvas = nextFigureSurfaceHolder.lockCanvas(null)
                 if (canvas == null) continue
-                if (nextFigureCanvas == null) continue
                 synchronized(surfaceHolder) {
-                    synchronized(nextFigureSurfaceHolder) {
-                        var status = true
-                        if (state.status != "pause") {
-                            if (deltaTime > TIME_UPDATE_CONTROLLER) {
-                                if (ending == 1000) {
-                                    status = state.update(deltaTime.toFloat(), controller)
-                                }
-                                deltaTime = 0
-                            }
-                        }
-                        display.render(state, canvas, nextFigureCanvas)
-                        if (!status || ending != 1000) {
-                            ending -= tempDeltaTime
-                        }
-                        if (ending < 0 || state.status == "new game") {
-                            state = State(
-                                widthCanvas, heightCanvas, settings
-                            )
-                            ending = 1000
-                            deltaTime = 0
-                        }
-                        prevTime = now
-                    }
+                    display.render(state, canvas)
                 }
+
+                nextFigureCanvas = nextFigureSurfaceHolder.lockCanvas(null)
+                if (nextFigureCanvas == null) continue
+                synchronized(nextFigureSurfaceHolder) {
+                    display.renderInfo(state, nextFigureCanvas)
+                }
+
             } finally {
-                if (canvas != null) {
+                if (canvas != null)
                     surfaceHolder.unlockCanvasAndPost(canvas)
+                if (nextFigureCanvas != null)
                     nextFigureSurfaceHolder.unlockCanvasAndPost(nextFigureCanvas)
-                }
+
             }
         }
+    }
+
+    private fun stateUpdate() {
+        val now = System.currentTimeMillis()
+        deltaTime = min(now - prevTime, 100).toInt()
+
+        if (state.status != "pause") {
+            var status = true
+            if (ending == 1000)
+                status = state.update(controller, deltaTime)
+
+            if (!status || ending != 1000)
+                ending -= deltaTime
+        }
+
+        if (ending < 0 || state.status == "new game") {
+            state = State(widthCanvas, heightCanvas, settings)
+            ending = 1000
+        }
+
+        deltaTime = 0
+        prevTime = now
     }
 }

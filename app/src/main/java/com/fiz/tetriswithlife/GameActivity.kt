@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class GameActivity : AppCompatActivity() {
-    private var drawThread: DrawThread? = null
+    private var gameThread: GameThread? = null
 
     private lateinit var newGameButton: Button
     private lateinit var pauseButton: Button
@@ -46,29 +46,28 @@ class GameActivity : AppCompatActivity() {
         gameSurfaceView=findViewById(R.id.game_game_surfaceview)
         nextFigureSurfaceView=findViewById(R.id.nextfigure_game_surfaceview)
 
-        drawThread = DrawThread(gameSurfaceView.holder,nextFigureSurfaceView.holder,
+        gameThread = GameThread(gameSurfaceView.holder,nextFigureSurfaceView.holder,
             resources,scoresTextView,
             getSharedPreferences("data", Context.MODE_PRIVATE),recordTextView,infoBreathTextview,
             breathTextview,pauseButton, this.applicationContext)
-        drawThread!!.setRunning(true)
-        drawThread!!.start()
+        gameThread!!.setRunning(true)
+        gameThread!!.start()
 
         leftButton.setOnTouchListener { view: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = true
-                    drawThread!!.controller.Right = false
-
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = true
+                    gameThread!!.controller.Right = false
                 }
                 MotionEvent.ACTION_MOVE -> {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = false
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = false
                 }
             }
             true
@@ -77,19 +76,18 @@ class GameActivity : AppCompatActivity() {
         rightButton.setOnTouchListener { view: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = true
-
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = true
                 }
                 MotionEvent.ACTION_MOVE -> {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = false
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = false
                 }
             }
             true
@@ -98,19 +96,18 @@ class GameActivity : AppCompatActivity() {
         downButton.setOnTouchListener { view: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    drawThread!!.controller.Down = true
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = false
-
+                    gameThread!!.controller.Down = true
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = false
                 }
                 MotionEvent.ACTION_MOVE -> {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = false
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = false
                 }
             }
             true
@@ -119,29 +116,28 @@ class GameActivity : AppCompatActivity() {
         rotateButton.setOnTouchListener { view: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = true
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = false
-
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = true
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = false
                 }
                 MotionEvent.ACTION_MOVE -> {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    drawThread!!.controller.Down = false
-                    drawThread!!.controller.Up = false
-                    drawThread!!.controller.Left = false
-                    drawThread!!.controller.Right = false
+                    gameThread!!.controller.Down = false
+                    gameThread!!.controller.Up = false
+                    gameThread!!.controller.Left = false
+                    gameThread!!.controller.Right = false
                 }
             }
             true
         }
 
         newGameButton.setOnClickListener {
-            drawThread!!.state.status = "new game"
+            gameThread!!.state.status = "new game"
         }
         pauseButton.setOnClickListener {
-            drawThread!!.state.clickPause()
+            gameThread!!.state.clickPause()
         }
         exitButton.setOnClickListener {
             finish()
@@ -151,10 +147,10 @@ class GameActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         var retry = true
-        drawThread!!.setRunning(false)
+        gameThread!!.setRunning(false)
         while (retry) {
             try {
-                drawThread!!.join()
+                gameThread!!.join()
                 retry = false
             } catch (e: InterruptedException) {
             }

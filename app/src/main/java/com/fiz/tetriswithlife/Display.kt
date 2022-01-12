@@ -47,24 +47,13 @@ class Display(
     return result
   }
 
-  private fun drawNextFigure(nextFigure: Figure, canvas: Canvas) {
-    canvas.drawColor(Color.BLACK)
-    for (cell in nextFigure.cells) {
-      val screenX = (cell.x) * newTile
-      val screenY = (cell.y) * newTile
-      canvas.drawBitmap(
-        bmpKv[cell.view - 1],
-        Rect(0, 0, tile, tile),
-        RectF(screenX, screenY, screenX + newTile, screenY + newTile),
-        paint
-      )
-    }
-  }
-
-  fun render(state: State, canvas: Canvas, nextFigureCanvas: Canvas) {
+  fun render(state: State, canvas: Canvas) {
     drawGridElements(state.grid, canvas)
     drawCurrentFigure(state.currentFigure, canvas)
     drawCharacter(state.character, canvas)
+  }
+
+  fun renderInfo(state: State, nextFigureCanvas: Canvas) {
     drawNextFigure(state.nextFigure, nextFigureCanvas)
 
     scoresTextView.text = "${resources.getString(R.string.scores_game_textview)}: ${
@@ -174,6 +163,20 @@ class Display(
       RectF(screenX, screenY, screenX + newTile, screenY + newTile),
       paint
     )
+  }
+
+  private fun drawNextFigure(nextFigure: Figure, canvas: Canvas) {
+    canvas.drawColor(Color.BLACK)
+    for (cell in nextFigure.cells) {
+      val screenX = (cell.x) * newTile
+      val screenY = (cell.y) * newTile
+      canvas.drawBitmap(
+        bmpKv[cell.view - 1],
+        Rect(0, 0, tile, tile),
+        RectF(screenX, screenY, screenX + newTile, screenY + newTile),
+        paint
+      )
+    }
   }
 }
 
