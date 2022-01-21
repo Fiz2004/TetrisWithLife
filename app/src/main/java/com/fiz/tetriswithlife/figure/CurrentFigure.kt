@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.figure
 
-import com.fiz.tetriswithlife.*
+import com.fiz.tetriswithlife.Controller
 import com.fiz.tetriswithlife.grid.Cell
 import com.fiz.tetriswithlife.grid.Coordinate
 import com.fiz.tetriswithlife.grid.Grid
@@ -58,11 +58,10 @@ class CurrentFigure(
     }
 
     fun moves(controller: Controller): String {
-        if (controller.Left) moveLeft()
-        if (controller.Right) moveRight()
-        if (controller.Up) rotate()
-
-        val step: Float = if (controller.Down) STEP_MOVE_KEY_Y.toFloat() else stepMoveAuto.toFloat()
+        if (controller.left) moveLeft()
+        if (controller.right) moveRight()
+        if (controller.up) rotate()
+        val step: Float = if (controller.down) STEP_MOVE_KEY_Y.toFloat() else stepMoveAuto.toFloat()
         return moveDown(step)
     }
 

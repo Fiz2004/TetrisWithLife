@@ -6,7 +6,6 @@ import com.fiz.tetriswithlife.grid.Point
 private const val PROBABILITY_EAT = 20
 
 open class CharacterEat(grid: Grid) : Character(grid) {
-
     var eat = 0
 
     override fun update(grid: Grid): String {
@@ -42,11 +41,6 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         throw Exception("Error: incorrect value function getDirectionEat")
     }
 
-//    fun isEatingNow(): Boolean {
-//        return eat == 1 && !isNewFrame()
-//                && (isMoveStraight())
-//    }
-
     override fun isCanMove(arrayDirections: Array<Array<Point>>, grid: Grid): Array<Point> {
         for (directions in arrayDirections)
             if (isCanDirections(directions, grid, (0..100).shuffled().first() < PROBABILITY_EAT))
@@ -59,12 +53,12 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         var addPoint = Point(0, 0)
         for (direction in directions) {
             addPoint += direction
-            val point = posTile+addPoint
+            val point = posTile + addPoint
 
             if (grid.isOutside(point))
                 return false
 
-            result+=direction
+            result += direction
 
             if (grid.isNotFree(point)) {
                 if (addPoint.y == 0 && isDestroy) {
@@ -79,29 +73,29 @@ open class CharacterEat(grid: Grid) : Character(grid) {
     }
 
     override fun getSprite(): Point {
-        if (eat==0)
+        if (eat == 0)
             return super.getSprite()
 
         if (angle == 0F && speed.line != 0F && getFrame(position.x) == -1)
-            return Point ( 2, 0 )
+            return Point(2, 0)
         if (angle == 0F && speed.line != 0F)
-            return Point (getFrame(position.x),  5)
+            return Point(getFrame(position.x), 5)
 
         if (angle == 180F && speed.line != 0F && getFrame(position.x) == -1)
-            return Point ( 6, 0 )
+            return Point(6, 0)
         if (angle == 180F && speed.line != 0F)
-            return Point (4- getFrame(position.x),  6 )
+            return Point(4 - getFrame(position.x), 6)
 
         if (angle == 90F && speed.line != 0F && getFrame(position.y) == -1)
-            return Point ( 0, 0 )
+            return Point(0, 0)
         if (angle == 90F && speed.line != 0F)
-            return Point ( getFrame(position.y), 8 )
+            return Point(getFrame(position.y), 8)
 
         if (angle == 270F && speed.line != 0F && getFrame(position.y) == -1)
-            return Point ( 4, 0 )
+            return Point(4, 0)
         if (angle == 270F && speed.line != 0F)
-            return Point (getFrame(this.position.y),  7)
+            return Point(getFrame(this.position.y), 7)
 
-        return Point ( 0, 0 )
+        return Point(0, 0)
     }
 }

@@ -6,14 +6,10 @@ import com.fiz.tetriswithlife.figure.CurrentFigure
 import com.fiz.tetriswithlife.figure.Figure
 import com.fiz.tetriswithlife.grid.Grid
 import com.fiz.tetriswithlife.grid.Point
-import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
 private const val NUMBER_FRAMES_ELEMENTS = 4
-
-// Время без дыхания для проигрыша
-private const val TIMES_BREATH_LOSE = 60
 
 class State(
     width: Int,
@@ -28,25 +24,20 @@ class State(
     var nextFigure: Figure = Figure()
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure)
     private val settings = _settings
-    private var pauseTime: Long = System.currentTimeMillis()
 
     private fun createCurrentFigure() {
         currentFigure = CurrentFigure(grid, nextFigure)
         nextFigure = Figure()
     }
 
-    fun update(controller: Controller, deltaTime: Int): Boolean {
-        if (controller.timeLast == 0) {
-            controller.timeLast = 80
-        } else {
-            controller.timeLast -= deltaTime
-            if (controller.timeLast < 0)
-                controller.timeLast = 0
+    fun update(controller: Controller, deltaTime: Double): Boolean {
+        if (!character.breath)
+            character.timeBreath -= deltaTime
+        if (controller.isCannotTimeLast(deltaTime))
             return true
-        }
 
         if (!actionsControl(controller)
-            || (!character.isBreath(grid) && (checkLose() || isCrushedBeetle()))
+            || (!character.breath && (isLose() || isCrushedBeetle()))
             || status == "new game"
         ) {
             ifRecord()
@@ -65,7 +56,7 @@ class State(
     }
 
     private fun actionsControl(controller: Controller): Boolean {
-        val status= currentFigure.moves(controller)
+        val status = currentFigure.moves(controller)
 
         if (status == "endGame"
             // Фигура достигла препятствия
@@ -132,7 +123,7 @@ class State(
         )
         grid.space[tile.y][tile.x].status[character.getDirectionEat()] =
             getStatusDestroyElement() + 1
-
+        character.isBreath(grid)
     }
 
     private fun getStatusDestroyElement(): Int {
@@ -146,25 +137,18 @@ class State(
         return 0
     }
 
-    private fun checkLose(): Boolean {
-        if ((this.grid.isNotFree(character.posTile) && character.eat == 0)
-            || TIMES_BREATH_LOSE - ceil(
-                (System.currentTimeMillis() - character.timeBreath)
-                        / 1000.0
-            ) <= 0
-        )
+    private fun isLose(): Boolean {
+        if (this.grid.isNotFree(character.posTile) && character.eat == 0)
+            return true
+
+        if (character.timeBreath <= 0)
             return true
 
         return false
     }
 
     fun clickPause() {
-        if (status == "playing") {
-            status = "pause"
-            pauseTime = System.currentTimeMillis()
-        } else {
-            status = "playing"
-            character.timeBreath += System.currentTimeMillis() - pauseTime
-        }
+        status = if (status == "playing") "pause" else "playing"
+
     }
 }

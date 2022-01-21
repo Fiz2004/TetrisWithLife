@@ -1,48 +1,40 @@
 package com.fiz.tetriswithlife
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.content.res.Resources
-import android.graphics.*
+import android.graphics.Canvas
 import android.view.SurfaceHolder
 import android.widget.Button
 import android.widget.TextView
 import kotlin.math.min
 
-private const val TIME_UPDATE_CONTROLLER = 80
 private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
-
-data class Controller(
-    var Down: Boolean = false,
-    var Up: Boolean = false,
-    var Left: Boolean = false,
-    var Right: Boolean = false,
-    var timeLast: Int = 0
-)
 
 class GameThread(
     private val surfaceHolder: SurfaceHolder,
     private val nextFigureSurfaceHolder: SurfaceHolder,
-    resources: Resources,
+    private val context: Context,
     scoresTextView: TextView,
-    private val settings: SharedPreferences, recordTextView: TextView,
-    infoBreathTextview: TextView, breathTextview: TextView,
-    pauseButton: Button, context: Context
+    recordTextView: TextView,
+    infoBreathTextview: TextView,
+    breathTextview: TextView,
+    pauseButton: Button
 ) : Thread() {
+    var state = State(
+        widthCanvas, heightCanvas, context.getSharedPreferences("data", Context.MODE_PRIVATE)
+    )
+    val controller = Controller()
+
     private var prevTime = System.currentTimeMillis()
-    private var deltaTime = 0
-    private var ending = 1000
+    private var ending = 1.0
+    private var running = false
+
     private val display = Display(
-        resources, scoresTextView,
+        context.resources, scoresTextView,
         recordTextView, infoBreathTextview, breathTextview, pauseButton,
         context
     )
-    var state = State(
-        widthCanvas, heightCanvas, settings
-    )
-    val controller = Controller()
-    private var running = false
+
 
     fun setRunning(running: Boolean) {
         this.running = running
@@ -81,23 +73,26 @@ class GameThread(
 
     private fun stateUpdate() {
         val now = System.currentTimeMillis()
-        deltaTime = min(now - prevTime, 100).toInt()
+        val deltaTime = min(now - prevTime, 100).toInt()/1000.0
 
         if (state.status != "pause") {
             var status = true
-            if (ending == 1000)
+            if (ending == 1.0)
                 status = state.update(controller, deltaTime)
 
-            if (!status || ending != 1000)
+            if (!status || ending != 1.0)
                 ending -= deltaTime
         }
 
         if (ending < 0 || state.status == "new game") {
-            state = State(widthCanvas, heightCanvas, settings)
-            ending = 1000
+            state = State(
+                widthCanvas,
+                heightCanvas,
+                context.getSharedPreferences("data", Context.MODE_PRIVATE)
+            )
+            ending = 1.0
         }
 
-        deltaTime = 0
         prevTime = now
     }
 }
