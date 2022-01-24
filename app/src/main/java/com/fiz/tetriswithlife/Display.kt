@@ -3,10 +3,6 @@ package com.fiz.tetriswithlife
 import android.content.Context
 import android.graphics.*
 import android.view.SurfaceView
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import androidx.core.view.isVisible
 import com.fiz.tetriswithlife.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.grid.Element
 import com.fiz.tetriswithlife.grid.Point
@@ -20,16 +16,24 @@ private const val NUMBER_ROWS_IMAGES_FON = 4
 
 class Display(
     private val surface: SurfaceView,
-    private val scoresTextView: TextView,
-    private val recordTextView: TextView,
-    private val infoBreathTextview: TextView,
-    private val breathTextview: TextView,
-    private val pauseButton: Button,
     private val context: Context
 ) {
+    companion object {
+        interface Listener {
+            fun setScoresTextView(scores: String)
+            fun setRecordTextView(record: String)
+
+            fun pauseButtonClick(status: String)
+            fun infoBreathTextviewChangeVisibility(visibility: Boolean)
+            fun breathTextviewChangeVisibilityAndColor(visibility: Boolean, sec: Double, color: Int)
+        }
+    }
+
+
     private lateinit var state: State
     private lateinit var canvas: Canvas
     private lateinit var canvasInfo: Canvas
+    private lateinit var listener: Listener
     private val paint: Paint = Paint()
     private val bmpFon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
     private val bmpCharacter: Bitmap =
@@ -66,17 +70,12 @@ class Display(
         this.canvasInfo = nextFigureCanvas
         drawNextFigure()
 
-        scoresTextView.text = "${context.resources.getString(R.string.scores_game_textview)}: ${
-            state.scores.toString().padStart(6, '0')
-        }"
-        recordTextView.text = "${context.resources.getString(R.string.record_game_textview)}: ${
-            state.record.toString().padStart(6, '0')
-        }"
+        listener = context as Listener
+        listener.setScoresTextView(state.scores.toString().padStart(6, '0'))
+        listener.setRecordTextView(state.record.toString().padStart(6, '0'))
 
-        if (state.status == "pause")
-            pauseButton.text = context.resources.getString(R.string.resume_game_button)
-        else
-            pauseButton.text = context.resources.getString(R.string.pause_game_button)
+        listener.pauseButtonClick(state.status)
+
 
         if (state.status != "pause") {
             val sec: Double = if (state.character.breath)
@@ -84,19 +83,9 @@ class Display(
             else
                 max(state.character.timeBreath, 0.0)
 
-            if (!state.character.breath) {
-                if (!breathTextview.isVisible) {
-                    infoBreathTextview.post { infoBreathTextview.visibility = View.VISIBLE }
-                    breathTextview.post { breathTextview.visibility = View.VISIBLE }
-                }
-                breathTextview.post { breathTextview.text = sec.toInt().toString() }
-            } else if (breathTextview.isVisible) {
-                infoBreathTextview.post { infoBreathTextview.visibility = View.INVISIBLE }
-                breathTextview.post { breathTextview.visibility = View.INVISIBLE }
-            }
+            listener.infoBreathTextviewChangeVisibility(state.character.breath)
             val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
-            breathTextview.post { breathTextview.setBackgroundColor(Color.rgb(255, cl, cl)) }
-
+            listener.breathTextviewChangeVisibilityAndColor(state.character.breath, sec, cl)
         }
     }
 

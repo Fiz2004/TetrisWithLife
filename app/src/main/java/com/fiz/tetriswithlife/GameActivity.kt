@@ -1,6 +1,7 @@
 package com.fiz.tetriswithlife
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceView
@@ -8,8 +9,9 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 
-class GameActivity : AppCompatActivity() {
+class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private var gameThread: GameThread? = null
     private lateinit var newGameButton: Button
     private lateinit var pauseButton: Button
@@ -48,12 +50,7 @@ class GameActivity : AppCompatActivity() {
         gameThread = GameThread(
             gameSurfaceView,
             nextFigureSurfaceView,
-            applicationContext,
-            scoresTextView,
-            recordTextView,
-            infoBreathTextview,
-            breathTextview,
-            pauseButton,
+            this
         )
         gameThread!!.setRunning(true)
         gameThread!!.start()
@@ -137,6 +134,51 @@ class GameActivity : AppCompatActivity() {
                 /* for lint */
             }
         }
+    }
+
+    override fun setScoresTextView(scores: String) {
+        scoresTextView.text = "${resources.getString(R.string.scores_game_textview)}: ${
+            scores.padStart(6, '0')
+        }"
+    }
+
+    override fun setRecordTextView(record: String) {
+        recordTextView.text = "${resources.getString(R.string.record_game_textview)}: ${
+            record.padStart(6, '0')
+        }"
+    }
+
+    override fun pauseButtonClick(status: String) {
+        if (status == "pause")
+            pauseButton.text = resources.getString(R.string.resume_game_button)
+        else
+            pauseButton.text = resources.getString(R.string.pause_game_button)
+    }
+
+    override fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
+        if (!visibility) {
+            if (!breathTextview.isVisible) {
+                infoBreathTextview.post { infoBreathTextview.visibility = View.VISIBLE }
+            }
+        } else if (breathTextview.isVisible) {
+            infoBreathTextview.post { infoBreathTextview.visibility = View.INVISIBLE }
+        }
+    }
+
+    override fun breathTextviewChangeVisibilityAndColor(
+        visibility: Boolean, sec: Double, color: Int
+    ) {
+        if (!visibility) {
+            if (!breathTextview.isVisible) {
+                breathTextview.post { breathTextview.visibility = View.VISIBLE }
+            }
+            breathTextview.post { breathTextview.text = sec.toInt().toString() }
+        } else if (breathTextview.isVisible) {
+            breathTextview.post { breathTextview.visibility = View.INVISIBLE }
+        }
+
+        breathTextview.post { breathTextview.setBackgroundColor(Color.rgb(255, color, color)) }
+
     }
 
 

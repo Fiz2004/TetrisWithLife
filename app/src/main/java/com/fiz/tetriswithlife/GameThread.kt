@@ -2,10 +2,7 @@ package com.fiz.tetriswithlife
 
 import android.content.Context
 import android.graphics.Canvas
-import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.widget.Button
-import android.widget.TextView
 import kotlin.math.min
 
 private const val widthCanvas: Int = 13
@@ -15,11 +12,6 @@ class GameThread(
     private val surface: SurfaceView,
     private val surfaceNextFigure: SurfaceView,
     private val context: Context,
-    scoresTextView: TextView,
-    recordTextView: TextView,
-    infoBreathTextview: TextView,
-    breathTextview: TextView,
-    pauseButton: Button
 ) : Thread() {
     var state = State(
         widthCanvas, heightCanvas, context.getSharedPreferences("data", Context.MODE_PRIVATE)
@@ -32,8 +24,6 @@ class GameThread(
 
     private val display = Display(
         surface,
-        scoresTextView,
-        recordTextView, infoBreathTextview, breathTextview, pauseButton,
         context
     )
 
