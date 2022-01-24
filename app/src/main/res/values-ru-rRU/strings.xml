@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Живой тетрис</string>
+    <string name="new_game_main_button">Новая игра</string>
+    <string name="options_main_button">Настройки</string>
+    <string name="exit_main_button">Выход</string>
+    <string name="name_options_textview">Имя:</string>
+    <string name="name_options_editview">Введите имя</string>
+    <string name="exit_options_button">Выход</string>
+    <string name="new_game_game_button">Новая игра</string>
+    <string name="pause_game_button">Пауза</string>
+    <string name="resume_game_button">Продолжить</string>
+    <string name="exit_game_button">Выход</string>
+    <string name="scores_game_textview">Очки:</string>
+    <string name="record_game_textview">Рекорд:</string>
+    <string name="infobreath_game_textview">Задыхаюсь. Осталось секунд</string>
+    <string name="left_game_button">Влево</string>
+    <string name="right_game_button">Вправо</string>
+    <string name="down_game_button">Вниз</string>
+    <string name="rotate_game_button">Поворот</string>
+</resources>

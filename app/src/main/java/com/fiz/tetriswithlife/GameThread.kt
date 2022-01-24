@@ -3,6 +3,7 @@ package com.fiz.tetriswithlife
 import android.content.Context
 import android.graphics.Canvas
 import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.widget.Button
 import android.widget.TextView
 import kotlin.math.min
@@ -11,8 +12,8 @@ private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
 
 class GameThread(
-    private val surfaceHolder: SurfaceHolder,
-    private val nextFigureSurfaceHolder: SurfaceHolder,
+    private val surface: SurfaceView,
+    private val surfaceNextFigure: SurfaceView,
     private val context: Context,
     scoresTextView: TextView,
     recordTextView: TextView,
@@ -30,7 +31,8 @@ class GameThread(
     private var running = false
 
     private val display = Display(
-        context.resources, scoresTextView,
+        surface,
+        scoresTextView,
         recordTextView, infoBreathTextview, breathTextview, pauseButton,
         context
     )
@@ -49,23 +51,23 @@ class GameThread(
             canvas = null
             nextFigureCanvas = null
             try {
-                canvas = surfaceHolder.lockCanvas(null)
+                canvas = surface.holder.lockCanvas(null)
                 if (canvas == null) continue
-                synchronized(surfaceHolder) {
+                synchronized(surface.holder) {
                     display.render(state, canvas)
                 }
 
-                nextFigureCanvas = nextFigureSurfaceHolder.lockCanvas(null)
+                nextFigureCanvas = surfaceNextFigure.holder.lockCanvas(null)
                 if (nextFigureCanvas == null) continue
-                synchronized(nextFigureSurfaceHolder) {
+                synchronized(surfaceNextFigure.holder) {
                     display.renderInfo(state, nextFigureCanvas)
                 }
 
             } finally {
                 if (canvas != null)
-                    surfaceHolder.unlockCanvasAndPost(canvas)
+                    surface.holder.unlockCanvasAndPost(canvas)
                 if (nextFigureCanvas != null)
-                    nextFigureSurfaceHolder.unlockCanvasAndPost(nextFigureCanvas)
+                    surfaceNextFigure.holder.unlockCanvasAndPost(nextFigureCanvas)
 
             }
         }

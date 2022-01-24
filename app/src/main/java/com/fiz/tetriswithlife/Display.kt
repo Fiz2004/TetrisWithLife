@@ -1,28 +1,25 @@
 package com.fiz.tetriswithlife
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.*
+import android.view.SurfaceView
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.view.isVisible
-import com.fiz.tetriswithlife.character.Character
 import com.fiz.tetriswithlife.character.TIMES_BREATH_LOSE
-import com.fiz.tetriswithlife.figure.CurrentFigure
-import com.fiz.tetriswithlife.figure.Figure
 import com.fiz.tetriswithlife.grid.Element
-import com.fiz.tetriswithlife.grid.Grid
 import com.fiz.tetriswithlife.grid.Point
 import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.min
 
 private const val NUMBER_IMAGES_FIGURE = 5
 private const val NUMBER_COLUMNS_IMAGES_FON = 4
 private const val NUMBER_ROWS_IMAGES_FON = 4
 
 class Display(
-    private val resources: Resources,
+    private val surface: SurfaceView,
     private val scoresTextView: TextView,
     private val recordTextView: TextView,
     private val infoBreathTextview: TextView,
@@ -30,19 +27,19 @@ class Display(
     private val pauseButton: Button,
     private val context: Context
 ) {
+    private lateinit var state: State
+    private lateinit var canvas: Canvas
+    private lateinit var canvasInfo: Canvas
     private val paint: Paint = Paint()
-    private val bmpFon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.fon)
+    private val bmpFon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
     private val bmpCharacter: Bitmap =
-        BitmapFactory.decodeResource(resources, R.drawable.character)
+        BitmapFactory.decodeResource(context.resources, R.drawable.character)
     private val bmpKv: Array<Bitmap> by lazy(::initBmpKv)
-    private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
-    private val newTile = (tile / 1.5).toFloat()
-
     private fun initBmpKv(): Array<Bitmap> {
         var result: Array<Bitmap> = emptyArray()
         for (i in 1..NUMBER_IMAGES_FIGURE)
             result += BitmapFactory.decodeResource(
-                resources, resources.getIdentifier(
+                context.resources, context.resources.getIdentifier(
                     "kvadrat$i",
                     "drawable", context.packageName
                 )
@@ -50,29 +47,39 @@ class Display(
         return result
     }
 
+    private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
+    private var newTile = (tile / 1.5).toFloat()
+
     fun render(state: State, canvas: Canvas) {
-        drawGridElements(state.grid, canvas)
-        drawCurrentFigure(state.currentFigure, canvas)
-        drawCharacter(state.character, canvas)
+        this.state = state
+        this.canvas = canvas
+        newTile = min(
+            surface.height / state.grid.height, surface.width / state.grid
+                .width
+        ).toFloat()
+        drawGridElements()
+        drawCurrentFigure()
+        drawCharacter()
     }
 
     fun renderInfo(state: State, nextFigureCanvas: Canvas) {
-        drawNextFigure(state.nextFigure, nextFigureCanvas)
+        this.canvasInfo = nextFigureCanvas
+        drawNextFigure()
 
-        scoresTextView.text = "${resources.getString(R.string.scores_game_textview)}: ${
+        scoresTextView.text = "${context.resources.getString(R.string.scores_game_textview)}: ${
             state.scores.toString().padStart(6, '0')
         }"
-        recordTextView.text = "${resources.getString(R.string.record_game_textview)}: ${
+        recordTextView.text = "${context.resources.getString(R.string.record_game_textview)}: ${
             state.record.toString().padStart(6, '0')
         }"
 
         if (state.status == "pause")
-            pauseButton.text = resources.getString(R.string.resume_game_button)
+            pauseButton.text = context.resources.getString(R.string.resume_game_button)
         else
-            pauseButton.text = resources.getString(R.string.pause_game_button)
+            pauseButton.text = context.resources.getString(R.string.pause_game_button)
 
         if (state.status != "pause") {
-            var sec: Double = if (state.character.breath)
+            val sec: Double = if (state.character.breath)
                 TIMES_BREATH_LOSE
             else
                 max(state.character.timeBreath, 0.0)
@@ -93,14 +100,13 @@ class Display(
         }
     }
 
-
-    private fun drawGridElements(grid: Grid, canvas: Canvas) {
-        for (y in 0 until grid.height)
-            for (x in 0 until grid.width) {
+    private fun drawGridElements() {
+        for (y in 0 until state.grid.height)
+            for (x in 0 until state.grid.width) {
                 val screenX = x * newTile
                 val screenY = y * newTile
-                val offsetX = (grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
-                val offsetY = (grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
+                val offsetX = (state.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
+                val offsetY = (state.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
 
                 canvas.drawBitmap(
                     bmpFon,
@@ -110,14 +116,14 @@ class Display(
                 )
             }
 
-        for (y in 0 until grid.height)
-            for (x in 0 until grid.width)
-                if (grid.space[y][x].block != 0) {
+        for (y in 0 until state.grid.height)
+            for (x in 0 until state.grid.width)
+                if (state.grid.space[y][x].block != 0) {
                     val screenX = x * newTile
                     val screenY = y * newTile
-                    val offset: Point = getOffset(grid.space[y][x])
+                    val offset: Point = getOffset(state.grid.space[y][x])
                     canvas.drawBitmap(
-                        bmpKv[grid.space[y][x].block - 1],
+                        bmpKv[state.grid.space[y][x].block - 1],
                         Rect(
                             offset.x * tile,
                             offset.y * tile,
@@ -130,10 +136,10 @@ class Display(
                 }
     }
 
-    private fun drawCurrentFigure(currentFigure: CurrentFigure, canvas: Canvas) {
-        for (cell in currentFigure.cells) {
-            val screenX = ((cell.x + currentFigure.position.x) * newTile).toFloat()
-            val screenY = ((cell.y + currentFigure.position.y) * newTile).toFloat()
+    private fun drawCurrentFigure() {
+        for (cell in state.currentFigure.cells) {
+            val screenX = ((cell.x + state.currentFigure.position.x) * newTile).toFloat()
+            val screenY = ((cell.y + state.currentFigure.position.y) * newTile).toFloat()
             canvas.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),
@@ -143,12 +149,12 @@ class Display(
         }
     }
 
-    private fun drawCharacter(character: Character, canvas: Canvas) {
-        val offset = character.getSprite()
+    private fun drawCharacter() {
+        val offset = state.character.getSprite()
         offset.x *= tile
         offset.y *= tile
-        val screenX = (character.position.x * newTile).toFloat()
-        val screenY = (character.position.y * newTile).toFloat()
+        val screenX = (state.character.position.x * newTile).toFloat()
+        val screenY = (state.character.position.y * newTile).toFloat()
         canvas.drawBitmap(
             bmpCharacter,
             Rect(
@@ -162,12 +168,12 @@ class Display(
         )
     }
 
-    private fun drawNextFigure(nextFigure: Figure, canvas: Canvas) {
-        canvas.drawColor(Color.BLACK)
-        for (cell in nextFigure.cells) {
+    private fun drawNextFigure() {
+        canvasInfo.drawColor(Color.BLACK)
+        for (cell in state.nextFigure.cells) {
             val screenX = (cell.x) * newTile
             val screenY = (cell.y) * newTile
-            canvas.drawBitmap(
+            canvasInfo.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),
                 RectF(screenX, screenY, screenX + newTile, screenY + newTile),

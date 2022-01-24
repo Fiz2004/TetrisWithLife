@@ -46,8 +46,8 @@ class GameActivity : AppCompatActivity() {
         nextFigureSurfaceView = findViewById(R.id.nextfigure_game_surfaceview)
 
         gameThread = GameThread(
-            gameSurfaceView.holder,
-            nextFigureSurfaceView.holder,
+            gameSurfaceView,
+            nextFigureSurfaceView,
             applicationContext,
             scoresTextView,
             recordTextView,
