@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,25 +12,58 @@
         android:id="@+id/name_main_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name: " />
+        android:layout_margin="16dp"
+        android:text="Name: "
+        app:layout_constraintBottom_toTopOf="@+id/new_game_main_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/new_game_main_button"
+        style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/new_game_main_button" />
+        android:layout_margin="16dp"
+        android:paddingStart="48dp"
+        android:paddingEnd="48dp"
+        android:text="@string/new_game_main_button"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/options_main_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/options_main_button"
-        android:layout_width="wrap_content"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/options_main_button" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/options_main_button"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/new_game_main_button"
+        app:layout_constraintStart_toStartOf="@+id/new_game_main_button"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/exit_main_button"
-        android:layout_width="wrap_content"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/exit_main_button" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/exit_main_button"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/new_game_main_button"
+        app:layout_constraintStart_toStartOf="@+id/new_game_main_button"
+        app:layout_constraintTop_toBottomOf="@+id/options_main_button"
+        app:layout_constraintVertical_bias="0.0" />
 
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

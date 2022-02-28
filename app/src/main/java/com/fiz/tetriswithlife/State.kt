@@ -6,6 +6,7 @@ import com.fiz.tetriswithlife.figure.CurrentFigure
 import com.fiz.tetriswithlife.figure.Figure
 import com.fiz.tetriswithlife.grid.Grid
 import com.fiz.tetriswithlife.grid.Point
+import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -15,7 +16,7 @@ class State(
     width: Int,
     height: Int,
     _settings: SharedPreferences
-) {
+) : Serializable {
     val grid = Grid(width, height)
     val character = CharacterBreath(grid)
     var scores = 0

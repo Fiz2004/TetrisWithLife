@@ -54,6 +54,9 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         )
         gameThread!!.setRunning(true)
         gameThread!!.start()
+        val state = savedInstanceState?.getSerializable("state")
+        if (state != null)
+            gameThread!!.state = state as State
 
         leftButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
@@ -137,15 +140,15 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     }
 
     override fun setScoresTextView(scores: String) {
-        scoresTextView.text = "${resources.getString(R.string.scores_game_textview)}: ${
-            scores.padStart(6, '0')
-        }"
+        scoresTextView.text = resources.getString(
+            R.string.scores_game_textview, scores.padStart
+                (6, '0')
+        )
     }
 
     override fun setRecordTextView(record: String) {
-        recordTextView.text = "${resources.getString(R.string.record_game_textview)}: ${
-            record.padStart(6, '0')
-        }"
+        recordTextView.text =
+            resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
     }
 
     override fun pauseButtonClick(status: String) {
@@ -181,6 +184,10 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("state", gameThread!!.state)
+    }
 
 }
 

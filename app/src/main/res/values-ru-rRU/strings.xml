@@ -11,11 +11,15 @@
     <string name="pause_game_button">Пауза</string>
     <string name="resume_game_button">Продолжить</string>
     <string name="exit_game_button">Выход</string>
-    <string name="scores_game_textview">Очки:</string>
-    <string name="record_game_textview">Рекорд:</string>
+    <string name="scores_game_textview">Очки: %1$s</string>
+    <string name="record_game_textview">Рекорд: %1$s</string>
     <string name="infobreath_game_textview">Задыхаюсь. Осталось секунд</string>
     <string name="left_game_button">Влево</string>
     <string name="right_game_button">Вправо</string>
     <string name="down_game_button">Вниз</string>
     <string name="rotate_game_button">Поворот</string>
+
+    <string name="name">Имя: %1$s</string>
+    <string name="enter_name">Введите имя</string>
+    <string name="name_options">Ваше имя</string>
 </resources>
