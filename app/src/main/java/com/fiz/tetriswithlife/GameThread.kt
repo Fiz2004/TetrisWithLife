@@ -1,32 +1,19 @@
 package com.fiz.tetriswithlife
 
-import android.content.Context
 import android.graphics.Canvas
 import android.view.SurfaceView
 import kotlin.math.min
 
-private const val widthCanvas: Int = 13
-private const val heightCanvas: Int = 25
-
 class GameThread(
+    var state: com.fiz.tetriswithlife.State,
+    private var display: Display,
+    val controller: Controller,
     private val surface: SurfaceView,
-    private val surfaceNextFigure: SurfaceView,
-    private val context: Context,
+    private val surfaceNextFigure: SurfaceView
 ) : Thread() {
-    var state = State(
-        widthCanvas, heightCanvas, context.getSharedPreferences("data", Context.MODE_PRIVATE)
-    )
-    val controller = Controller()
-
     private var prevTime = System.currentTimeMillis()
     private var ending = 1.0
     private var running = false
-
-    private val display = Display(
-        surface,
-        context
-    )
-
 
     fun setRunning(running: Boolean) {
         this.running = running
@@ -65,7 +52,7 @@ class GameThread(
 
     private fun stateUpdate() {
         val now = System.currentTimeMillis()
-        val deltaTime = min(now - prevTime, 100).toInt()/1000.0
+        val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
 
         if (state.status != "pause") {
             var status = true
@@ -77,11 +64,7 @@ class GameThread(
         }
 
         if (ending < 0 || state.status == "new game") {
-            state = State(
-                widthCanvas,
-                heightCanvas,
-                context.getSharedPreferences("data", Context.MODE_PRIVATE)
-            )
+            state.new()
             ending = 1.0
         }
 

@@ -1,6 +1,7 @@
 package com.fiz.tetriswithlife
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
@@ -10,6 +11,9 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+
+private const val widthCanvas: Int = 13
+private const val heightCanvas: Int = 25
 
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private var gameThread: GameThread? = null
@@ -46,17 +50,25 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
         gameSurfaceView = findViewById(R.id.game_game_surfaceview)
         nextFigureSurfaceView = findViewById(R.id.nextfigure_game_surfaceview)
+        val load = savedInstanceState?.getSerializable("state")
+        val state: State = if (load != null) load as State else
+            State(
+                widthCanvas, heightCanvas, getSharedPreferences("data", Context.MODE_PRIVATE)
+            )
+        val display = Display(
+            gameSurfaceView,
+            this
+        )
 
         gameThread = GameThread(
+            state,
+            display,
+            Controller(),
             gameSurfaceView,
-            nextFigureSurfaceView,
-            this
+            nextFigureSurfaceView
         )
         gameThread!!.setRunning(true)
         gameThread!!.start()
-        val state = savedInstanceState?.getSerializable("state")
-        if (state != null)
-            gameThread!!.state = state as State
 
         leftButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {

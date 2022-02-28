@@ -17,14 +17,24 @@ class State(
     height: Int,
     _settings: SharedPreferences
 ) : Serializable {
-    val grid = Grid(width, height)
-    val character = CharacterBreath(grid)
+    var grid = Grid(width, height)
+    var character = CharacterBreath(grid)
     var scores = 0
     var record = _settings.getInt("Record", 0)
     var status = "playing"
     var nextFigure: Figure = Figure()
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure)
     private val settings = _settings
+
+    fun new() {
+        grid = Grid(grid.width, grid.height)
+        character = CharacterBreath(grid)
+        scores = 0
+        record = settings.getInt("Record", 0)
+        status = "playing"
+        nextFigure = Figure()
+        currentFigure = CurrentFigure(grid, nextFigure)
+    }
 
     private fun createCurrentFigure() {
         currentFigure = CurrentFigure(grid, nextFigure)

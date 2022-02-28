@@ -13,7 +13,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Name: "
         app:layout_constraintBottom_toTopOf="@+id/new_game_main_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,14 +21,13 @@
 
     <Button
         android:id="@+id/new_game_main_button"
-        style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:paddingStart="48dp"
         android:paddingEnd="48dp"
         android:text="@string/new_game_main_button"
-        android:textSize="18sp"
+        style="@style/button"
         app:layout_constraintBottom_toTopOf="@+id/options_main_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,13 +36,12 @@
 
     <Button
         android:id="@+id/options_main_button"
-        style="@style/Widget.Material3.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/options_main_button"
-        android:textSize="18sp"
+        style="@style/button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/new_game_main_button"
         app:layout_constraintStart_toStartOf="@+id/new_game_main_button"
@@ -52,13 +49,12 @@
 
     <Button
         android:id="@+id/exit_main_button"
-        style="@style/Widget.Material3.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/exit_main_button"
-        android:textSize="18sp"
+        style="@style/button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/new_game_main_button"
         app:layout_constraintStart_toStartOf="@+id/new_game_main_button"

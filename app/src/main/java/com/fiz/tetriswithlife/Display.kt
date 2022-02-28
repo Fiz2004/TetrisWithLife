@@ -53,14 +53,21 @@ class Display(
 
     private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
     private var newTile = (tile / 1.5).toFloat()
+    private var offset = Point(surface.width, surface.height)
 
     fun render(state: State, canvas: Canvas) {
         this.state = state
         this.canvas = canvas
+        canvas.drawColor(Color.parseColor("#161616"))
         newTile = min(
             surface.height / state.grid.height, surface.width / state.grid
                 .width
         ).toFloat()
+        offset = Point(
+            ((surface.width - state.grid.width * newTile) / 2).toInt(),
+            ((surface.height - state.grid
+                .height * newTile) / 2).toInt()
+        )
         drawGridElements()
         drawCurrentFigure()
         drawCharacter()
@@ -92,8 +99,8 @@ class Display(
     private fun drawGridElements() {
         for (y in 0 until state.grid.height)
             for (x in 0 until state.grid.width) {
-                val screenX = x * newTile
-                val screenY = y * newTile
+                val screenX = offset.x + x * newTile
+                val screenY = offset.y + y * newTile
                 val offsetX = (state.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
                 val offsetY = (state.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
 
@@ -108,8 +115,8 @@ class Display(
         for (y in 0 until state.grid.height)
             for (x in 0 until state.grid.width)
                 if (state.grid.space[y][x].block != 0) {
-                    val screenX = x * newTile
-                    val screenY = y * newTile
+                    val screenX = offset.x + x * newTile
+                    val screenY = offset.y + y * newTile
                     val offset: Point = getOffset(state.grid.space[y][x])
                     canvas.drawBitmap(
                         bmpKv[state.grid.space[y][x].block - 1],
@@ -127,12 +134,21 @@ class Display(
 
     private fun drawCurrentFigure() {
         for (cell in state.currentFigure.cells) {
-            val screenX = ((cell.x + state.currentFigure.position.x) * newTile).toFloat()
-            val screenY = ((cell.y + state.currentFigure.position.y) * newTile).toFloat()
+            val screenX = offset.x + ((cell.x + state.currentFigure.position.x) * newTile).toFloat()
+            val screenY = offset.y + ((cell.y + state.currentFigure.position.y) * newTile).toFloat()
+            var oldY = 0
+            var cY = screenY
+            var nTile = newTile
+            if (screenY - offset.y < 0 && screenY + newTile - offset.y < 0) return
+            if (screenY - offset.y < 0) {
+                nTile = screenY - offset.y + newTile
+                oldY = (nTile * tile / newTile).toInt()
+                cY = offset.y.toFloat()
+            }
             canvas.drawBitmap(
                 bmpKv[cell.view - 1],
-                Rect(0, 0, tile, tile),
-                RectF(screenX, screenY, screenX + newTile, screenY + newTile),
+                Rect(0, oldY, tile, tile),
+                RectF(screenX, cY, screenX + newTile, cY + nTile),
                 paint
             )
         }
@@ -142,8 +158,8 @@ class Display(
         val offset = state.character.getSprite()
         offset.x *= tile
         offset.y *= tile
-        val screenX = (state.character.position.x * newTile).toFloat()
-        val screenY = (state.character.position.y * newTile).toFloat()
+        val screenX = this.offset.x + (state.character.position.x * newTile).toFloat()
+        val screenY = this.offset.y + (state.character.position.y * newTile).toFloat()
         canvas.drawBitmap(
             bmpCharacter,
             Rect(
@@ -158,10 +174,14 @@ class Display(
     }
 
     private fun drawNextFigure() {
-        canvasInfo.drawColor(Color.BLACK)
+        val offset = Point(
+            ((canvasInfo.width - 4 * newTile) / 2).toInt(),
+            ((canvasInfo.height - 4 * newTile) / 2).toInt()
+        )
+        canvasInfo.drawColor(Color.parseColor("#242424"))
         for (cell in state.nextFigure.cells) {
-            val screenX = (cell.x) * newTile
-            val screenY = (cell.y) * newTile
+            val screenX = offset.x + (cell.x) * newTile
+            val screenY = offset.y + (cell.y) * newTile
             canvasInfo.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),

@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         if (arguments != null) {
             val name = arguments["name"].toString()
             nameTextView.text = resources.getString(R.string.name, name)
+        } else {
+            nameTextView.text = resources.getString(R.string.name, "")
         }
 
         newGameButton.setOnClickListener {
