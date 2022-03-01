@@ -6,59 +6,59 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".MainActivity">
+    tools:context=".view.MainActivity">
 
     <TextView
-        android:id="@+id/name_main_textview"
+        android:id="@+id/nameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/new_game_main_button"
+        app:layout_constraintBottom_toTopOf="@+id/newGameButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
-        android:id="@+id/new_game_main_button"
+        android:id="@+id/newGameButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/button"
         android:layout_margin="16dp"
         android:paddingStart="48dp"
         android:paddingEnd="48dp"
         android:text="@string/new_game_main_button"
-        app:layout_constraintBottom_toTopOf="@+id/options_main_button"
+        style="@style/button"
+        app:layout_constraintBottom_toTopOf="@+id/optionsButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
-        android:id="@+id/options_main_button"
+        android:id="@+id/optionsButton"
         style="@style/button"
         android:layout_height="wrap_content"
-        android:layout_width="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/options_main_button"
+        android:layout_width="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/new_game_main_button"
-        app:layout_constraintStart_toStartOf="@+id/new_game_main_button"
+        app:layout_constraintEnd_toEndOf="@+id/newGameButton"
+        app:layout_constraintStart_toStartOf="@+id/newGameButton"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/exit_main_button"
+        android:id="@+id/exitButton"
         style="@style/button"
         android:layout_height="wrap_content"
-        android:layout_width="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/exit_main_button"
+        android:layout_width="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/new_game_main_button"
-        app:layout_constraintStart_toStartOf="@+id/new_game_main_button"
-        app:layout_constraintTop_toBottomOf="@+id/options_main_button"
+        app:layout_constraintEnd_toEndOf="@+id/newGameButton"
+        app:layout_constraintStart_toStartOf="@+id/newGameButton"
+        app:layout_constraintTop_toBottomOf="@+id/optionsButton"
         app:layout_constraintVertical_bias="0.0" />
 
 
