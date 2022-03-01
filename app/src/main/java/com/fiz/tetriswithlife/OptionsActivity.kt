@@ -1,6 +1,8 @@
 package com.fiz.tetriswithlife
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,6 +24,13 @@ class OptionsActivity : AppCompatActivity() {
         nameTextView = findViewById(R.id.name_options_textview)
         nameEditView = findViewById(R.id.name_options_editview)
         exitButton = findViewById(R.id.exit_options_button)
+        val prefEditor: SharedPreferences = getSharedPreferences(
+            "data", Context
+                .MODE_PRIVATE
+        )
+        name = prefEditor.getString("Name", "") ?: ""
+
+        nameEditView.setText(name)
 
         nameEditView.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {}
@@ -42,5 +51,15 @@ class OptionsActivity : AppCompatActivity() {
             setResult(RESULT_OK, data)
             finish()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val prefEditor: SharedPreferences.Editor = getSharedPreferences(
+            "data", Context
+                .MODE_PRIVATE
+        ).edit()
+        prefEditor.putString("Name", name)
+        prefEditor.apply()
     }
 }

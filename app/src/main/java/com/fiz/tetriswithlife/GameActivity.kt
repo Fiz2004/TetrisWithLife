@@ -148,9 +148,8 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         while (retry) {
             try {
                 runBlocking {
-                    job?.join()
+                    job?.cancelAndJoin()
                 }
-
                 retry = false
             } catch (e: InterruptedException) {
                 /* for lint */
