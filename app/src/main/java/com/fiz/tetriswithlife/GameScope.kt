@@ -4,13 +4,13 @@ import android.graphics.Canvas
 import android.view.SurfaceView
 import kotlin.math.min
 
-class GameThread(
+class GameScope(
     var state: com.fiz.tetriswithlife.State,
     private var display: Display,
     val controller: Controller,
     private val surface: SurfaceView,
     private val surfaceNextFigure: SurfaceView
-) : Thread() {
+) {
     private var prevTime = System.currentTimeMillis()
     private var ending = 1.0
     private var running = false
@@ -19,7 +19,7 @@ class GameThread(
         this.running = running
     }
 
-    override fun run() {
+    suspend fun run() {
         var canvas: Canvas?
         var nextFigureCanvas: Canvas?
         while (running) {

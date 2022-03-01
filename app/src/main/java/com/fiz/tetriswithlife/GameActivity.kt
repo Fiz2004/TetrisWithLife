@@ -11,12 +11,14 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import kotlinx.coroutines.*
 
 private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
 
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
-    private var gameThread: GameThread? = null
+    private var gameScope: GameScope? = null
+    private var job: Job? = null
     private lateinit var newGameButton: Button
     private lateinit var pauseButton: Button
     private lateinit var exitButton: Button
@@ -60,25 +62,27 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             this
         )
 
-        gameThread = GameThread(
-            state,
-            display,
-            Controller(),
-            gameSurfaceView,
-            nextFigureSurfaceView
-        )
-        gameThread!!.setRunning(true)
-        gameThread!!.start()
+        job = CoroutineScope(Dispatchers.Default).launch {
+            gameScope = GameScope(
+                state,
+                display,
+                Controller(),
+                gameSurfaceView,
+                nextFigureSurfaceView
+            )
+            gameScope?.setRunning(true)
+            gameScope?.run()
+        }
 
         leftButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameThread!!.controller
+                MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionLeft()
                 MotionEvent.ACTION_MOVE -> {
                     /* for lint */
                 }
                 MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameThread!!.controller
+                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
                     .actionCancel()
             }
             true
@@ -86,13 +90,13 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
         rightButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameThread!!.controller
+                MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionRight()
                 MotionEvent.ACTION_MOVE -> {
                     /* for lint */
                 }
                 MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameThread!!.controller
+                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
                     .actionCancel()
             }
             true
@@ -100,13 +104,13 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
         downButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameThread!!.controller
+                MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionDown()
                 MotionEvent.ACTION_MOVE -> {
                     /* for lint */
                 }
                 MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameThread!!.controller
+                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
                     .actionCancel()
             }
             true
@@ -114,23 +118,23 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
         rotateButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameThread!!.controller
+                MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionUp()
                 MotionEvent.ACTION_MOVE -> {
                     /* for lint */
                 }
                 MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameThread!!.controller
+                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
                     .actionCancel()
             }
             true
         }
 
         newGameButton.setOnClickListener {
-            gameThread!!.state.status = "new game"
+            gameScope!!.state.status = "new game"
         }
         pauseButton.setOnClickListener {
-            gameThread!!.state.clickPause()
+            gameScope!!.state.clickPause()
         }
         exitButton.setOnClickListener {
             finish()
@@ -140,10 +144,13 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     override fun onDestroy() {
         super.onDestroy()
         var retry = true
-        gameThread!!.setRunning(false)
+        gameScope!!.setRunning(false)
         while (retry) {
             try {
-                gameThread!!.join()
+                runBlocking {
+                    job?.join()
+                }
+
                 retry = false
             } catch (e: InterruptedException) {
                 /* for lint */
@@ -198,7 +205,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putSerializable("state", gameThread!!.state)
+        outState.putSerializable("state", gameScope!!.state)
     }
 
 }
