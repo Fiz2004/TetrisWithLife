@@ -1,40 +1,52 @@
 package com.fiz.tetriswithlife.figure
 
-import com.fiz.tetriswithlife.grid.Coordinate
-import com.fiz.tetriswithlife.grid.Grid
-import com.fiz.tetriswithlife.grid.Point
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import com.fiz.tetriswithlife.game.domain.models.Coordinate
+import com.fiz.tetriswithlife.game.domain.models.Grid
+import com.fiz.tetriswithlife.game.domain.models.figure.CurrentFigure
+import com.fiz.tetriswithlife.game.domain.models.figure.Figure
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
 
-@DisplayName("CurrentFigureTest")
 internal class CurrentFigureTest {
     private lateinit var grid: Grid
     private lateinit var figure: Figure
     private lateinit var currentFigure: CurrentFigure
 
-    @BeforeEach
+    @Before
     fun setUp() {
-        grid = Grid(5, 10) { 0 }
-        figure = Figure { 0 }
-        var currentFigure = CurrentFigure(grid, figure) { 0 }
+        grid = Grid(5, 10, { 0 })
+        figure = Figure(getNumberFigure = 0)
+        currentFigure = CurrentFigure(figure, Coordinate(0.0, (0 - figure.getMaxY()).toDouble()))
     }
 
     @Test
-    @DisplayName("isCollission")
-    fun isCollission() {
-        var coordinate = Coordinate(0.0, 0.0)
-        assertFalse(currentFigure.isCollission(coordinate))
+    fun whenNotCollision_shouldReturnFalse() {
+        val coordinate = Coordinate(0.0, 0.0)
 
-        coordinate = Coordinate(12.0, 0.0)
-        assertTrue(currentFigure.isCollission(coordinate))
+        assertFalse(grid.isCollision(coordinate))
+    }
 
-        coordinate = Coordinate(0.0, -2.0)
-        assertFalse(currentFigure.isCollission(coordinate))
+    @Test
+    fun whenCoordinateOutsideGridForX_shouldReturnTrue() {
+        val coordinate = Coordinate(12.0, 0.0)
 
+        assertTrue(grid.isCollision(coordinate))
+    }
+
+    @Test
+    fun whenCoordinateOutsideGridForMinusY_shouldReturnFalse() {
+        val coordinate = Coordinate(0.0, -2.0)
+
+        assertFalse(grid.isCollision(coordinate))
+    }
+
+    @Test
+    fun whenCollision_shouldReturnTrue() {
         grid.space[9][3].block = 1
-        coordinate = Coordinate(0.0, 9.0)
-        assertTrue(currentFigure.isCollission(coordinate))
+        val coordinate = Coordinate(0.0, 9.0)
+
+        assertTrue(grid.isCollision(coordinate))
     }
 }

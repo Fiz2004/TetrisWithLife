@@ -3,27 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout"
-    android:background="#161616"
+    android:background="?attr/backgroundColor"
+    android:padding="@dimen/mainPadding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.GameActivity">
-
+    tools:context=".game.ui.GameActivity">
 
     <SurfaceView
         android:id="@+id/gameSurfaceView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        app:layout_constraintEnd_toStartOf="@+id/leftButton"
-        app:layout_constraintStart_toEndOf="@+id/newGameButton"
-        tools:layout_editor_absoluteY="0dp" />
+        android:layout_marginHorizontal="@dimen/buttonPadding"
+        app:layout_constraintDimensionRatio="w,13:25"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="16dp" />
 
     <SurfaceView
         android:id="@+id/nextFigureSurfaceView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="h,1:1"
-        app:layout_constraintEnd_toEndOf="@+id/newGameButton"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="@dimen/mainPadding"
+        app:layout_constraintBottom_toTopOf="@+id/rotateButton"
+        app:layout_constraintDimensionRatio="w,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/gameSurfaceView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -31,45 +35,55 @@
         style="@style/button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/new_game_game_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nextFigureSurfaceView" />
+        app:layout_constraintBottom_toTopOf="@+id/pauseButton"
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/pauseButton"
         style="@style/button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/pause_game_button"
+        app:layout_constraintBottom_toTopOf="@+id/exitButton"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/newGameButton" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/exitButton"
         style="@style/button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/exit_game_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pauseButton" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/scoresTextView"
+        style="@style/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/text"
+        android:layout_marginHorizontal="@dimen/buttonPadding"
         android:text="@string/scores_game_textview"
-        app:layout_constraintEnd_toEndOf="@+id/newGameButton"
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exitButton" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/infoBreathTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         style="@style/text"
+        android:layout_marginHorizontal="@dimen/buttonPadding"
+        android:layout_marginTop="@dimen/buttonPadding"
         android:text="@string/infobreath_game_textview"
         android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
@@ -77,23 +91,14 @@
         app:layout_constraintTop_toBottomOf="@+id/recordTextview" />
 
     <TextView
-        android:id="@+id/breathTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        style="@style/text"
-        android:text=""
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="@+id/newGameButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/infoBreathTextView" />
-
-    <TextView
         android:id="@+id/recordTextview"
+        style="@style/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/text"
+        android:layout_marginHorizontal="@dimen/buttonPadding"
+        android:layout_marginTop="@dimen/buttonPadding"
         android:text="@string/record_game_textview"
-        app:layout_constraintEnd_toEndOf="@+id/newGameButton"
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scoresTextView" />
 
@@ -101,50 +106,56 @@
     <Button
         android:id="@+id/leftButton"
         style="@style/button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/halfButtonPadding"
+        android:layout_marginBottom="@dimen/buttonPadding"
         android:text="@string/left_game_button"
         app:icon="@drawable/ic_baseline_keyboard_arrow_left_24"
-        app:layout_constraintBottom_toBottomOf="@+id/rightButton"
+        app:layout_constraintBottom_toTopOf="@+id/downButton"
         app:layout_constraintEnd_toStartOf="@+id/rightButton"
-        app:layout_constraintTop_toTopOf="@+id/rightButton" />
+        app:layout_constraintStart_toEndOf="@+id/gameSurfaceView" />
 
     <Button
         android:id="@+id/rightButton"
         style="@style/button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/halfButtonPadding"
+        android:layout_marginBottom="@dimen/buttonPadding"
         android:text="@string/right_game_button"
         app:icon="@drawable/ic_baseline_keyboard_arrow_right_24"
         app:iconGravity="end"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/downButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/leftButton" />
 
     <Button
         android:id="@+id/downButton"
         style="@style/button"
+        android:layout_marginStart="@dimen/buttonPadding"
+        android:padding="0dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:drawableBottom="@drawable/ic_baseline_keyboard_arrow_down_24"
         android:text="@string/down_game_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/leftButton"
-        app:layout_constraintTop_toBottomOf="@+id/rightButton"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toEndOf="@+id/gameSurfaceView" />
 
     <Button
         android:id="@+id/rotateButton"
         style="@style/button"
         android:layout_width="0dp"
+        android:layout_marginStart="@dimen/buttonPadding"
+        android:layout_marginBottom="@dimen/buttonPadding"
+        android:padding="0dp"
         android:layout_height="wrap_content"
         android:drawableTop="@drawable/ic_baseline_rotate_right_24"
         android:text="@string/rotate_game_button"
         app:layout_constraintBottom_toTopOf="@+id/rightButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/gameSurfaceView"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintStart_toEndOf="@+id/gameSurfaceView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

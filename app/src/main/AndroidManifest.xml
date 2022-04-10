@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fiz.tetriswithlife">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
@@ -10,13 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TetrisWithLife">
         <activity
-            android:name=".view.OptionsActivity"
+            android:name=".menu.ui.OptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".view.GameActivity"
+            android:name=".game.ui.GameActivity"
             android:exported="false" />
         <activity
-            android:name=".view.MainActivity"
+            android:name=".menu.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

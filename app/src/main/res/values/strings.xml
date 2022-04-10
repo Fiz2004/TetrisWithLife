@@ -12,9 +12,9 @@
     <string name="pause_game_button">Pause</string>
     <string name="resume_game_button">Resume</string>
     <string name="exit_game_button">Exit</string>
-    <string name="scores_game_textview">Scores: %1$s</string>
-    <string name="record_game_textview">Record: %1$s</string>
-    <string name="infobreath_game_textview">Suffocating. Seconds left:</string>
+    <string name="scores_game_textview">Scores:\n %1$s</string>
+    <string name="record_game_textview">Record:\n %1$s</string>
+    <string name="infobreath_game_textview">Breath\n Seconds left:\n %1$s</string>
 
     <string name="left_game_button">Left</string>
     <string name="right_game_button">Right</string>
