@@ -10,13 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TetrisWithLife">
         <activity
-            android:name=".OptionsActivity"
+            android:name=".view.OptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".GameActivity"
+            android:name=".view.GameActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

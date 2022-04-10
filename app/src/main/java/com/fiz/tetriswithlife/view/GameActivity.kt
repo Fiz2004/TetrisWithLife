@@ -1,64 +1,39 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.view
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
-import android.view.SurfaceView
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import com.fiz.tetriswithlife.*
+import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import kotlinx.coroutines.*
 
 private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
 
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
+    private lateinit var binding: ActivityGameBinding
     private var gameScope: GameScope? = null
     private var job: Job? = null
-    private lateinit var newGameButton: Button
-    private lateinit var pauseButton: Button
-    private lateinit var exitButton: Button
-    private lateinit var scoresTextView: TextView
-    private lateinit var recordTextView: TextView
-    private lateinit var infoBreathTextview: TextView
-    private lateinit var breathTextview: TextView
-    private lateinit var leftButton: Button
-    private lateinit var rightButton: Button
-    private lateinit var downButton: Button
-    private lateinit var rotateButton: Button
-    private lateinit var gameSurfaceView: SurfaceView
-    private lateinit var nextFigureSurfaceView: SurfaceView
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game)
-
-        newGameButton = findViewById(R.id.new_game_game_button)
-        pauseButton = findViewById(R.id.pause_game_button)
-        exitButton = findViewById(R.id.exit_game_button)
-        scoresTextView = findViewById(R.id.scores_game_textview)
-        recordTextView = findViewById(R.id.record_game_textview)
-        infoBreathTextview = findViewById(R.id.infobreath_game_textview)
-        breathTextview = findViewById(R.id.breath_game_textview)
-        leftButton = findViewById(R.id.left_game_button)
-        rightButton = findViewById(R.id.right_game_button)
-        downButton = findViewById(R.id.down_game_button)
-        rotateButton = findViewById(R.id.rotate_game_button)
-
-        gameSurfaceView = findViewById(R.id.game_game_surfaceview)
-        nextFigureSurfaceView = findViewById(R.id.nextfigure_game_surfaceview)
+        binding = ActivityGameBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
         val load = savedInstanceState?.getSerializable("state")
-        val state: State = if (load != null) load as State else
+        val state: State = if (load != null)
+            load as State
+        else
             State(
                 widthCanvas, heightCanvas, getSharedPreferences("data", Context.MODE_PRIVATE)
             )
         val display = Display(
-            gameSurfaceView,
+            binding.gameSurfaceView,
             this
         )
 
@@ -67,14 +42,19 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
                 state,
                 display,
                 Controller(),
-                gameSurfaceView,
-                nextFigureSurfaceView
+                binding.gameSurfaceView,
+                binding.nextFigureSurfaceView
             )
             gameScope?.setRunning(true)
             gameScope?.run()
         }
 
-        leftButton.setOnTouchListener { _: View, event: MotionEvent ->
+        bindListener()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun bindListener() {
+        binding.leftButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionLeft()
@@ -88,7 +68,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             true
         }
 
-        rightButton.setOnTouchListener { _: View, event: MotionEvent ->
+        binding.rightButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionRight()
@@ -102,7 +82,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             true
         }
 
-        downButton.setOnTouchListener { _: View, event: MotionEvent ->
+        binding.downButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionDown()
@@ -116,7 +96,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             true
         }
 
-        rotateButton.setOnTouchListener { _: View, event: MotionEvent ->
+        binding.rotateButton.setOnTouchListener { _: View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> gameScope!!.controller
                     .actionUp()
@@ -130,13 +110,13 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             true
         }
 
-        newGameButton.setOnClickListener {
+        binding.newGameButton.setOnClickListener {
             gameScope!!.state.status = "new game"
         }
-        pauseButton.setOnClickListener {
+        binding.pauseButton.setOnClickListener {
             gameScope!!.state.clickPause()
         }
-        exitButton.setOnClickListener {
+        binding.exitButton.setOnClickListener {
             finish()
         }
     }
@@ -158,31 +138,35 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     }
 
     override fun setScoresTextView(scores: String) {
-        scoresTextView.text = resources.getString(
+        binding.scoresTextView.text = resources.getString(
             R.string.scores_game_textview, scores.padStart
                 (6, '0')
         )
     }
 
     override fun setRecordTextView(record: String) {
-        recordTextView.text =
+        binding.recordTextview.text =
             resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
     }
 
     override fun pauseButtonClick(status: String) {
         if (status == "pause")
-            pauseButton.text = resources.getString(R.string.resume_game_button)
+            binding.pauseButton.text = resources.getString(R.string.resume_game_button)
         else
-            pauseButton.text = resources.getString(R.string.pause_game_button)
+            binding.pauseButton.text = resources.getString(R.string.pause_game_button)
     }
 
     override fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
         if (!visibility) {
-            if (!breathTextview.isVisible) {
-                infoBreathTextview.post { infoBreathTextview.visibility = View.VISIBLE }
+            if (!binding.breathTextView.isVisible) {
+                binding.infoBreathTextView.post {
+                    binding.infoBreathTextView.visibility = View.VISIBLE
+                }
             }
-        } else if (breathTextview.isVisible) {
-            infoBreathTextview.post { infoBreathTextview.visibility = View.INVISIBLE }
+        } else if (binding.breathTextView.isVisible) {
+            binding.infoBreathTextView.post {
+                binding.infoBreathTextView.visibility = View.INVISIBLE
+            }
         }
     }
 
@@ -190,15 +174,23 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         visibility: Boolean, sec: Double, color: Int
     ) {
         if (!visibility) {
-            if (!breathTextview.isVisible) {
-                breathTextview.post { breathTextview.visibility = View.VISIBLE }
+            if (!binding.breathTextView.isVisible) {
+                binding.breathTextView.post { binding.breathTextView.visibility = View.VISIBLE }
             }
-            breathTextview.post { breathTextview.text = sec.toInt().toString() }
-        } else if (breathTextview.isVisible) {
-            breathTextview.post { breathTextview.visibility = View.INVISIBLE }
+            binding.breathTextView.post { binding.breathTextView.text = sec.toInt().toString() }
+        } else if (binding.breathTextView.isVisible) {
+            binding.breathTextView.post { binding.breathTextView.visibility = View.INVISIBLE }
         }
 
-        breathTextview.post { breathTextview.setBackgroundColor(Color.rgb(255, color, color)) }
+        binding.breathTextView.post {
+            binding.breathTextView.setBackgroundColor(
+                Color.rgb(
+                    255,
+                    color,
+                    color
+                )
+            )
+        }
 
     }
 
