@@ -19,6 +19,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private lateinit var binding: ActivityGameBinding
     private var gameScope: GameScope? = null
     private var job: Job? = null
+    private val surfaceReady = mutableListOf(false, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,19 +38,32 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             this
         )
 
-        job = CoroutineScope(Dispatchers.Default).launch {
-            gameScope = GameScope(
-                state,
-                display,
-                Controller(),
-                binding.gameSurfaceView,
-                binding.nextFigureSurfaceView
-            )
-            gameScope?.setRunning(true)
-            gameScope?.run()
+        binding.gameSurfaceView.addOnLayoutChangeListener { view, i, i2, i3, i4, i5, i6, i7, i8 ->
+            surfaceReady[0] = true
+            canStartGame(state, display)
+        }
+
+        binding.nextFigureSurfaceView.addOnLayoutChangeListener { view, i, i2, i3, i4, i5, i6, i7, i8 ->
+            surfaceReady[1] = true
+            canStartGame(state, display)
         }
 
         bindListener()
+    }
+
+    private fun canStartGame(state: State, display: Display) {
+        if (surfaceReady.all { it })
+            job = CoroutineScope(Dispatchers.Default).launch {
+                gameScope = GameScope(
+                    state,
+                    display,
+                    Controller(),
+                    binding.gameSurfaceView,
+                    binding.nextFigureSurfaceView
+                )
+                gameScope?.setRunning(true)
+                gameScope?.run()
+            }
     }
 
     @SuppressLint("ClickableViewAccessibility")
