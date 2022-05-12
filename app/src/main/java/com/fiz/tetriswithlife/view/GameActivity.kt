@@ -197,7 +197,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
 
         binding.breathTextView.post {
-            binding.breathTextView.setBackgroundColor(
+            binding.breathTextView.setTextColor(
                 Color.rgb(
                     255,
                     color,

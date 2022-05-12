@@ -10,8 +10,11 @@ import com.fiz.tetriswithlife.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
     private var nameRepository: NameRepository? = null
+
     var name: String = ""
+
     private val mStartForResult = registerForActivityResult(
         StartActivityForResult()
     ) { result ->
