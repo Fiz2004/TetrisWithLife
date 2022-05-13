@@ -1,7 +1,7 @@
-package com.fiz.tetriswithlife.figure
+package com.fiz.tetriswithlife.game.domain.figure
 
-import com.fiz.tetriswithlife.grid.Cell
-import com.fiz.tetriswithlife.grid.Point
+import com.fiz.tetriswithlife.game.domain.grid.Cell
+import com.fiz.tetriswithlife.game.domain.grid.Point
 
 private const val NUMBER_IMAGES_FIGURE = 5
 val FIGURE: Array<Array<Point>> = arrayOf(
@@ -15,17 +15,17 @@ val FIGURE: Array<Array<Point>> = arrayOf(
 )
 
 open class Figure(
-    numberFigure: () -> Int = {
+    getNumberFigure: () -> Int = {
         (FIGURE.indices).shuffled().first()
     }
 ) {
-    var cells: Array<Cell> = createFigure(numberFigure)
+    var cells: Array<Cell> = createFigure(getNumberFigure())
 
     private fun createFigure(
-        numberFigure: () -> Int
+        numberFigure: Int
     ): Array<Cell> {
         var result: Array<Cell> = emptyArray()
-        for (cell in FIGURE[numberFigure()]) {
+        for (cell in FIGURE[numberFigure]) {
             val view = (1..NUMBER_IMAGES_FIGURE).shuffled().first()
             result += Cell(cell.x, cell.y, view)
         }

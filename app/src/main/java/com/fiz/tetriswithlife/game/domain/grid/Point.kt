@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.grid
+package com.fiz.tetriswithlife.game.domain.grid
 
 open class Point(var x: Int, var y: Int) {
     operator fun plus(p: Point): Point {

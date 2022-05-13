@@ -1,17 +1,21 @@
-package com.fiz.tetriswithlife.view
+package com.fiz.tetriswithlife.menu.ui
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
+import com.fiz.tetriswithlife.App
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.data.NameRepository
+import com.fiz.tetriswithlife.menu.data.NameRepository
 import com.fiz.tetriswithlife.databinding.ActivityMainBinding
+import com.fiz.tetriswithlife.game.ui.GameActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private var nameRepository: NameRepository? = null
+    private val nameRepository: NameRepository by lazy{
+        (application as App).nameRepository
+    }
 
     var name: String = ""
 
@@ -43,7 +47,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        nameRepository = NameRepository(applicationContext)
         loadInfo()
     }
 
@@ -64,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadInfo() {
-        name = nameRepository?.loadInfo() ?: name
+        name = nameRepository.loadInfo() ?: name
     }
 
     override fun onStop() {
@@ -73,6 +76,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveInfo() {
-        nameRepository?.saveInfo(name)
+        nameRepository.saveInfo(name)
     }
 }

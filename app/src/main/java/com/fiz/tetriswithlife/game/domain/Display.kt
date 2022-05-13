@@ -1,11 +1,12 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.game.domain
 
 import android.content.Context
 import android.graphics.*
 import android.view.SurfaceView
-import com.fiz.tetriswithlife.character.TIMES_BREATH_LOSE
-import com.fiz.tetriswithlife.grid.Element
-import com.fiz.tetriswithlife.grid.Point
+import com.fiz.tetriswithlife.R
+import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
+import com.fiz.tetriswithlife.game.domain.grid.Element
+import com.fiz.tetriswithlife.game.domain.grid.Point
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
@@ -194,13 +195,13 @@ class Display(
 
 fun getOffset(element: Element): Point {
     if (element.getSpaceStatus() == 'R')
-        return Point((element.status['R'] ?: 0 - 1), 1)
+        return Point(((element.status['R'] ?: (0 - 1))), 1)
 
     if (element.getSpaceStatus() == 'L')
-        return Point((element.status['L'] ?: 0 - 1), 2)
+        return Point(((element.status['L'] ?: (0 - 1))), 2)
 
     if (element.getSpaceStatus() == 'U')
-        return Point((element.status['U'] ?: 0 - 1), 3)
+        return Point(((element.status['U'] ?: (0 - 1))), 3)
 
     return Point(0, 0)
 }

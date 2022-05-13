@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.grid
+package com.fiz.tetriswithlife.game.domain.grid
 
 private const val NUMBER_IMAGES_BACKGROUND = 16
 

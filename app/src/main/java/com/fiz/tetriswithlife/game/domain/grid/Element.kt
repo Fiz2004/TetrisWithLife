@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.grid
+package com.fiz.tetriswithlife.game.domain.grid
 
 class Element(
     val background: Int,

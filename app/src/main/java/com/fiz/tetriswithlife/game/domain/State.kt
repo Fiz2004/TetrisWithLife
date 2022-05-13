@@ -1,11 +1,11 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.game.domain
 
-import android.content.SharedPreferences
-import com.fiz.tetriswithlife.character.CharacterBreath
-import com.fiz.tetriswithlife.figure.CurrentFigure
-import com.fiz.tetriswithlife.figure.Figure
-import com.fiz.tetriswithlife.grid.Grid
-import com.fiz.tetriswithlife.grid.Point
+import com.fiz.tetriswithlife.game.data.RecordRepository
+import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
+import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
+import com.fiz.tetriswithlife.game.domain.figure.Figure
+import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.grid.Point
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -15,22 +15,21 @@ private const val NUMBER_FRAMES_ELEMENTS = 4
 class State(
     width: Int,
     height: Int,
-    _settings: SharedPreferences
+    private val recordRepository: RecordRepository
 ) : Serializable {
     var grid = Grid(width, height)
     var character = CharacterBreath(grid)
     var scores = 0
-    var record = _settings.getInt("Record", 0)
+    var record = recordRepository.loadRecord()
     var status = "playing"
     var nextFigure: Figure = Figure()
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure)
-    private val settings = _settings
 
     fun new() {
         grid = Grid(grid.width, grid.height)
         character = CharacterBreath(grid)
         scores = 0
-        record = settings.getInt("Record", 0)
+        record = recordRepository.loadRecord()
         status = "playing"
         nextFigure = Figure()
         currentFigure = CurrentFigure(grid, nextFigure)
@@ -115,12 +114,9 @@ class State(
     }
 
     private fun ifRecord() {
-        val tempRecord = settings.getInt("Record", 0)
-        if (scores > tempRecord) {
+        if (scores > recordRepository.loadRecord()) {
             record = scores
-            val prefEditor: SharedPreferences.Editor = settings.edit()
-            prefEditor.putInt("Record", scores)
-            prefEditor.apply()
+            recordRepository.saveRecord(record)
         }
     }
 

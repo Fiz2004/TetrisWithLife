@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife
 
-import com.fiz.tetriswithlife.grid.Element
+import com.fiz.tetriswithlife.game.domain.grid.Element
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName
 
 @DisplayName("ElementTest")
 class ElementTest {
-    private lateinit var element:Element
+    private lateinit var element: Element
 
     @BeforeEach
     fun init() {

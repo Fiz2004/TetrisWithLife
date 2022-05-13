@@ -1,8 +1,9 @@
 package com.fiz.tetriswithlife.figure
 
-import com.fiz.tetriswithlife.grid.Coordinate
-import com.fiz.tetriswithlife.grid.Grid
-import com.fiz.tetriswithlife.grid.Point
+import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
+import com.fiz.tetriswithlife.game.domain.figure.Figure
+import com.fiz.tetriswithlife.game.domain.grid.Coordinate
+import com.fiz.tetriswithlife.game.domain.grid.Grid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -10,15 +11,15 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("CurrentFigureTest")
 internal class CurrentFigureTest {
-  private lateinit var grid:Grid
-  private lateinit var figure:Figure
-  private lateinit var currentFigure:CurrentFigure
+  private lateinit var grid: Grid
+  private lateinit var figure: Figure
+  private lateinit var currentFigure: CurrentFigure
 
   @BeforeEach
   fun setUp() {
     grid= Grid(5,10) { 0 }
-    figure=Figure{0}
-    var currentFigure=CurrentFigure(grid,figure) { 0 }
+    figure= Figure{0}
+    var currentFigure= CurrentFigure(grid,figure) { 0 }
   }
 
   @Test

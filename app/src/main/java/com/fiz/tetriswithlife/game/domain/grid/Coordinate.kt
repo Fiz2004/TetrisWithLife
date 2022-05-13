@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.grid
+package com.fiz.tetriswithlife.game.domain.grid
 
 class Coordinate(var x: Double, var y: Double) {
     operator fun plus(add: Coordinate): Coordinate {

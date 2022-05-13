@@ -1,15 +1,20 @@
-package com.fiz.tetriswithlife.view
+package com.fiz.tetriswithlife.menu.ui
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import com.fiz.tetriswithlife.data.NameRepository
+import com.fiz.tetriswithlife.App
+import com.fiz.tetriswithlife.menu.data.NameRepository
 import com.fiz.tetriswithlife.databinding.ActivityOptionsBinding
 
 class OptionsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOptionsBinding
-    private var nameRepository: NameRepository?=null
+
+    private val nameRepository: NameRepository by lazy{
+        (application as App).nameRepository
+    }
+
     private var name: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +29,6 @@ class OptionsActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        nameRepository=NameRepository(applicationContext)
         loadInfo()
     }
 
@@ -52,10 +56,10 @@ class OptionsActivity : AppCompatActivity() {
     }
 
     private fun loadInfo() {
-        name=nameRepository?.loadInfo()?:name
+        name= nameRepository.loadInfo() ?:name
     }
 
     private fun saveInfo() {
-        nameRepository?.saveInfo(name)
+        nameRepository.saveInfo(name)
     }
 }

@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.game.domain
 
 data class Controller(
     var down: Boolean = false,

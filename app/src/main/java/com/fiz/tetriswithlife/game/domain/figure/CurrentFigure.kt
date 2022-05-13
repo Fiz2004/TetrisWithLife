@@ -1,10 +1,10 @@
-package com.fiz.tetriswithlife.figure
+package com.fiz.tetriswithlife.game.domain.figure
 
-import com.fiz.tetriswithlife.Controller
-import com.fiz.tetriswithlife.grid.Cell
-import com.fiz.tetriswithlife.grid.Coordinate
-import com.fiz.tetriswithlife.grid.Grid
-import com.fiz.tetriswithlife.grid.Point
+import com.fiz.tetriswithlife.game.domain.Controller
+import com.fiz.tetriswithlife.game.domain.grid.Cell
+import com.fiz.tetriswithlife.game.domain.grid.Coordinate
+import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.grid.Point
 import kotlin.math.ceil
 
 private const val START_STEP_MOVE_AUTO = 0.03
@@ -15,18 +15,18 @@ private const val STEP_MOVE_KEY_Y = 4
 class CurrentFigure(
     private val grid: Grid,
     figure: Figure,
-    startX: () -> Int = { (0 until (grid.width - figure.getWidth())).shuffled().first() }
+    getStartX: () -> Int = { (0 until (grid.width - figure.getWidth())).shuffled().first() }
 ) : Figure() {
     private var stepMoveAuto = START_STEP_MOVE_AUTO
-    val position = createStartPosition(startX)
+    val position = createStartPosition(getStartX())
 
     init {
         cells = figure.cells.clone()
     }
 
-    private fun createStartPosition(startX: () -> Int): Coordinate {
+    private fun createStartPosition(startX: Int): Coordinate {
         return Coordinate(
-            startX().toDouble(),
+            startX.toDouble(),
             (0 - getHeight()).toDouble()
         )
     }

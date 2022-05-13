@@ -1,11 +1,11 @@
-package com.fiz.tetriswithlife
+package com.fiz.tetriswithlife.game.domain
 
 import android.graphics.Canvas
 import android.view.SurfaceView
 import kotlin.math.min
 
-class GameScope(
-    var state: com.fiz.tetriswithlife.State,
+class GameLoop(
+    var state: State,
     private var display: Display,
     val controller: Controller,
     private val surface: SurfaceView,
@@ -19,34 +19,40 @@ class GameScope(
         this.running = running
     }
 
-    suspend fun run() {
-        var canvas: Canvas?
-        var nextFigureCanvas: Canvas?
+    fun run() {
+
         while (running) {
+
             stateUpdate()
 
-            canvas = null
-            nextFigureCanvas = null
-            try {
-                canvas = surface.holder.lockCanvas(null)
-                if (canvas == null) continue
-                synchronized(surface.holder) {
-                    display.render(state, canvas)
-                }
+            displayUpdate()
+        }
 
-                nextFigureCanvas = surfaceNextFigure.holder.lockCanvas(null)
-                if (nextFigureCanvas == null) continue
-                synchronized(surfaceNextFigure.holder) {
-                    display.renderInfo(state, nextFigureCanvas)
-                }
+    }
 
-            } finally {
-                if (canvas != null)
-                    surface.holder.unlockCanvasAndPost(canvas)
-                if (nextFigureCanvas != null)
-                    surfaceNextFigure.holder.unlockCanvasAndPost(nextFigureCanvas)
+    private fun displayUpdate() {
+        var canvas: Canvas? = null
+        var nextFigureCanvas: Canvas? = null
 
+        try {
+            canvas = surface.holder.lockCanvas(null)
+            if (canvas == null) return
+            synchronized(surface.holder) {
+                display.render(state, canvas)
             }
+
+            nextFigureCanvas = surfaceNextFigure.holder.lockCanvas(null)
+            if (nextFigureCanvas == null) return
+            synchronized(surfaceNextFigure.holder) {
+                display.renderInfo(state, nextFigureCanvas)
+            }
+
+        } finally {
+            if (canvas != null)
+                surface.holder.unlockCanvasAndPost(canvas)
+            if (nextFigureCanvas != null)
+                surfaceNextFigure.holder.unlockCanvasAndPost(nextFigureCanvas)
+
         }
     }
 

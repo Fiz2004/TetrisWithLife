@@ -1,7 +1,6 @@
-package com.fiz.tetriswithlife.view
+package com.fiz.tetriswithlife.game.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
@@ -10,40 +9,56 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.fiz.tetriswithlife.*
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
+import com.fiz.tetriswithlife.game.data.RecordRepository
+import com.fiz.tetriswithlife.game.domain.Controller
+import com.fiz.tetriswithlife.game.domain.Display
+import com.fiz.tetriswithlife.game.domain.GameLoop
+import com.fiz.tetriswithlife.game.domain.State
+import com.fiz.tetriswithlife.menu.data.NameRepository
 import kotlinx.coroutines.*
 
 private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
 
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
-    private lateinit var binding: ActivityGameBinding
-    private var gameScope: GameScope? = null
+    private var gameLoop: GameLoop? = null
+
     private var job: Job? = null
+
     private val surfaceReady = mutableListOf(false, false)
+
+    private val recordRepository: RecordRepository by lazy{
+        (application as App).recordRepository
+    }
+
+    private lateinit var binding: ActivityGameBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGameBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        val load = savedInstanceState?.getSerializable("state")
-        val state: State = if (load != null)
-            load as State
+
+        val loadState = savedInstanceState?.getSerializable("state")
+
+        val state: State = if (loadState != null)
+            loadState as State
         else
             State(
-                widthCanvas, heightCanvas, getSharedPreferences("data", Context.MODE_PRIVATE)
+                widthCanvas, heightCanvas, recordRepository
             )
+
         val display = Display(
             binding.gameSurfaceView,
             this
         )
 
-        binding.gameSurfaceView.addOnLayoutChangeListener { view, i, i2, i3, i4, i5, i6, i7, i8 ->
+        binding.gameSurfaceView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             surfaceReady[0] = true
             canStartGame(state, display)
         }
 
-        binding.nextFigureSurfaceView.addOnLayoutChangeListener { view, i, i2, i3, i4, i5, i6, i7, i8 ->
+        binding.nextFigureSurfaceView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             surfaceReady[1] = true
             canStartGame(state, display)
         }
@@ -54,81 +69,89 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private fun canStartGame(state: State, display: Display) {
         if (surfaceReady.all { it })
             job = CoroutineScope(Dispatchers.Default).launch {
-                gameScope = GameScope(
+                gameLoop = GameLoop(
                     state,
                     display,
                     Controller(),
                     binding.gameSurfaceView,
                     binding.nextFigureSurfaceView
                 )
-                gameScope?.setRunning(true)
-                gameScope?.run()
+                gameLoop?.setRunning(true)
+                gameLoop?.run()
             }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun bindListener() {
         binding.leftButton.setOnTouchListener { _: View, event: MotionEvent ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameScope!!.controller
-                    .actionLeft()
-                MotionEvent.ACTION_MOVE -> {
-                    /* for lint */
+            gameLoop?.let {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> it.controller
+                        .actionLeft()
+                    MotionEvent.ACTION_MOVE -> {
+                        /* for lint */
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> it.controller
+                        .actionCancel()
                 }
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
-                    .actionCancel()
             }
             true
         }
 
         binding.rightButton.setOnTouchListener { _: View, event: MotionEvent ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameScope!!.controller
-                    .actionRight()
-                MotionEvent.ACTION_MOVE -> {
-                    /* for lint */
+            gameLoop?.let {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> it.controller
+                        .actionRight()
+                    MotionEvent.ACTION_MOVE -> {
+                        /* for lint */
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> it.controller
+                        .actionCancel()
                 }
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
-                    .actionCancel()
             }
             true
         }
 
         binding.downButton.setOnTouchListener { _: View, event: MotionEvent ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameScope!!.controller
-                    .actionDown()
-                MotionEvent.ACTION_MOVE -> {
-                    /* for lint */
+            gameLoop?.let {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> it.controller
+                        .actionDown()
+                    MotionEvent.ACTION_MOVE -> {
+                        /* for lint */
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> it.controller
+                        .actionCancel()
                 }
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
-                    .actionCancel()
             }
             true
         }
 
         binding.rotateButton.setOnTouchListener { _: View, event: MotionEvent ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> gameScope!!.controller
-                    .actionUp()
-                MotionEvent.ACTION_MOVE -> {
-                    /* for lint */
+            gameLoop?.let {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> it.controller
+                        .actionUp()
+                    MotionEvent.ACTION_MOVE -> {
+                        /* for lint */
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> it.controller
+                        .actionCancel()
                 }
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> gameScope!!.controller
-                    .actionCancel()
             }
             true
         }
 
         binding.newGameButton.setOnClickListener {
-            gameScope!!.state.status = "new game"
+            gameLoop?.state?.status = "new game"
         }
         binding.pauseButton.setOnClickListener {
-            gameScope!!.state.clickPause()
+            gameLoop?.state?.clickPause()
         }
         binding.exitButton.setOnClickListener {
             finish()
@@ -138,11 +161,12 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     override fun onDestroy() {
         super.onDestroy()
         var retry = true
-        gameScope!!.setRunning(false)
+        gameLoop?.setRunning(false)
         while (retry) {
             try {
                 runBlocking {
                     job?.cancelAndJoin()
+                    job=null
                 }
                 retry = false
             } catch (e: InterruptedException) {
@@ -164,10 +188,10 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     }
 
     override fun pauseButtonClick(status: String) {
-        if (status == "pause")
-            binding.pauseButton.text = resources.getString(R.string.resume_game_button)
+        binding.pauseButton.text = if (status == "pause")
+            resources.getString(R.string.resume_game_button)
         else
-            binding.pauseButton.text = resources.getString(R.string.pause_game_button)
+            resources.getString(R.string.pause_game_button)
     }
 
     override fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
@@ -210,7 +234,9 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putSerializable("state", gameScope!!.state)
+        gameLoop?.let {
+            outState.putSerializable("state", it.state)
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife
 
-import com.fiz.tetriswithlife.grid.Grid
-import com.fiz.tetriswithlife.grid.Point
+import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.grid.Point
 import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.BeforeEach
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("GridTest")
 internal class GridTest {
-    private lateinit var grid:Grid
+    private lateinit var grid: Grid
 
     @BeforeEach
     fun setUp() {
