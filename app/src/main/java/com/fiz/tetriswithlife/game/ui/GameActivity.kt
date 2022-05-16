@@ -7,30 +7,28 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import com.fiz.tetriswithlife.*
+import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.Display
 import com.fiz.tetriswithlife.game.domain.GameLoop
 import com.fiz.tetriswithlife.game.domain.State
-import com.fiz.tetriswithlife.menu.data.NameRepository
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
 private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
 
+@AndroidEntryPoint
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private var gameLoop: GameLoop? = null
-
     private var job: Job? = null
-
     private val surfaceReady = mutableListOf(false, false)
 
-    private val recordRepository: RecordRepository by lazy{
-        (application as App).recordRepository
-    }
-
+    @Inject
+    lateinit var recordRepository: RecordRepository
     private lateinit var binding: ActivityGameBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,16 +36,13 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         binding = ActivityGameBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
         val loadState = savedInstanceState?.getSerializable("state")
-
         val state: State = if (loadState != null)
             loadState as State
         else
             State(
                 widthCanvas, heightCanvas, recordRepository
             )
-
         val display = Display(
             binding.gameSurfaceView,
             this

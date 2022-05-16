@@ -1,9 +1,11 @@
 package com.fiz.tetriswithlife.game.data
 
 import android.content.SharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RecordRepository(private val sharedPreferences: SharedPreferences) {
-
+@Singleton
+class RecordRepository @Inject constructor(private val sharedPreferences: SharedPreferences) {
     fun loadRecord(): Int {
         return sharedPreferences
             .getInt("Record", 0)

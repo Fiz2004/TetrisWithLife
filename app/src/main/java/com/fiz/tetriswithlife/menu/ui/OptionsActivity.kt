@@ -4,17 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import com.fiz.tetriswithlife.App
-import com.fiz.tetriswithlife.menu.data.NameRepository
 import com.fiz.tetriswithlife.databinding.ActivityOptionsBinding
+import com.fiz.tetriswithlife.menu.data.NameRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class OptionsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOptionsBinding
 
-    private val nameRepository: NameRepository by lazy{
-        (application as App).nameRepository
-    }
-
+    @Inject
+    lateinit var nameRepository: NameRepository
     private var name: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {

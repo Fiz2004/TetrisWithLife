@@ -4,21 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import com.fiz.tetriswithlife.App
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.menu.data.NameRepository
 import com.fiz.tetriswithlife.databinding.ActivityMainBinding
 import com.fiz.tetriswithlife.game.ui.GameActivity
+import com.fiz.tetriswithlife.menu.data.NameRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private val nameRepository: NameRepository by lazy{
-        (application as App).nameRepository
-    }
-
+    @Inject
+    lateinit var nameRepository: NameRepository
     var name: String = ""
-
     private val mStartForResult = registerForActivityResult(
         StartActivityForResult()
     ) { result ->

@@ -1,0 +1,59 @@
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15_[Default_Changelist]/shelved.patch
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15_[Default_Changelist]/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15_[Default_Changelist]/shelved.patch
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15_[Default_Changelist]/shelved.patch	(revision 8b7e0b6a44377bde6e14a07c2f2b69d6fd4c2c78)
++++ /dev/null	(revision 8b7e0b6a44377bde6e14a07c2f2b69d6fd4c2c78)
+@@ -1,19 +0,0 @@
+-Index: .idea/compiler.xml
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CompilerConfiguration\">\r\n    <bytecodeTargetLevel target=\"17\" />\r\n  </component>\r\n</project>
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+---- a/.idea/compiler.xml	(revision ebe62481e038e0f4fb99f750c64513f9c634f534)
+-+++ b/.idea/compiler.xml	(date 1646100882647)
+-@@ -1,6 +1,6 @@
+- <?xml version="1.0" encoding="UTF-8"?>
+- <project version="4">
+-   <component name="CompilerConfiguration">
+--    <bytecodeTargetLevel target="17" />
+-+    <bytecodeTargetLevel target="11" />
+-   </component>
+- </project>
+-\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15__Default_Changelist_.xml
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15__Default_Changelist_.xml b/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15__Default_Changelist_.xml
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15__Default_Changelist_.xml	(revision 8b7e0b6a44377bde6e14a07c2f2b69d6fd4c2c78)
++++ /dev/null	(revision 8b7e0b6a44377bde6e14a07c2f2b69d6fd4c2c78)
+@@ -1,4 +0,0 @@
+-<changelist name="Uncommitted_changes_before_Checkout_at_01_03_2022_9_15_[Default_Changelist]" date="1646100952755" recycled="true" deleted="true">
+-  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_03_2022_9_15_[Default_Changelist]/shelved.patch" />
+-  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 01.03.2022 9:15 [Default Changelist]" />
+-</changelist>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectModuleManager\">\r\n    <modules>\r\n      <module fileurl=\"file://$PROJECT_DIR$/.idea/modules/Tetris_with_life.iml\" filepath=\"$PROJECT_DIR$/.idea/modules/Tetris_with_life.iml\" />\r\n      <module fileurl=\"file://$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.iml\" filepath=\"$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.iml\" />\r\n    </modules>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+--- a/.idea/modules.xml	(revision 873e2397aaf65397a3354eb8db91f5b937b4aff3)
++++ b/.idea/modules.xml	(date 1652685916386)
+@@ -4,6 +4,9 @@
+     <modules>
+       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Tetris_with_life.iml" filepath="$PROJECT_DIR$/.idea/modules/Tetris_with_life.iml" />
+       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.androidTest.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.main.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Tetris_with_life.app.unitTest.iml" />
+     </modules>
+   </component>
+ </project>
+\ No newline at end of file
