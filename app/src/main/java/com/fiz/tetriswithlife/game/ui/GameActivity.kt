@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.SurfaceHolder
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -30,6 +31,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     @Inject
     lateinit var recordRepository: RecordRepository
     private lateinit var binding: ActivityGameBinding
+    private lateinit var display:Display
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,37 +45,52 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             State(
                 widthCanvas, heightCanvas, recordRepository
             )
-        val display = Display(
-            binding.gameSurfaceView,
-            this
-        )
 
-        binding.gameSurfaceView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            surfaceReady[0] = true
-            canStartGame(state, display)
-        }
+        binding.gameSurfaceView.holder.addCallback(object:SurfaceHolder.Callback{
+            override fun surfaceCreated(p0: SurfaceHolder) {            }
 
-        binding.nextFigureSurfaceView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            surfaceReady[1] = true
-            canStartGame(state, display)
-        }
+            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
+                surfaceReady[0] = true
+                display = Display(
+                    binding.gameSurfaceView,
+                    this@GameActivity
+                )
+                if (surfaceReady.all { it })
+                    canStartGame(state)
+            }
+
+            override fun surfaceDestroyed(p0: SurfaceHolder) {            }
+
+        })
+
+        binding.nextFigureSurfaceView.holder.addCallback(object:SurfaceHolder.Callback{
+            override fun surfaceCreated(p0: SurfaceHolder) {            }
+
+            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
+                surfaceReady[1] = true
+                if (surfaceReady.all { it })
+                    canStartGame(state)
+            }
+
+            override fun surfaceDestroyed(p0: SurfaceHolder) {            }
+
+        })
 
         bindListener()
     }
 
-    private fun canStartGame(state: State, display: Display) {
-        if (surfaceReady.all { it })
-            job = CoroutineScope(Dispatchers.Default).launch {
-                gameLoop = GameLoop(
-                    state,
-                    display,
-                    Controller(),
-                    binding.gameSurfaceView,
-                    binding.nextFigureSurfaceView
-                )
-                gameLoop?.setRunning(true)
-                gameLoop?.run()
-            }
+    private fun canStartGame(state: State) {
+        job = CoroutineScope(Dispatchers.Default).launch {
+            gameLoop = GameLoop(
+                state,
+                display,
+                Controller(),
+                binding.gameSurfaceView,
+                binding.nextFigureSurfaceView
+            )
+            gameLoop?.setRunning(true)
+            gameLoop?.run()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -161,7 +178,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             try {
                 runBlocking {
                     job?.cancelAndJoin()
-                    job=null
+                    job = null
                 }
                 retry = false
             } catch (e: InterruptedException) {

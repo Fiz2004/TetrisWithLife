@@ -75,6 +75,7 @@ class Display(
     }
 
     fun renderInfo(state: State, nextFigureCanvas: Canvas) {
+        this.state = state
         this.canvasInfo = nextFigureCanvas
         drawNextFigure()
 

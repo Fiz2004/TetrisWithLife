@@ -31,29 +31,17 @@ class GameLoop(
     }
 
     private fun displayUpdate() {
-        var canvas: Canvas? = null
-        var nextFigureCanvas: Canvas? = null
 
-        try {
-            canvas = surface.holder.lockCanvas(null)
-            if (canvas == null) return
-            synchronized(surface.holder) {
-                display.render(state, canvas)
-            }
-
-            nextFigureCanvas = surfaceNextFigure.holder.lockCanvas(null)
-            if (nextFigureCanvas == null) return
-            synchronized(surfaceNextFigure.holder) {
-                display.renderInfo(state, nextFigureCanvas)
-            }
-
-        } finally {
-            if (canvas != null)
-                surface.holder.unlockCanvasAndPost(canvas)
-            if (nextFigureCanvas != null)
-                surfaceNextFigure.holder.unlockCanvasAndPost(nextFigureCanvas)
-
+        surface.holder.lockCanvas(null)?.let{
+            display.render(state, it)
+            surface.holder.unlockCanvasAndPost(it)
         }
+
+        surfaceNextFigure.holder.lockCanvas(null)?.let{
+            display.renderInfo(state, it)
+            surfaceNextFigure.holder.unlockCanvasAndPost(it)
+        }
+
     }
 
     private fun stateUpdate() {
