@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.character
 
+import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Grid
-import com.fiz.tetriswithlife.game.domain.grid.Point
 
 // Время без дыхания для проигрыша
 const val TIMES_BREATH_LOSE = 60.0

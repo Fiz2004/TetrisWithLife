@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.character
 
+import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Grid
-import com.fiz.tetriswithlife.game.domain.grid.Point
 
 private const val PROBABILITY_EAT = 20
 

@@ -1,5 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.grid
 
+import com.fiz.tetriswithlife.game.domain.figure.Point
+
 private const val NUMBER_IMAGES_BACKGROUND = 16
 
 class Grid(

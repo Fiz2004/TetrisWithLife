@@ -1,10 +1,8 @@
 package com.fiz.tetriswithlife.game.domain.figure
 
 import com.fiz.tetriswithlife.game.domain.Controller
-import com.fiz.tetriswithlife.game.domain.grid.Cell
 import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
-import com.fiz.tetriswithlife.game.domain.grid.Point
 import kotlin.math.ceil
 
 private const val START_STEP_MOVE_AUTO = 0.03
@@ -14,25 +12,17 @@ private const val STEP_MOVE_KEY_Y = 4
 
 class CurrentFigure(
     private val grid: Grid,
-    figure: Figure,
-    getStartX: () -> Int = { (0 until (grid.width - figure.getWidth())).shuffled().first() }
-) : Figure() {
-    private var stepMoveAuto = START_STEP_MOVE_AUTO
-    val position = createStartPosition(getStartX())
+    var figure: Figure,
+    getStartX: () -> Int = { (0 until (grid.width - figure.getWidth())).shuffled().first() },
+    private var stepMoveAuto: Double = START_STEP_MOVE_AUTO,
+    val position: Coordinate = Coordinate(
+        getStartX().toDouble(),
+        (0 - figure.getHeight()).toDouble()
+    )
+) {
 
-    init {
-        cells = figure.cells.clone()
-    }
-
-    private fun createStartPosition(startX: Int): Coordinate {
-        return Coordinate(
-            startX.toDouble(),
-            (0 - getHeight()).toDouble()
-        )
-    }
-
-    fun getPositionTile(p: Coordinate = Coordinate(position.x, position.y)): Array<Point> {
-        return cells.map { it + p.toPoint() }.toTypedArray()
+    fun getPositionTile(p: Coordinate = Coordinate(position.x, position.y)): List<Point> {
+        return figure.cells.map { it.point + p.toPoint() }
     }
 
     fun fixation(scores: Int) {
@@ -76,10 +66,17 @@ class CurrentFigure(
     }
 
     private fun rotate() {
-        val oldCells = cells
-        cells = cells.map { cell -> Cell(3 - cell.y, cell.x, cell.view) }.toTypedArray()
+        val oldCells = figure.cells
+        figure = figure.copy(cells = figure.cells.map { cell ->
+            Cell(
+                Point(
+                    3 - cell.point.y,
+                    cell.point.x
+                ), cell.view
+            )
+        })
         if (isCollission(Coordinate(position.x, position.y)))
-            cells = oldCells
+            figure = figure.copy(cells = oldCells)
     }
 
     private fun moveDown(stepY: Float): String {

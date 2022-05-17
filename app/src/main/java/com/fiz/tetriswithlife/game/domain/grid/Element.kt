@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.game.domain.grid
 
-class Element(
+data class Element(
     val background: Int,
     var block: Int = 0,
     val status: MutableMap<Char, Int> =

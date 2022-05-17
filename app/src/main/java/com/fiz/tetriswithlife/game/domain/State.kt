@@ -4,8 +4,8 @@ import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.figure.Figure
+import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Grid
-import com.fiz.tetriswithlife.game.domain.grid.Point
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -98,7 +98,7 @@ class State(
         val tile = currentFigure.getPositionTile()
         for ((index, value) in tile.withIndex())
             grid.space[value.y][value.x].block =
-                currentFigure.cells[index].view
+                currentFigure.figure.cells[index].view
         val countRowFull = grid.getCountRowFull()
         if (countRowFull != 0)
             grid.deleteRows()

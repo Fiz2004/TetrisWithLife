@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife
 
+import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Grid
-import com.fiz.tetriswithlife.game.domain.grid.Point
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

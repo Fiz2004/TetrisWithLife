@@ -5,8 +5,8 @@ import android.graphics.*
 import android.view.SurfaceView
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
+import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Element
-import com.fiz.tetriswithlife.game.domain.grid.Point
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
@@ -134,9 +134,11 @@ class Display(
     }
 
     private fun drawCurrentFigure() {
-        for (cell in state.currentFigure.cells) {
-            val screenX = offset.x + ((cell.x + state.currentFigure.position.x) * newTile).toFloat()
-            val screenY = offset.y + ((cell.y + state.currentFigure.position.y) * newTile).toFloat()
+        for (cell in state.currentFigure.figure.cells) {
+            val screenX =
+                offset.x + ((cell.point.x + state.currentFigure.position.x) * newTile).toFloat()
+            val screenY =
+                offset.y + ((cell.point.y + state.currentFigure.position.y) * newTile).toFloat()
             var oldY = 0
             var cY = screenY
             var nTile = newTile
@@ -181,8 +183,8 @@ class Display(
         )
         canvasInfo.drawColor(Color.parseColor("#242424"))
         for (cell in state.nextFigure.cells) {
-            val screenX = offset.x + (cell.x) * newTile
-            val screenY = offset.y + (cell.y) * newTile
+            val screenX = offset.x + (cell.point.x) * newTile
+            val screenY = offset.y + (cell.point.y) * newTile
             canvasInfo.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),

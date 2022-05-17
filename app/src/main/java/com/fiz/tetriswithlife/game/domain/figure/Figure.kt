@@ -1,43 +1,29 @@
 package com.fiz.tetriswithlife.game.domain.figure
 
-import com.fiz.tetriswithlife.game.domain.grid.Cell
-import com.fiz.tetriswithlife.game.domain.grid.Point
-
 private const val NUMBER_IMAGES_FIGURE = 5
-val FIGURE: Array<Array<Point>> = arrayOf(
-    arrayOf(Point(0, 1), Point(1, 1), Point(2, 1), Point(3, 1)),
-    arrayOf(Point(1, 1), Point(2, 1), Point(2, 2), Point(3, 2)),
-    arrayOf(Point(1, 1), Point(2, 1), Point(2, 2), Point(2, 3)),
-    arrayOf(Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 3)),
-    arrayOf(Point(1, 1), Point(1, 2), Point(2, 2), Point(1, 3)),
-    arrayOf(Point(1, 1), Point(1, 2), Point(2, 1), Point(2, 2)),
-    arrayOf(Point(1, 1), Point(2, 1), Point(1, 2), Point(1, 3))
+
+val FIGURE: List<List<Point>> = listOf(
+    listOf(Point(0, 1), Point(1, 1), Point(2, 1), Point(3, 1)),
+    listOf(Point(1, 1), Point(2, 1), Point(2, 2), Point(3, 2)),
+    listOf(Point(1, 1), Point(2, 1), Point(2, 2), Point(2, 3)),
+    listOf(Point(1, 1), Point(1, 2), Point(2, 2), Point(2, 3)),
+    listOf(Point(1, 1), Point(1, 2), Point(2, 2), Point(1, 3)),
+    listOf(Point(1, 1), Point(1, 2), Point(2, 1), Point(2, 2)),
+    listOf(Point(1, 1), Point(2, 1), Point(1, 2), Point(1, 3))
 )
 
-open class Figure(
-    getNumberFigure: () -> Int = {
-        (FIGURE.indices).shuffled().first()
-    }
+data class Figure(
+    private val getNumberFigure: () -> Int = { (FIGURE.indices).shuffled().first() },
+    val cells: List<Cell> =
+        FIGURE[getNumberFigure()].map { Cell(it, (1..NUMBER_IMAGES_FIGURE).shuffled().first()) }
 ) {
-    var cells: Array<Cell> = createFigure(getNumberFigure())
-
-    private fun createFigure(
-        numberFigure: Int
-    ): Array<Cell> {
-        var result: Array<Cell> = emptyArray()
-        for (cell in FIGURE[numberFigure]) {
-            val view = (1..NUMBER_IMAGES_FIGURE).shuffled().first()
-            result += Cell(cell.x, cell.y, view)
-        }
-        return result
-    }
 
     fun getWidth(): Int {
-        return cells.maxByOrNull { it.x }?.x ?: 0
+        return cells.maxByOrNull { it.point.x }?.point?.x ?: 0
     }
 
     fun getHeight(): Int {
-        return cells.maxByOrNull { it.y }?.y ?: 0
+        return cells.maxByOrNull { it.point.y }?.point?.y ?: 0
     }
 }
 

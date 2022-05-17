@@ -171,22 +171,28 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     }
 
     override fun setScoresTextView(scores: String) {
-        binding.scoresTextView.text = resources.getString(
-            R.string.scores_game_textview, scores.padStart
-                (6, '0')
-        )
+        binding.scoresTextView.post {
+            binding.scoresTextView.text = resources.getString(
+                R.string.scores_game_textview, scores.padStart
+                    (6, '0')
+            )
+        }
     }
 
     override fun setRecordTextView(record: String) {
-        binding.recordTextview.text =
-            resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
+        binding.recordTextview.post {
+            binding.recordTextview.text =
+                resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
+        }
     }
 
     override fun pauseButtonClick(status: String) {
-        binding.pauseButton.text = if (status == "pause")
-            resources.getString(R.string.resume_game_button)
-        else
-            resources.getString(R.string.pause_game_button)
+        binding.pauseButton.post {
+            binding.pauseButton.text = if (status == "pause")
+                resources.getString(R.string.resume_game_button)
+            else
+                resources.getString(R.string.pause_game_button)
+        }
     }
 
     override fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
