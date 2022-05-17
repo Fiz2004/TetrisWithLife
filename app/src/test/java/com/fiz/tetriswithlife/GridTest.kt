@@ -2,92 +2,108 @@ package com.fiz.tetriswithlife
 
 import com.fiz.tetriswithlife.game.domain.grid.Grid
 import com.fiz.tetriswithlife.game.domain.grid.Point
-import org.junit.jupiter.api.Assertions.*
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Test
 
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-
-@DisplayName("GridTest")
-internal class GridTest {
+class GridTest {
     private lateinit var grid: Grid
 
-    @BeforeEach
-    fun setUp() {
-        grid= Grid(5,10) { 0 }
-    }
-
-
-    @Test
-    @DisplayName("isInside")
-    fun isInside() {
-        var result=grid.isInside(Point(1,1))
-        assertTrue(result)
-        result=grid.isInside(Point(0,0))
-        assertTrue(result)
-        result=grid.isInside(Point(7,1))
-        assertFalse(result)
-        result=grid.isInside(Point(5,10))
-        assertFalse(result)
+    @Before
+    fun setup() {
+        grid = Grid(5, 10) { 0 }
     }
 
     @Test
-    @DisplayName("isOutside")
-    fun isOutside() {
-        var result=grid.isOutside(Point(1,1))
-        assertFalse(result)
-        result=grid.isOutside(Point(0,0))
-        assertFalse(result)
-        result=grid.isOutside(Point(7,1))
-        assertTrue(result)
-        result=grid.isOutside(Point(5,10))
+    fun whenPointIsInside_shouldReturnTrue() {
+        val result = grid.isInside(Point(1, 1))
+
         assertTrue(result)
     }
 
     @Test
-    @DisplayName("isFree")
-    fun isFree() {
-        var result=grid.isFree(Point(1,1))
-        assertTrue(result)
-        grid.space[1][1].block=1
-        result=grid.isFree(Point(1,1))
+    fun whenPointIsNotInside_shouldReturnFalse() {
+        val result = grid.isInside(Point(7, 1))
+
         assertFalse(result)
     }
 
     @Test
-    @DisplayName("isNotFree")
-    fun isNotFree() {
-        var result=grid.isNotFree(Point(1,1))
-        assertFalse(result)
-        grid.space[1][1].block=1
-        result=grid.isNotFree(Point(1,1))
+    fun whenPointIsOutside_shouldReturnTrue() {
+        val result = grid.isOutside(Point(7, 1))
+
         assertTrue(result)
     }
 
     @Test
-    @DisplayName("getCountRowFull")
-    fun getCountRowFull() {
-        var result=grid.getCountRowFull()
-        assertEquals(result,0)
+    fun whenPointIsNotOutside_shouldReturnFalse() {
+        val result = grid.isOutside(Point(1, 1))
 
+        assertFalse(result)
+    }
+
+    @Test
+    fun whenPointFree_shouldReturnTrue() {
+        val result = grid.isFree(Point(1, 1))
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun whenPointNotFree_shouldReturnFalse() {
+        grid.space[1][1].block = 1
+        val result = grid.isFree(Point(1, 1))
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun whenPointNotFree_shouldReturnTrue() {
+        grid.space[1][1].block = 1
+        val result = grid.isNotFree(Point(1, 1))
+        assertTrue(result)
+    }
+
+    @Test
+    fun whenPointFree_shouldReturnFalse() {
+        val result = grid.isNotFree(Point(1, 1))
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun whenRowNotFull_shouldReturnZero() {
+        val result = grid.getCountRowFull()
+
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun whenRowFullOne_shouldReturnOne() {
         for (i in 0 until 5)
-            grid.space[9][i].block=1
-        result=grid.getCountRowFull()
-        assertEquals(result,1)
+            grid.space[9][i].block = 1
+        val result = grid.getCountRowFull()
 
-        for (i in 0 until 5)
-            grid.space[5][i].block=1
-        result=grid.getCountRowFull()
-        assertEquals(result,2)
+        assertEquals(1, result)
     }
 
     @Test
-    @DisplayName("deleteRows")
-    fun deleteRows() {
+    fun whenRowFullTwo_shouldReturnTwo() {
+        for (i in 0 until 5) {
+            grid.space[5][i].block = 1
+            grid.space[9][i].block = 1
+        }
+        val result = grid.getCountRowFull()
+
+        assertEquals(2, result)
+    }
+
+    @Test
+    fun whenRowFull_shouldCheckRowClean() {
         for (i in 0 until 5)
-            grid.space[9][i].block=1
+            grid.space[9][i].block = 1
         grid.deleteRows()
-        assertEquals(grid.space[9][0].block,0)
 
+        assertEquals(0, grid.space[9][0].block)
     }
 }
