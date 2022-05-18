@@ -14,11 +14,14 @@ import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.Display
 import com.fiz.tetriswithlife.game.domain.GameState
+import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.math.floor
+import kotlin.math.max
 
 @AndroidEntryPoint
-class GameActivity : AppCompatActivity(), Display.Companion.Listener {
+class GameActivity : AppCompatActivity() {
 
     private val gameViewModel: GameViewModel by viewModels()
 
@@ -50,7 +53,6 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
                     gameViewModel.gameState.grid.height,
                     bitmapRepository
                 )
-                display.initListener(this@GameActivity)
 
                 surfaceReady[0] = true
                 if (surfaceReady.all { it })
@@ -89,6 +91,24 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
         }
 
+        setScoresTextView(gameViewModel.gameState.scores.toString().padStart(6, '0'))
+        setRecordTextView(gameViewModel.gameState.record.toString().padStart(6, '0'))
+        pauseButtonClick(gameViewModel.gameState.status)
+
+        if (gameViewModel.gameState.status != "pause") {
+            val sec: Double = if (gameViewModel.gameState.character.breath)
+                TIMES_BREATH_LOSE
+            else
+                max(gameViewModel.gameState.character.timeBreath, 0.0)
+
+            infoBreathTextviewChangeVisibility(gameViewModel.gameState.character.breath)
+            val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
+            breathTextviewChangeVisibilityAndColor(
+                gameViewModel.gameState.character.breath,
+                sec,
+                cl
+            )
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -130,7 +150,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         gameViewModel.activityStop()
     }
 
-    override fun setScoresTextView(scores: String) {
+    private fun setScoresTextView(scores: String) {
         binding.scoresTextView.post {
             binding.scoresTextView.text = resources.getString(
                 R.string.scores_game_textview, scores.padStart
@@ -139,14 +159,14 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
     }
 
-    override fun setRecordTextView(record: String) {
+    private fun setRecordTextView(record: String) {
         binding.recordTextview.post {
             binding.recordTextview.text =
                 resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
         }
     }
 
-    override fun pauseButtonClick(status: String) {
+    private fun pauseButtonClick(status: String) {
         binding.pauseButton.post {
             binding.pauseButton.text = if (status == "pause")
                 resources.getString(R.string.resume_game_button)
@@ -155,7 +175,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
     }
 
-    override fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
+    private fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
         if (!visibility) {
             if (!binding.breathTextView.isVisible) {
                 binding.infoBreathTextView.post {
@@ -169,7 +189,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
     }
 
-    override fun breathTextviewChangeVisibilityAndColor(
+    private fun breathTextviewChangeVisibilityAndColor(
         visibility: Boolean, sec: Double, color: Int
     ) {
         if (!visibility) {

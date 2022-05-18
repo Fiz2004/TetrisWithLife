@@ -1,13 +1,9 @@
 package com.fiz.tetriswithlife.game.domain
 
-import android.content.Context
 import android.graphics.*
 import com.fiz.tetriswithlife.game.data.BitmapRepository
-import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.domain.grid.Element
 import com.fiz.tetriswithlife.game.domain.models.Point
-import kotlin.math.floor
-import kotlin.math.max
 import kotlin.math.min
 
 
@@ -21,19 +17,6 @@ class Display(
     heightGrid: Int,
     bitmapRepository: BitmapRepository
 ) {
-    companion object {
-        interface Listener {
-            fun setScoresTextView(scores: String)
-            fun setRecordTextView(record: String)
-
-            fun pauseButtonClick(status: String)
-            fun infoBreathTextviewChangeVisibility(visibility: Boolean)
-            fun breathTextviewChangeVisibilityAndColor(visibility: Boolean, sec: Double, color: Int)
-        }
-    }
-
-    private lateinit var listener: Listener
-
     private val paint: Paint = Paint()
 
     private var bmpFon: Bitmap = bitmapRepository.bmpFon
@@ -52,10 +35,6 @@ class Display(
         ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
 
-    fun initListener(context: Context) {
-        listener = context as Listener
-    }
-
     fun render(gameState: GameState, canvas: Canvas) {
 
         canvas.drawColor(Color.parseColor("#161616"))
@@ -66,23 +45,6 @@ class Display(
 
     fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas) {
         drawNextFigure(gameState, nextFigureCanvas)
-
-        listener.setScoresTextView(gameState.scores.toString().padStart(6, '0'))
-        listener.setRecordTextView(gameState.record.toString().padStart(6, '0'))
-
-        listener.pauseButtonClick(gameState.status)
-
-
-        if (gameState.status != "pause") {
-            val sec: Double = if (gameState.character.breath)
-                TIMES_BREATH_LOSE
-            else
-                max(gameState.character.timeBreath, 0.0)
-
-            listener.infoBreathTextviewChangeVisibility(gameState.character.breath)
-            val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
-            listener.breathTextviewChangeVisibilityAndColor(gameState.character.breath, sec, cl)
-        }
     }
 
     private fun drawGridElements(gameState: GameState, canvas: Canvas) {
