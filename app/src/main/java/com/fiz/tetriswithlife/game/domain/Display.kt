@@ -2,7 +2,6 @@ package com.fiz.tetriswithlife.game.domain
 
 import android.content.Context
 import android.graphics.*
-import android.view.SurfaceView
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.domain.grid.Element
@@ -16,9 +15,11 @@ private const val NUMBER_COLUMNS_IMAGES_FON = 4
 private const val NUMBER_ROWS_IMAGES_FON = 4
 
 class Display(
-    surface: SurfaceView,
+    widthSurface: Int,
+    heightSurface: Int,
     private val context: Context,
-    gameState: GameState
+    widthGrid: Int,
+    heightGrid: Int
 ) {
     companion object {
         interface Listener {
@@ -54,13 +55,12 @@ class Display(
 
     private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
     private var newTile = min(
-        surface.height / gameState.grid.height,
-        surface.width / gameState.grid.width
+        heightSurface / heightGrid,
+        widthSurface / widthGrid
     ).toFloat()
     private var offset = Point(
-        ((surface.width - gameState.grid.width * newTile) / 2).toInt(),
-        ((surface.height - gameState.grid
-            .height * newTile) / 2).toInt()
+        ((widthSurface - widthGrid * newTile) / 2).toInt(),
+        ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
 
     fun render(gameState: GameState, canvas: Canvas) {
