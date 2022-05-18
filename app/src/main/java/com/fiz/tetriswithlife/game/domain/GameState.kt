@@ -25,7 +25,8 @@ data class GameState(
     var record: Int = startRecord,
     var status: String = "playing",
     var nextFigure: Figure = Figure(),
-    var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure)
+    var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure),
+    val changed:Boolean=false
 ) : Serializable {
     val scoresFormat
         get() = scores.toString().padStart(6, '0')

@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife.game.ui
 
-import android.util.Log
 import android.view.MotionEvent
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +9,7 @@ import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.GameState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import kotlin.math.min
 
@@ -18,7 +18,7 @@ const val heightGrid: Int = 25
 
 @HiltViewModel
 class GameViewModel @Inject constructor(var recordRepository: RecordRepository) : ViewModel() {
-    var gameState: MutableLiveData<GameState> = MutableLiveData(); private set
+    var gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState(widthGrid, heightGrid, recordRepository.loadRecord())); private set
 
     private var controller = Controller()
     private var job: Job? = null
@@ -28,9 +28,8 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
     var running = false
 
     fun tryLoadState(gameState: GameState?) {
-        if (this.gameState.value == null)
+        if (gameState != null)
             this.gameState.value = gameState
-                ?: GameState(widthGrid, heightGrid, recordRepository.loadRecord())
     }
 
     fun startGame() {
@@ -50,18 +49,17 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
     }
 
     private fun stateUpdate() {
-        gameState.value?.let {
             val now = System.currentTimeMillis()
             val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
             if (deltaTime == 0.0) return
 
-            if (it.status != "pause") {
+            if (gameState.value.status != "pause") {
                 var status = true
                 if (ending == 1.0)
-                    status = it.update(controller, deltaTime) {
-                        if (it.scores > recordRepository.loadRecord()) {
-                            it.record = it.scores
-                            recordRepository.saveRecord(it.record)
+                    status = gameState.value.update(controller, deltaTime) {
+                        if (gameState.value.scores > recordRepository.loadRecord()) {
+                            gameState.value.record = gameState.value.scores
+                            recordRepository.saveRecord(gameState.value.record)
                         }
                     }
 
@@ -69,15 +67,14 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
                     ending -= deltaTime
             }
 
-            if (ending < 0 || it.status == "new game") {
-                it.new(recordRepository.loadRecord())
+            if (ending < 0 || gameState.value.status == "new game") {
+                gameState.value.new(recordRepository.loadRecord())
                 ending = 1.0
             }
 
-            gameState.postValue(it)
+            gameState.value=gameState.value.copy(changed=!gameState.value.changed)
 
             prevTime = now
-        }
     }
 
     fun clickLeftButton(event: MotionEvent) {
@@ -114,13 +111,13 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
 
     fun clickNewGameButton() {
         job?.let {
-            gameState.value?.status = "new game"
+            gameState.value.status = "new game"
         }
     }
 
     fun clickPauseButton() {
         job?.let {
-            gameState.value?.clickPause()
+            gameState.value.clickPause()
         }
     }
 

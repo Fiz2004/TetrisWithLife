@@ -7,12 +7,17 @@ import android.view.SurfaceHolder
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.Display
 import com.fiz.tetriswithlife.game.domain.GameState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -73,9 +78,14 @@ class GameActivity : AppCompatActivity() {
 
         bindListener()
 
-        gameViewModel.gameState.observe(this) {
-            displayUpdate(it)
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                gameViewModel.gameState.collectLatest {
+                    displayUpdate(it)
+                }
+            }
         }
+
     }
 
     private fun displayUpdate(gameState: GameState) {
@@ -150,7 +160,7 @@ class GameActivity : AppCompatActivity() {
 
     // Сериализация не проходит
     override fun onSaveInstanceState(outState: Bundle) {
-        gameViewModel.gameState.value?.let {
+        gameViewModel.gameState.value.let {
 //            outState.putSerializable(STATE, it)
         }
         super.onSaveInstanceState(outState)
