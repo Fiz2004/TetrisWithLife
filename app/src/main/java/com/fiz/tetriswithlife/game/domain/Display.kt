@@ -17,7 +17,6 @@ private const val NUMBER_ROWS_IMAGES_FON = 4
 class Display(
     widthSurface: Int,
     heightSurface: Int,
-    private val context: Context,
     widthGrid: Int,
     heightGrid: Int
 ) {
@@ -36,24 +35,11 @@ class Display(
 
     private val paint: Paint = Paint()
 
-    private val bmpFon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
+    private lateinit var bmpFon: Bitmap
+    private lateinit var bmpCharacter: Bitmap
+    private lateinit var bmpKv: List<Bitmap>
 
-    private val bmpCharacter: Bitmap =
-        BitmapFactory.decodeResource(context.resources, R.drawable.character)
-
-    private val bmpKv: List<Bitmap> by lazy {
-        val result: MutableList<Bitmap> = mutableListOf()
-        for (i in 1..NUMBER_IMAGES_FIGURE)
-            result += BitmapFactory.decodeResource(
-                context.resources, context.resources.getIdentifier(
-                    "kvadrat$i",
-                    "drawable", context.packageName
-                )
-            )
-        result
-    }
-
-    private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
+    private var tile: Int = 0
     private var newTile = min(
         heightSurface / heightGrid,
         widthSurface / widthGrid
@@ -63,7 +49,34 @@ class Display(
         ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
 
+    fun loadResources(context: Context) {
+
+        bmpFon = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
+
+        bmpCharacter =
+            BitmapFactory.decodeResource(context.resources, R.drawable.character)
+
+        bmpKv = run {
+            val result: MutableList<Bitmap> = mutableListOf()
+            for (i in 1..NUMBER_IMAGES_FIGURE)
+                result += BitmapFactory.decodeResource(
+                    context.resources, context.resources.getIdentifier(
+                        "kvadrat$i",
+                        "drawable", context.packageName
+                    )
+                )
+            result
+        }
+
+        tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
+    }
+
+    fun initListener(context: Context) {
+        listener = context as Listener
+    }
+
     fun render(gameState: GameState, canvas: Canvas) {
+
         canvas.drawColor(Color.parseColor("#161616"))
         drawGridElements(gameState, canvas)
         drawCurrentFigure(gameState, canvas)
@@ -73,7 +86,6 @@ class Display(
     fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas) {
         drawNextFigure(gameState, nextFigureCanvas)
 
-        listener = context as Listener
         listener.setScoresTextView(gameState.scores.toString().padStart(6, '0'))
         listener.setRecordTextView(gameState.record.toString().padStart(6, '0'))
 
@@ -116,6 +128,7 @@ class Display(
                     val screenX = offset.x + x * newTile
                     val screenY = offset.y + y * newTile
                     val offset: Point = getOffset(gameState.grid.space[y][x])
+
                     canvas.drawBitmap(
                         bmpKv[gameState.grid.space[y][x].block - 1],
                         Rect(

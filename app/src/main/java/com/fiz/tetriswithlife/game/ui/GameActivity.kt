@@ -20,7 +20,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
     private val gameViewModel: GameViewModel by viewModels()
 
-    private val surfaceReady = mutableListOf(false, false)
+    private var surfaceReady = mutableListOf(false, false)
 
     private lateinit var binding: ActivityGameBinding
 
@@ -38,14 +38,16 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             override fun surfaceCreated(p0: SurfaceHolder) {}
 
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
-                surfaceReady[0] = true
                 display = Display(
                     binding.gameSurfaceView.width,
                     binding.gameSurfaceView.height,
-                    this@GameActivity,
                     gameViewModel.gameState.grid.width,
                     gameViewModel.gameState.grid.height,
                 )
+                display.loadResources(applicationContext)
+                display.initListener(this@GameActivity)
+
+                surfaceReady[0] = true
                 if (surfaceReady.all { it })
                     gameViewModel.startGame(this@GameActivity)
             }
@@ -117,19 +119,10 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        gameViewModel.activityStart()
-    }
-
     override fun onStop() {
         super.onStop()
+        surfaceReady = mutableListOf(false, false)
         gameViewModel.activityStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        gameViewModel.activityDestroy()
     }
 
     override fun setScoresTextView(scores: String) {

@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife.game.ui
 
-import android.util.Log
 import android.view.MotionEvent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,18 +32,20 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
     }
 
     fun startGame(activity: GameActivity) {
-        job = viewModelScope.launch(Dispatchers.Default) {
-            running = true
 
-            while (isActive) {
-                if (running) {
+        viewModelScope.launch(Dispatchers.Default) {
+            job?.cancelAndJoin()
+            job = viewModelScope.launch(Dispatchers.Default) {
+                running = true
 
-                    Log.d("Game", "+")
+                while (isActive) {
+                    if (running) {
 
-                    stateUpdate()
+                        stateUpdate()
 
-                    activity.displayUpdate()
+                        activity.displayUpdate()
 
+                    }
                 }
             }
         }
@@ -136,18 +137,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
         }
     }
 
-    fun activityStart() {
-        running = true
-    }
-
     fun activityStop() {
         running = false
-    }
-
-    fun activityDestroy() {
-        runBlocking {
-            job?.cancelAndJoin()
-            job = null
-        }
     }
 }
