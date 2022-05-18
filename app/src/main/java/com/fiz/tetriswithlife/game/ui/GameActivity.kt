@@ -8,7 +8,6 @@ import android.view.SurfaceHolder
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.BitmapRepository
@@ -95,24 +94,41 @@ class GameActivity : AppCompatActivity() {
             binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
         }
 
-        setScoresTextView(gameState.scores.toString().padStart(6, '0'))
-        setRecordTextView(gameState.record.toString().padStart(6, '0'))
-        pauseButtonClick(gameState.status)
-
-        if (gameState.status != "pause") {
-            val sec: Double = if (gameState.character.breath)
-                TIMES_BREATH_LOSE
-            else
-                max(gameState.character.timeBreath, 0.0)
-
-            infoBreathTextviewChangeVisibility(gameState.character.breath)
-            val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
-            breathTextviewChangeVisibilityAndColor(
-                gameState.character.breath,
-                sec,
-                cl
+        binding.scoresTextView.text = resources.getString(
+            R.string.scores_game_textview, gameState.scores.toString().padStart(6, '0')
+        )
+        binding.recordTextview.text =
+            resources.getString(
+                R.string.record_game_textview,
+                gameState.record.toString().padStart(6, '0')
             )
-        }
+
+        val textOnButtonPause = if (gameState.status == "pause")
+            R.string.resume_game_button
+        else
+            R.string.pause_game_button
+
+        binding.pauseButton.text = resources.getString(textOnButtonPause)
+
+        binding.infoBreathTextView.visibility = if (gameState.character.breath)
+            View.INVISIBLE
+        else
+            View.VISIBLE
+
+        val sec: Double = if (gameState.character.breath)
+            TIMES_BREATH_LOSE
+        else
+            max(gameState.character.timeBreath, 0.0)
+        val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
+
+        binding.breathTextView.visibility = (if (gameState.character.breath)
+            View.INVISIBLE
+        else
+            View.VISIBLE)
+
+        binding.breathTextView.text = sec.toInt().toString()
+
+        binding.breathTextView.setTextColor(Color.rgb(255, cl, cl))
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -154,60 +170,10 @@ class GameActivity : AppCompatActivity() {
         gameViewModel.activityStop()
     }
 
-    private fun setScoresTextView(scores: String) {
-            binding.scoresTextView.text = resources.getString(
-                R.string.scores_game_textview, scores.padStart
-                    (6, '0')
-            )
-    }
-
-    private fun setRecordTextView(record: String) {
-            binding.recordTextview.text =
-                resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
-    }
-
-    private fun pauseButtonClick(status: String) {
-            binding.pauseButton.text = if (status == "pause")
-                resources.getString(R.string.resume_game_button)
-            else
-                resources.getString(R.string.pause_game_button)
-    }
-
-    private fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
-        if (!visibility) {
-            if (!binding.breathTextView.isVisible) {
-                    binding.infoBreathTextView.visibility = View.VISIBLE
-            }
-        } else if (binding.breathTextView.isVisible) {
-                binding.infoBreathTextView.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun breathTextviewChangeVisibilityAndColor(
-        visibility: Boolean, sec: Double, color: Int
-    ) {
-        if (!visibility) {
-            if (!binding.breathTextView.isVisible) {
-                binding.breathTextView.visibility = View.VISIBLE
-            }
-            binding.breathTextView.text = sec.toInt().toString()
-        } else if (binding.breathTextView.isVisible) {
-            binding.breathTextView.visibility = View.INVISIBLE
-        }
-
-            binding.breathTextView.setTextColor(
-                Color.rgb(
-                    255,
-                    color,
-                    color
-                )
-            )
-
-    }
-
+    // Сериализация не проходит
     override fun onSaveInstanceState(outState: Bundle) {
-        gameViewModel.gameState.let {
-//            outState.putSerializable("state", it)
+        gameViewModel.gameState.value?.let {
+//            outState.putSerializable(STATE, it)
         }
         super.onSaveInstanceState(outState)
     }

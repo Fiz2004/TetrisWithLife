@@ -4,9 +4,9 @@ import com.fiz.tetriswithlife.game.domain.models.Point
 
 private const val NUMBER_IMAGES_BACKGROUND = 16
 
-class Grid(
+data class Grid(
     val width: Int, val height: Int,
-    valueFon: () -> Int = { (0 until NUMBER_IMAGES_BACKGROUND).shuffled().first() }
+    val valueFon: () -> Int = { (0 until NUMBER_IMAGES_BACKGROUND).shuffled().first() }
 ) {
     val space: Array<Array<Element>> = Array(height) {
         Array(width) {

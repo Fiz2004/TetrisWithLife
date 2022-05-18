@@ -10,9 +10,26 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
     var timeBreath = TIMES_BREATH_LOSE
     var breath = true
 
+    private var tempGrid: Array<Array<Int>> = Array(grid.height) {
+        Array(grid.width) {
+            0
+        }
+    }
+
+    private fun refreshTempGrid(grid: Grid) {
+        grid.space.forEachIndexed { indexY, arrayOfElements ->
+            arrayOfElements.forEachIndexed { indexX, element ->
+                tempGrid[indexY][indexX] = element.block
+            }
+        }
+    }
+
     fun isBreath(grid: Grid): Boolean {
         val temp = breath
-        breath = findWay(posTile, emptyArray(), grid)
+
+        refreshTempGrid(grid)
+
+        breath = findWay(posTile, grid)
 
         if (temp && !breath)
             timeBreath = TIMES_BREATH_LOSE
@@ -20,16 +37,24 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
         return breath
     }
 
-    private fun findWay(tile: Point, tempCash: Array<Point>, grid: Grid): Boolean {
+    private fun isInside(p: Point): Boolean {
+        return p.y in tempGrid.indices && p.x in tempGrid[p.y].indices
+    }
+
+    private fun isFree(p: Point): Boolean {
+        return tempGrid[p.y][p.x] == 0
+    }
+
+    private fun findWay(tile: Point, grid: Grid): Boolean {
         if (tile.y == 0)
             return true
-        var cash: Array<Point> = tempCash.clone()
-        cash += Point(tile.x, tile.y)
+
+        tempGrid[tile.y][tile.x] = 1
 
         for (shiftPoint in arrayOf(Point(0, -1), Point(1, 0), Point(-1, 0), Point(0, 1))) {
             val nextElement = tile + shiftPoint
-            if (grid.isInside(nextElement) && grid.isFree(nextElement)
-                && !cash.contains(nextElement) && findWay(nextElement, cash, grid)
+            if (isInside(nextElement) && isFree(nextElement)
+                && findWay(nextElement, grid)
             )
                 return true
         }
