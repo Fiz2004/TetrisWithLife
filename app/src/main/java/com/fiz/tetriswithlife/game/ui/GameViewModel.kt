@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife.game.ui
 
+import android.util.Log
 import android.view.MotionEvent
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -52,6 +53,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
         gameState.value?.let {
             val now = System.currentTimeMillis()
             val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
+            if (deltaTime == 0.0) return
 
             if (it.status != "pause") {
                 var status = true
@@ -61,7 +63,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
                             it.record = it.scores
                             recordRepository.saveRecord(it.record)
                         }
-                    } == true
+                    }
 
                 if (!status || ending != 1.0)
                     ending -= deltaTime

@@ -49,6 +49,8 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
         if (tile.y == 0)
             return true
 
+        if (tempGrid[tile.y][tile.x]!=0) return false
+
         tempGrid[tile.y][tile.x] = 1
 
         for (shiftPoint in listOf(Point(0, -1), Point(1, 0), Point(-1, 0), Point(0, 1))) {

@@ -63,7 +63,6 @@ data class GameState(
             )
         }
 
-
     fun new(startRecord: Int) {
         grid = Grid(grid.width, grid.height)
         character = CharacterBreath(grid)
@@ -82,21 +81,33 @@ data class GameState(
     fun update(controller: Controller, deltaTime: Double, updateRecord: () -> Unit): Boolean {
         if (!character.breath)
             character.timeBreath -= deltaTime
+
         if (controller.isCannotTimeLast(deltaTime))
             return true
 
-        if (!actionsControl(controller, updateRecord)
-            || (!character.breath && (isLose() || isCrushedBeetle()))
-            || status == "new game"
-        ) {
+        val status = currentFigure.moves(controller)
+
+        if (isEndGame(status, updateRecord)) {
             updateRecord()
             return false
         }
+
+        if (!character.breath && (isLose() || isCrushedBeetle())) {
+            updateRecord()
+            return false
+        }
+
+        if (status == "new game") {
+            updateRecord()
+            return false
+        }
+
         val statusCharacter = character.update(grid)
         if (statusCharacter == "eat") {
             val tile = character.posTile
             grid.space[tile.y][tile.x].setZero()
             scores += 50
+            updateRecord()
         } else if (statusCharacter == "eatDestroy") {
             changeGridDestroyElement()
         }
@@ -104,22 +115,20 @@ data class GameState(
         return true
     }
 
-    private fun actionsControl(controller: Controller, updateRecord: () -> Unit): Boolean {
-        val status = currentFigure.moves(controller)
-
+    private fun isEndGame(status: String, updateRecord: () -> Unit): Boolean {
         if (status == "endGame"
             // Фигура достигла препятствия
             || (status == "fall" && isCrushedBeetle())
         )
         // Стакан заполнен игра окончена
-            return false
+            return true
 
         if (status == "fixation") {
             fixation(updateRecord)
             createCurrentFigure()
         }
 
-        return true
+        return false
     }
 
     private fun isCrushedBeetle(): Boolean {
