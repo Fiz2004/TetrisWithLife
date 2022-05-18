@@ -49,14 +49,14 @@ class GameActivity : AppCompatActivity() {
                 display = Display(
                     binding.gameSurfaceView.width,
                     binding.gameSurfaceView.height,
-                    gameViewModel.gameState.grid.width,
-                    gameViewModel.gameState.grid.height,
+                    gameViewModel.gameState.value?.grid?.width ?: 0,
+                    gameViewModel.gameState.value?.grid?.height ?: 0,
                     bitmapRepository
                 )
 
                 surfaceReady[0] = true
                 if (surfaceReady.all { it })
-                    gameViewModel.startGame(this@GameActivity)
+                    gameViewModel.startGame()
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {}
@@ -69,7 +69,7 @@ class GameActivity : AppCompatActivity() {
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
                 surfaceReady[1] = true
                 if (surfaceReady.all { it })
-                    gameViewModel.startGame(this@GameActivity)
+                    gameViewModel.startGame()
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {}
@@ -77,34 +77,38 @@ class GameActivity : AppCompatActivity() {
         })
 
         bindListener()
+
+        gameViewModel.gameState.observe(this) {
+            displayUpdate(it)
+        }
     }
 
-    fun displayUpdate() {
+    private fun displayUpdate(gameState: GameState) {
 
         binding.gameSurfaceView.holder.lockCanvas(null)?.let {
-            display.render(gameViewModel.gameState, it)
+            display.render(gameState, it)
             binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
         }
 
         binding.nextFigureSurfaceView.holder.lockCanvas(null)?.let {
-            display.renderInfo(gameViewModel.gameState, it)
+            display.renderInfo(gameState, it)
             binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
         }
 
-        setScoresTextView(gameViewModel.gameState.scores.toString().padStart(6, '0'))
-        setRecordTextView(gameViewModel.gameState.record.toString().padStart(6, '0'))
-        pauseButtonClick(gameViewModel.gameState.status)
+        setScoresTextView(gameState.scores.toString().padStart(6, '0'))
+        setRecordTextView(gameState.record.toString().padStart(6, '0'))
+        pauseButtonClick(gameState.status)
 
-        if (gameViewModel.gameState.status != "pause") {
-            val sec: Double = if (gameViewModel.gameState.character.breath)
+        if (gameState.status != "pause") {
+            val sec: Double = if (gameState.character.breath)
                 TIMES_BREATH_LOSE
             else
-                max(gameViewModel.gameState.character.timeBreath, 0.0)
+                max(gameState.character.timeBreath, 0.0)
 
-            infoBreathTextviewChangeVisibility(gameViewModel.gameState.character.breath)
+            infoBreathTextviewChangeVisibility(gameState.character.breath)
             val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
             breathTextviewChangeVisibilityAndColor(
-                gameViewModel.gameState.character.breath,
+                gameState.character.breath,
                 sec,
                 cl
             )
@@ -151,41 +155,31 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun setScoresTextView(scores: String) {
-        binding.scoresTextView.post {
             binding.scoresTextView.text = resources.getString(
                 R.string.scores_game_textview, scores.padStart
                     (6, '0')
             )
-        }
     }
 
     private fun setRecordTextView(record: String) {
-        binding.recordTextview.post {
             binding.recordTextview.text =
                 resources.getString(R.string.record_game_textview, record.padStart(6, '0'))
-        }
     }
 
     private fun pauseButtonClick(status: String) {
-        binding.pauseButton.post {
             binding.pauseButton.text = if (status == "pause")
                 resources.getString(R.string.resume_game_button)
             else
                 resources.getString(R.string.pause_game_button)
-        }
     }
 
     private fun infoBreathTextviewChangeVisibility(visibility: Boolean) {
         if (!visibility) {
             if (!binding.breathTextView.isVisible) {
-                binding.infoBreathTextView.post {
                     binding.infoBreathTextView.visibility = View.VISIBLE
-                }
             }
         } else if (binding.breathTextView.isVisible) {
-            binding.infoBreathTextView.post {
                 binding.infoBreathTextView.visibility = View.INVISIBLE
-            }
         }
     }
 
@@ -194,14 +188,13 @@ class GameActivity : AppCompatActivity() {
     ) {
         if (!visibility) {
             if (!binding.breathTextView.isVisible) {
-                binding.breathTextView.post { binding.breathTextView.visibility = View.VISIBLE }
+                binding.breathTextView.visibility = View.VISIBLE
             }
-            binding.breathTextView.post { binding.breathTextView.text = sec.toInt().toString() }
+            binding.breathTextView.text = sec.toInt().toString()
         } else if (binding.breathTextView.isVisible) {
-            binding.breathTextView.post { binding.breathTextView.visibility = View.INVISIBLE }
+            binding.breathTextView.visibility = View.INVISIBLE
         }
 
-        binding.breathTextView.post {
             binding.breathTextView.setTextColor(
                 Color.rgb(
                     255,
@@ -209,7 +202,6 @@ class GameActivity : AppCompatActivity() {
                     color
                 )
             )
-        }
 
     }
 
