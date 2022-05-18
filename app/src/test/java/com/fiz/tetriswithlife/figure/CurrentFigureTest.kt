@@ -1,9 +1,9 @@
 package com.fiz.tetriswithlife.figure
 
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.figure.Figure
 import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Figure
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -15,10 +15,10 @@ internal class CurrentFigureTest {
   private lateinit var currentFigure: CurrentFigure
 
   @Before
-  fun setup() {
+  fun setUp() {
     grid = Grid(5, 10) { 0 }
-    figure = Figure { 0 }
-    currentFigure = CurrentFigure(grid, figure) { 0 }
+    figure = Figure(getNumberFigure = { 0 })
+    currentFigure = CurrentFigure(grid, figure, getStartX = { 0 })
   }
 
   @Test

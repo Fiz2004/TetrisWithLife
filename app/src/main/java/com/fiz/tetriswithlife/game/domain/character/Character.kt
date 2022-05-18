@@ -1,8 +1,8 @@
 package com.fiz.tetriswithlife.game.domain.character
 
-import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.*
 
 //TODO Проверить когда персонажа запирают в одной клетке, игра начинается заново до того как он

@@ -5,8 +5,8 @@ import android.graphics.*
 import android.view.SurfaceView
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
-import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Element
+import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
@@ -16,8 +16,9 @@ private const val NUMBER_COLUMNS_IMAGES_FON = 4
 private const val NUMBER_ROWS_IMAGES_FON = 4
 
 class Display(
-    private val surface: SurfaceView,
-    private val context: Context
+    surface: SurfaceView,
+    private val context: Context,
+    gameState: GameState
 ) {
     companion object {
         interface Listener {
@@ -30,18 +31,17 @@ class Display(
         }
     }
 
-
-    private lateinit var state: State
-    private lateinit var canvas: Canvas
-    private lateinit var canvasInfo: Canvas
     private lateinit var listener: Listener
+
     private val paint: Paint = Paint()
+
     private val bmpFon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
+
     private val bmpCharacter: Bitmap =
         BitmapFactory.decodeResource(context.resources, R.drawable.character)
-    private val bmpKv: Array<Bitmap> by lazy(::initBmpKv)
-    private fun initBmpKv(): Array<Bitmap> {
-        var result: Array<Bitmap> = emptyArray()
+
+    private val bmpKv: List<Bitmap> by lazy {
+        val result: MutableList<Bitmap> = mutableListOf()
         for (i in 1..NUMBER_IMAGES_FIGURE)
             result += BitmapFactory.decodeResource(
                 context.resources, context.resources.getIdentifier(
@@ -49,62 +49,58 @@ class Display(
                     "drawable", context.packageName
                 )
             )
-        return result
+        result
     }
 
     private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
-    private var newTile = (tile / 1.5).toFloat()
-    private var offset = Point(surface.width, surface.height)
+    private var newTile = min(
+        surface.height / gameState.grid.height,
+        surface.width / gameState.grid.width
+    ).toFloat()
+    private var offset = Point(
+        ((surface.width - gameState.grid.width * newTile) / 2).toInt(),
+        ((surface.height - gameState.grid
+            .height * newTile) / 2).toInt()
+    )
 
-    fun render(state: State, canvas: Canvas) {
-        this.state = state
-        this.canvas = canvas
+    fun render(gameState: GameState, canvas: Canvas) {
         canvas.drawColor(Color.parseColor("#161616"))
-        newTile = min(
-            surface.height / state.grid.height, surface.width / state.grid
-                .width
-        ).toFloat()
-        offset = Point(
-            ((surface.width - state.grid.width * newTile) / 2).toInt(),
-            ((surface.height - state.grid
-                .height * newTile) / 2).toInt()
-        )
-        drawGridElements()
-        drawCurrentFigure()
-        drawCharacter()
+        drawGridElements(gameState, canvas)
+        drawCurrentFigure(gameState, canvas)
+        drawCharacter(gameState, canvas)
     }
 
-    fun renderInfo(state: State, nextFigureCanvas: Canvas) {
-        this.state = state
-        this.canvasInfo = nextFigureCanvas
-        drawNextFigure()
+    fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas) {
+        drawNextFigure(gameState, nextFigureCanvas)
 
         listener = context as Listener
-        listener.setScoresTextView(state.scores.toString().padStart(6, '0'))
-        listener.setRecordTextView(state.record.toString().padStart(6, '0'))
+        listener.setScoresTextView(gameState.scores.toString().padStart(6, '0'))
+        listener.setRecordTextView(gameState.record.toString().padStart(6, '0'))
 
-        listener.pauseButtonClick(state.status)
+        listener.pauseButtonClick(gameState.status)
 
 
-        if (state.status != "pause") {
-            val sec: Double = if (state.character.breath)
+        if (gameState.status != "pause") {
+            val sec: Double = if (gameState.character.breath)
                 TIMES_BREATH_LOSE
             else
-                max(state.character.timeBreath, 0.0)
+                max(gameState.character.timeBreath, 0.0)
 
-            listener.infoBreathTextviewChangeVisibility(state.character.breath)
+            listener.infoBreathTextviewChangeVisibility(gameState.character.breath)
             val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
-            listener.breathTextviewChangeVisibilityAndColor(state.character.breath, sec, cl)
+            listener.breathTextviewChangeVisibilityAndColor(gameState.character.breath, sec, cl)
         }
     }
 
-    private fun drawGridElements() {
-        for (y in 0 until state.grid.height)
-            for (x in 0 until state.grid.width) {
+    private fun drawGridElements(gameState: GameState, canvas: Canvas) {
+        for (y in 0 until gameState.grid.height)
+            for (x in 0 until gameState.grid.width) {
                 val screenX = offset.x + x * newTile
                 val screenY = offset.y + y * newTile
-                val offsetX = (state.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
-                val offsetY = (state.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
+                val offsetX =
+                    (gameState.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
+                val offsetY =
+                    (gameState.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
 
                 canvas.drawBitmap(
                     bmpFon,
@@ -114,14 +110,14 @@ class Display(
                 )
             }
 
-        for (y in 0 until state.grid.height)
-            for (x in 0 until state.grid.width)
-                if (state.grid.space[y][x].block != 0) {
+        for (y in 0 until gameState.grid.height)
+            for (x in 0 until gameState.grid.width)
+                if (gameState.grid.space[y][x].block != 0) {
                     val screenX = offset.x + x * newTile
                     val screenY = offset.y + y * newTile
-                    val offset: Point = getOffset(state.grid.space[y][x])
+                    val offset: Point = getOffset(gameState.grid.space[y][x])
                     canvas.drawBitmap(
-                        bmpKv[state.grid.space[y][x].block - 1],
+                        bmpKv[gameState.grid.space[y][x].block - 1],
                         Rect(
                             offset.x * tile,
                             offset.y * tile,
@@ -134,12 +130,12 @@ class Display(
                 }
     }
 
-    private fun drawCurrentFigure() {
-        for (cell in state.currentFigure.figure.cells) {
+    private fun drawCurrentFigure(gameState: GameState, canvas: Canvas) {
+        for (cell in gameState.currentFigure.figure.cells) {
             val screenX =
-                offset.x + ((cell.point.x + state.currentFigure.position.x) * newTile).toFloat()
+                offset.x + ((cell.point.x + gameState.currentFigure.position.x) * newTile).toFloat()
             val screenY =
-                offset.y + ((cell.point.y + state.currentFigure.position.y) * newTile).toFloat()
+                offset.y + ((cell.point.y + gameState.currentFigure.position.y) * newTile).toFloat()
             var oldY = 0
             var cY = screenY
             var nTile = newTile
@@ -158,12 +154,10 @@ class Display(
         }
     }
 
-    private fun drawCharacter() {
-        val offset = state.character.getSprite()
-        offset.x *= tile
-        offset.y *= tile
-        val screenX = this.offset.x + (state.character.position.x * newTile).toFloat()
-        val screenY = this.offset.y + (state.character.position.y * newTile).toFloat()
+    private fun drawCharacter(gameState: GameState, canvas: Canvas) {
+        val offset = gameState.character.getSprite() * tile
+        val screenX = this.offset.x + (gameState.character.position.x * newTile).toFloat()
+        val screenY = this.offset.y + (gameState.character.position.y * newTile).toFloat()
         canvas.drawBitmap(
             bmpCharacter,
             Rect(
@@ -177,13 +171,13 @@ class Display(
         )
     }
 
-    private fun drawNextFigure() {
+    private fun drawNextFigure(gameState: GameState, canvasInfo: Canvas) {
         val offset = Point(
             ((canvasInfo.width - 4 * newTile) / 2).toInt(),
             ((canvasInfo.height - 4 * newTile) / 2).toInt()
         )
         canvasInfo.drawColor(Color.parseColor("#242424"))
-        for (cell in state.nextFigure.cells) {
+        for (cell in gameState.nextFigure.cells) {
             val screenX = offset.x + (cell.point.x) * newTile
             val screenY = offset.y + (cell.point.y) * newTile
             canvasInfo.drawBitmap(

@@ -1,0 +1,375 @@
+Index: app/src/main/java/com/fiz/tetriswithlife/game/domain/GameLoop.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.fiz.tetriswithlife.game.domain\r\n\r\nimport android.view.SurfaceView\r\nimport kotlin.math.min\r\n\r\nclass GameLoop(\r\n    var state: State,\r\n    private var display: Display,\r\n    val controller: Controller,\r\n    private val surface: SurfaceView,\r\n    private val surfaceNextFigure: SurfaceView\r\n) {\r\n    private var prevTime = System.currentTimeMillis()\r\n    private var ending = 1.0\r\n    private var running = false\r\n\r\n    fun setRunning(running: Boolean) {\r\n        this.running = running\r\n    }\r\n\r\n    fun run() {\r\n\r\n        while (running) {\r\n\r\n            stateUpdate()\r\n\r\n            displayUpdate()\r\n        }\r\n\r\n    }\r\n\r\n    private fun displayUpdate() {\r\n\r\n        surface.holder.lockCanvas(null)?.let{\r\n            display.render(state, it)\r\n            surface.holder.unlockCanvasAndPost(it)\r\n        }\r\n\r\n        surfaceNextFigure.holder.lockCanvas(null)?.let{\r\n            display.renderInfo(state, it)\r\n            surfaceNextFigure.holder.unlockCanvasAndPost(it)\r\n        }\r\n\r\n    }\r\n\r\n    private fun stateUpdate() {\r\n        val now = System.currentTimeMillis()\r\n        val deltaTime = min(now - prevTime, 100).toInt() / 1000.0\r\n\r\n        if (state.status != \"pause\") {\r\n            var status = true\r\n            if (ending == 1.0)\r\n                status = state.update(controller, deltaTime)\r\n\r\n            if (!status || ending != 1.0)\r\n                ending -= deltaTime\r\n        }\r\n\r\n        if (ending < 0 || state.status == \"new game\") {\r\n            state.new()\r\n            ending = 1.0\r\n        }\r\n\r\n        prevTime = now\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/fiz/tetriswithlife/game/domain/GameLoop.kt b/app/src/main/java/com/fiz/tetriswithlife/game/domain/GameLoop.kt
+--- a/app/src/main/java/com/fiz/tetriswithlife/game/domain/GameLoop.kt	(revision 2aebeeaee63cd5ea64502a987afadb394c21a2a2)
++++ b/app/src/main/java/com/fiz/tetriswithlife/game/domain/GameLoop.kt	(date 1652846626791)
+@@ -4,7 +4,7 @@
+ import kotlin.math.min
+ 
+ class GameLoop(
+-    var state: State,
++    var gameState: GameState,
+     private var display: Display,
+     val controller: Controller,
+     private val surface: SurfaceView,
+@@ -32,12 +32,12 @@
+     private fun displayUpdate() {
+ 
+         surface.holder.lockCanvas(null)?.let{
+-            display.render(state, it)
++            display.render(gameState, it)
+             surface.holder.unlockCanvasAndPost(it)
+         }
+ 
+         surfaceNextFigure.holder.lockCanvas(null)?.let{
+-            display.renderInfo(state, it)
++            display.renderInfo(gameState, it)
+             surfaceNextFigure.holder.unlockCanvasAndPost(it)
+         }
+ 
+@@ -47,17 +47,17 @@
+         val now = System.currentTimeMillis()
+         val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
+ 
+-        if (state.status != "pause") {
++        if (gameState.status != "pause") {
+             var status = true
+             if (ending == 1.0)
+-                status = state.update(controller, deltaTime)
++                status = gameState.update(controller, deltaTime)
+ 
+             if (!status || ending != 1.0)
+                 ending -= deltaTime
+         }
+ 
+-        if (ending < 0 || state.status == "new game") {
+-            state.new()
++        if (ending < 0 || gameState.status == "new game") {
++            gameState.new()
+             ending = 1.0
+         }
+ 
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id(\"dagger.hilt.android.plugin\")\r\n    id(\"com.android.application\")\r\n    id(\"kotlin-android\")\r\n}\r\n\r\napply plugin: \"kotlin-kapt\"\r\n\r\nandroid {\r\n    compileSdk 32\r\n\r\n    defaultConfig {\r\n        applicationId \"com.fiz.tetriswithlife\"\r\n        minSdk 21\r\n        targetSdk 32\r\n        versionCode 1\r\n        versionName '0.1.2'\r\n\r\n        testInstrumentationRunner \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility JavaVersion.VERSION_1_8\r\n        targetCompatibility JavaVersion.VERSION_1_8\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = '1.8'\r\n    }\r\n\r\n    buildFeatures {\r\n        viewBinding true\r\n    }\r\n    namespace 'com.fiz.tetriswithlife'\r\n}\r\n\r\ndependencies {\r\n    implementation(\"androidx.core:core-ktx:1.7.0\")\r\n    implementation(\"androidx.appcompat:appcompat:1.4.1\")\r\n    implementation(\"com.google.android.material:material:1.6.0\")\r\n    implementation(\"androidx.constraintlayout:constraintlayout:2.1.3\")\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1\")\r\n\r\n    implementation(\"com.google.dagger:hilt-android:2.42\")\r\n    kapt(\"com.google.dagger:hilt-android-compiler:2.42\")\r\n\r\n    testImplementation(\"junit:junit:4.13.2\")\r\n    testImplementation(\"org.mockito.kotlin:mockito-kotlin:4.0.0\")\r\n\r\n    androidTestImplementation(\"androidx.test.ext:junit:1.1.3\")\r\n    androidTestImplementation(\"androidx.test.espresso:espresso-core:3.4.0\")\r\n}\r\n\r\n// Allow references to generated code\r\nkapt {\r\n    correctErrorTypes = true\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle b/app/build.gradle
+--- a/app/build.gradle	(revision 2aebeeaee63cd5ea64502a987afadb394c21a2a2)
++++ b/app/build.gradle	(date 1652846635793)
+@@ -46,6 +46,8 @@
+     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+ 
++    implementation("androidx.activity:activity-ktx:1.4.0")
++
+     implementation("com.google.dagger:hilt-android:2.42")
+     kapt("com.google.dagger:hilt-android-compiler:2.42")
+ 
+Index: app/src/main/java/com/fiz/tetriswithlife/game/ui/GameActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.fiz.tetriswithlife.game.ui\r\n\r\nimport android.annotation.SuppressLint\r\nimport android.graphics.Color\r\nimport android.os.Bundle\r\nimport android.view.MotionEvent\r\nimport android.view.SurfaceHolder\r\nimport android.view.View\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport androidx.core.view.isVisible\r\nimport com.fiz.tetriswithlife.R\r\nimport com.fiz.tetriswithlife.databinding.ActivityGameBinding\r\nimport com.fiz.tetriswithlife.game.data.RecordRepository\r\nimport com.fiz.tetriswithlife.game.domain.Controller\r\nimport com.fiz.tetriswithlife.game.domain.Display\r\nimport com.fiz.tetriswithlife.game.domain.GameLoop\r\nimport com.fiz.tetriswithlife.game.domain.State\r\nimport dagger.hilt.android.AndroidEntryPoint\r\nimport kotlinx.coroutines.*\r\nimport javax.inject.Inject\r\n\r\nprivate const val widthCanvas: Int = 13\r\nprivate const val heightCanvas: Int = 25\r\n\r\n@AndroidEntryPoint\r\nclass GameActivity : AppCompatActivity(), Display.Companion.Listener {\r\n    private var gameLoop: GameLoop? = null\r\n    private var job: Job? = null\r\n    private val surfaceReady = mutableListOf(false, false)\r\n\r\n    @Inject\r\n    lateinit var recordRepository: RecordRepository\r\n    private lateinit var binding: ActivityGameBinding\r\n    private lateinit var display:Display\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        binding = ActivityGameBinding.inflate(layoutInflater)\r\n        val view = binding.root\r\n        setContentView(view)\r\n        val loadState = savedInstanceState?.getSerializable(\"state\")\r\n        val state: State = if (loadState != null)\r\n            loadState as State\r\n        else\r\n            State(\r\n                widthCanvas, heightCanvas, recordRepository\r\n            )\r\n\r\n        binding.gameSurfaceView.holder.addCallback(object:SurfaceHolder.Callback{\r\n            override fun surfaceCreated(p0: SurfaceHolder) {            }\r\n\r\n            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {\r\n                surfaceReady[0] = true\r\n                display = Display(\r\n                    binding.gameSurfaceView,\r\n                    this@GameActivity\r\n                )\r\n                if (surfaceReady.all { it })\r\n                    canStartGame(state)\r\n            }\r\n\r\n            override fun surfaceDestroyed(p0: SurfaceHolder) {            }\r\n\r\n        })\r\n\r\n        binding.nextFigureSurfaceView.holder.addCallback(object:SurfaceHolder.Callback{\r\n            override fun surfaceCreated(p0: SurfaceHolder) {            }\r\n\r\n            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {\r\n                surfaceReady[1] = true\r\n                if (surfaceReady.all { it })\r\n                    canStartGame(state)\r\n            }\r\n\r\n            override fun surfaceDestroyed(p0: SurfaceHolder) {            }\r\n\r\n        })\r\n\r\n        bindListener()\r\n    }\r\n\r\n    private fun canStartGame(state: State) {\r\n        job = CoroutineScope(Dispatchers.Default).launch {\r\n            gameLoop = GameLoop(\r\n                state,\r\n                display,\r\n                Controller(),\r\n                binding.gameSurfaceView,\r\n                binding.nextFigureSurfaceView\r\n            )\r\n            gameLoop?.setRunning(true)\r\n            gameLoop?.run()\r\n        }\r\n    }\r\n\r\n    @SuppressLint(\"ClickableViewAccessibility\")\r\n    private fun bindListener() {\r\n        binding.leftButton.setOnTouchListener { _: View, event: MotionEvent ->\r\n            gameLoop?.let {\r\n                when (event.action) {\r\n                    MotionEvent.ACTION_DOWN -> it.controller\r\n                        .actionLeft()\r\n                    MotionEvent.ACTION_MOVE -> {\r\n                        /* for lint */\r\n                    }\r\n                    MotionEvent.ACTION_UP,\r\n                    MotionEvent.ACTION_CANCEL -> it.controller\r\n                        .actionCancel()\r\n                }\r\n            }\r\n            true\r\n        }\r\n\r\n        binding.rightButton.setOnTouchListener { _: View, event: MotionEvent ->\r\n            gameLoop?.let {\r\n                when (event.action) {\r\n                    MotionEvent.ACTION_DOWN -> it.controller\r\n                        .actionRight()\r\n                    MotionEvent.ACTION_MOVE -> {\r\n                        /* for lint */\r\n                    }\r\n                    MotionEvent.ACTION_UP,\r\n                    MotionEvent.ACTION_CANCEL -> it.controller\r\n                        .actionCancel()\r\n                }\r\n            }\r\n            true\r\n        }\r\n\r\n        binding.downButton.setOnTouchListener { _: View, event: MotionEvent ->\r\n            gameLoop?.let {\r\n                when (event.action) {\r\n                    MotionEvent.ACTION_DOWN -> it.controller\r\n                        .actionDown()\r\n                    MotionEvent.ACTION_MOVE -> {\r\n                        /* for lint */\r\n                    }\r\n                    MotionEvent.ACTION_UP,\r\n                    MotionEvent.ACTION_CANCEL -> it.controller\r\n                        .actionCancel()\r\n                }\r\n            }\r\n            true\r\n        }\r\n\r\n        binding.rotateButton.setOnTouchListener { _: View, event: MotionEvent ->\r\n            gameLoop?.let {\r\n                when (event.action) {\r\n                    MotionEvent.ACTION_DOWN -> it.controller\r\n                        .actionUp()\r\n                    MotionEvent.ACTION_MOVE -> {\r\n                        /* for lint */\r\n                    }\r\n                    MotionEvent.ACTION_UP,\r\n                    MotionEvent.ACTION_CANCEL -> it.controller\r\n                        .actionCancel()\r\n                }\r\n            }\r\n            true\r\n        }\r\n\r\n        binding.newGameButton.setOnClickListener {\r\n            gameLoop?.state?.status = \"new game\"\r\n        }\r\n        binding.pauseButton.setOnClickListener {\r\n            gameLoop?.state?.clickPause()\r\n        }\r\n        binding.exitButton.setOnClickListener {\r\n            finish()\r\n        }\r\n    }\r\n\r\n    override fun onDestroy() {\r\n        super.onDestroy()\r\n        var retry = true\r\n        gameLoop?.setRunning(false)\r\n        while (retry) {\r\n            try {\r\n                runBlocking {\r\n                    job?.cancelAndJoin()\r\n                    job = null\r\n                }\r\n                retry = false\r\n            } catch (e: InterruptedException) {\r\n                /* for lint */\r\n            }\r\n        }\r\n    }\r\n\r\n    override fun setScoresTextView(scores: String) {\r\n        binding.scoresTextView.post {\r\n            binding.scoresTextView.text = resources.getString(\r\n                R.string.scores_game_textview, scores.padStart\r\n                    (6, '0')\r\n            )\r\n        }\r\n    }\r\n\r\n    override fun setRecordTextView(record: String) {\r\n        binding.recordTextview.post {\r\n            binding.recordTextview.text =\r\n                resources.getString(R.string.record_game_textview, record.padStart(6, '0'))\r\n        }\r\n    }\r\n\r\n    override fun pauseButtonClick(status: String) {\r\n        binding.pauseButton.post {\r\n            binding.pauseButton.text = if (status == \"pause\")\r\n                resources.getString(R.string.resume_game_button)\r\n            else\r\n                resources.getString(R.string.pause_game_button)\r\n        }\r\n    }\r\n\r\n    override fun infoBreathTextviewChangeVisibility(visibility: Boolean) {\r\n        if (!visibility) {\r\n            if (!binding.breathTextView.isVisible) {\r\n                binding.infoBreathTextView.post {\r\n                    binding.infoBreathTextView.visibility = View.VISIBLE\r\n                }\r\n            }\r\n        } else if (binding.breathTextView.isVisible) {\r\n            binding.infoBreathTextView.post {\r\n                binding.infoBreathTextView.visibility = View.INVISIBLE\r\n            }\r\n        }\r\n    }\r\n\r\n    override fun breathTextviewChangeVisibilityAndColor(\r\n        visibility: Boolean, sec: Double, color: Int\r\n    ) {\r\n        if (!visibility) {\r\n            if (!binding.breathTextView.isVisible) {\r\n                binding.breathTextView.post { binding.breathTextView.visibility = View.VISIBLE }\r\n            }\r\n            binding.breathTextView.post { binding.breathTextView.text = sec.toInt().toString() }\r\n        } else if (binding.breathTextView.isVisible) {\r\n            binding.breathTextView.post { binding.breathTextView.visibility = View.INVISIBLE }\r\n        }\r\n\r\n        binding.breathTextView.post {\r\n            binding.breathTextView.setTextColor(\r\n                Color.rgb(\r\n                    255,\r\n                    color,\r\n                    color\r\n                )\r\n            )\r\n        }\r\n\r\n    }\r\n\r\n    override fun onSaveInstanceState(outState: Bundle) {\r\n        super.onSaveInstanceState(outState)\r\n        gameLoop?.let {\r\n            outState.putSerializable(\"state\", it.state)\r\n        }\r\n    }\r\n\r\n}\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameActivity.kt b/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameActivity.kt
+--- a/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameActivity.kt	(revision 2aebeeaee63cd5ea64502a987afadb394c21a2a2)
++++ b/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameActivity.kt	(date 1652846678643)
+@@ -6,6 +6,7 @@
+ import android.view.MotionEvent
+ import android.view.SurfaceHolder
+ import android.view.View
++import androidx.activity.viewModels
+ import androidx.appcompat.app.AppCompatActivity
+ import androidx.core.view.isVisible
+ import com.fiz.tetriswithlife.R
+@@ -14,7 +15,7 @@
+ import com.fiz.tetriswithlife.game.domain.Controller
+ import com.fiz.tetriswithlife.game.domain.Display
+ import com.fiz.tetriswithlife.game.domain.GameLoop
+-import com.fiz.tetriswithlife.game.domain.State
++import com.fiz.tetriswithlife.game.domain.GameState
+ import dagger.hilt.android.AndroidEntryPoint
+ import kotlinx.coroutines.*
+ import javax.inject.Inject
+@@ -24,6 +25,7 @@
+ 
+ @AndroidEntryPoint
+ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
++    private val gameViewModel:GameViewModel by viewModels()
+     private var gameLoop: GameLoop? = null
+     private var job: Job? = null
+     private val surfaceReady = mutableListOf(false, false)
+@@ -38,11 +40,11 @@
+         binding = ActivityGameBinding.inflate(layoutInflater)
+         val view = binding.root
+         setContentView(view)
+-        val loadState = savedInstanceState?.getSerializable("state")
+-        val state: State = if (loadState != null)
+-            loadState as State
++        val loadState = savedInstanceState?.getSerializable(STATE)
++        val gameState: GameState = if (loadState != null)
++            loadState as GameState
+         else
+-            State(
++            GameState(
+                 widthCanvas, heightCanvas, recordRepository
+             )
+ 
+@@ -56,7 +58,7 @@
+                     this@GameActivity
+                 )
+                 if (surfaceReady.all { it })
+-                    canStartGame(state)
++                    canStartGame(gameState)
+             }
+ 
+             override fun surfaceDestroyed(p0: SurfaceHolder) {            }
+@@ -69,7 +71,7 @@
+             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
+                 surfaceReady[1] = true
+                 if (surfaceReady.all { it })
+-                    canStartGame(state)
++                    canStartGame(gameState)
+             }
+ 
+             override fun surfaceDestroyed(p0: SurfaceHolder) {            }
+@@ -79,10 +81,10 @@
+         bindListener()
+     }
+ 
+-    private fun canStartGame(state: State) {
++    private fun canStartGame(gameState: GameState) {
+         job = CoroutineScope(Dispatchers.Default).launch {
+             gameLoop = GameLoop(
+-                state,
++                gameState,
+                 display,
+                 Controller(),
+                 binding.gameSurfaceView,
+@@ -160,10 +162,10 @@
+         }
+ 
+         binding.newGameButton.setOnClickListener {
+-            gameLoop?.state?.status = "new game"
++            gameLoop?.gameState?.status = "new game"
+         }
+         binding.pauseButton.setOnClickListener {
+-            gameLoop?.state?.clickPause()
++            gameLoop?.gameState?.clickPause()
+         }
+         binding.exitButton.setOnClickListener {
+             finish()
+@@ -253,9 +255,13 @@
+     override fun onSaveInstanceState(outState: Bundle) {
+         super.onSaveInstanceState(outState)
+         gameLoop?.let {
+-            outState.putSerializable("state", it.state)
++            outState.putSerializable(STATE, it.gameState)
+         }
+     }
++
++    companion object{
++        const val STATE="state"
++    }
+ 
+ }
+ 
+Index: app/src/main/java/com/fiz/tetriswithlife/game/domain/Display.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.fiz.tetriswithlife.game.domain\r\n\r\nimport android.content.Context\r\nimport android.graphics.*\r\nimport android.view.SurfaceView\r\nimport com.fiz.tetriswithlife.R\r\nimport com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE\r\nimport com.fiz.tetriswithlife.game.domain.grid.Element\r\nimport com.fiz.tetriswithlife.game.domain.models.Point\r\nimport kotlin.math.floor\r\nimport kotlin.math.max\r\nimport kotlin.math.min\r\n\r\nprivate const val NUMBER_IMAGES_FIGURE = 5\r\nprivate const val NUMBER_COLUMNS_IMAGES_FON = 4\r\nprivate const val NUMBER_ROWS_IMAGES_FON = 4\r\n\r\nclass Display(\r\n    private val surface: SurfaceView,\r\n    private val context: Context\r\n) {\r\n    companion object {\r\n        interface Listener {\r\n            fun setScoresTextView(scores: String)\r\n            fun setRecordTextView(record: String)\r\n\r\n            fun pauseButtonClick(status: String)\r\n            fun infoBreathTextviewChangeVisibility(visibility: Boolean)\r\n            fun breathTextviewChangeVisibilityAndColor(visibility: Boolean, sec: Double, color: Int)\r\n        }\r\n    }\r\n\r\n\r\n    private lateinit var state: State\r\n    private lateinit var canvas: Canvas\r\n    private lateinit var canvasInfo: Canvas\r\n    private lateinit var listener: Listener\r\n    private val paint: Paint = Paint()\r\n    private val bmpFon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.fon)\r\n    private val bmpCharacter: Bitmap =\r\n        BitmapFactory.decodeResource(context.resources, R.drawable.character)\r\n    private val bmpKv: Array<Bitmap> by lazy(::initBmpKv)\r\n    private fun initBmpKv(): Array<Bitmap> {\r\n        var result: Array<Bitmap> = emptyArray()\r\n        for (i in 1..NUMBER_IMAGES_FIGURE)\r\n            result += BitmapFactory.decodeResource(\r\n                context.resources, context.resources.getIdentifier(\r\n                    \"kvadrat$i\",\r\n                    \"drawable\", context.packageName\r\n                )\r\n            )\r\n        return result\r\n    }\r\n\r\n    private val tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON\r\n    private var newTile = (tile / 1.5).toFloat()\r\n    private var offset = Point(surface.width, surface.height)\r\n\r\n    fun render(state: State, canvas: Canvas) {\r\n        this.state = state\r\n        this.canvas = canvas\r\n        canvas.drawColor(Color.parseColor(\"#161616\"))\r\n        newTile = min(\r\n            surface.height / state.grid.height, surface.width / state.grid\r\n                .width\r\n        ).toFloat()\r\n        offset = Point(\r\n            ((surface.width - state.grid.width * newTile) / 2).toInt(),\r\n            ((surface.height - state.grid\r\n                .height * newTile) / 2).toInt()\r\n        )\r\n        drawGridElements()\r\n        drawCurrentFigure()\r\n        drawCharacter()\r\n    }\r\n\r\n    fun renderInfo(state: State, nextFigureCanvas: Canvas) {\r\n        this.state = state\r\n        this.canvasInfo = nextFigureCanvas\r\n        drawNextFigure()\r\n\r\n        listener = context as Listener\r\n        listener.setScoresTextView(state.scores.toString().padStart(6, '0'))\r\n        listener.setRecordTextView(state.record.toString().padStart(6, '0'))\r\n\r\n        listener.pauseButtonClick(state.status)\r\n\r\n\r\n        if (state.status != \"pause\") {\r\n            val sec: Double = if (state.character.breath)\r\n                TIMES_BREATH_LOSE\r\n            else\r\n                max(state.character.timeBreath, 0.0)\r\n\r\n            listener.infoBreathTextviewChangeVisibility(state.character.breath)\r\n            val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()\r\n            listener.breathTextviewChangeVisibilityAndColor(state.character.breath, sec, cl)\r\n        }\r\n    }\r\n\r\n    private fun drawGridElements() {\r\n        for (y in 0 until state.grid.height)\r\n            for (x in 0 until state.grid.width) {\r\n                val screenX = offset.x + x * newTile\r\n                val screenY = offset.y + y * newTile\r\n                val offsetX = (state.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile\r\n                val offsetY = (state.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile\r\n\r\n                canvas.drawBitmap(\r\n                    bmpFon,\r\n                    Rect(offsetX, offsetY, offsetX + tile, offsetY + tile),\r\n                    RectF(screenX, screenY, screenX + newTile, screenY + newTile),\r\n                    paint\r\n                )\r\n            }\r\n\r\n        for (y in 0 until state.grid.height)\r\n            for (x in 0 until state.grid.width)\r\n                if (state.grid.space[y][x].block != 0) {\r\n                    val screenX = offset.x + x * newTile\r\n                    val screenY = offset.y + y * newTile\r\n                    val offset: Point = getOffset(state.grid.space[y][x])\r\n                    canvas.drawBitmap(\r\n                        bmpKv[state.grid.space[y][x].block - 1],\r\n                        Rect(\r\n                            offset.x * tile,\r\n                            offset.y * tile,\r\n                            offset.x * tile + tile,\r\n                            offset.y * tile + tile\r\n                        ),\r\n                        RectF(screenX, screenY, screenX + newTile, screenY + newTile),\r\n                        paint\r\n                    )\r\n                }\r\n    }\r\n\r\n    private fun drawCurrentFigure() {\r\n        for (cell in state.currentFigure.figure.cells) {\r\n            val screenX =\r\n                offset.x + ((cell.point.x + state.currentFigure.position.x) * newTile).toFloat()\r\n            val screenY =\r\n                offset.y + ((cell.point.y + state.currentFigure.position.y) * newTile).toFloat()\r\n            var oldY = 0\r\n            var cY = screenY\r\n            var nTile = newTile\r\n            if (screenY - offset.y < 0 && screenY + newTile - offset.y < 0) return\r\n            if (screenY - offset.y < 0) {\r\n                nTile = screenY - offset.y + newTile\r\n                oldY = (nTile * tile / newTile).toInt()\r\n                cY = offset.y.toFloat()\r\n            }\r\n            canvas.drawBitmap(\r\n                bmpKv[cell.view - 1],\r\n                Rect(0, oldY, tile, tile),\r\n                RectF(screenX, cY, screenX + newTile, cY + nTile),\r\n                paint\r\n            )\r\n        }\r\n    }\r\n\r\n    private fun drawCharacter() {\r\n        val offset = state.character.getSprite() * tile\r\n        val screenX = this.offset.x + (state.character.position.x * newTile).toFloat()\r\n        val screenY = this.offset.y + (state.character.position.y * newTile).toFloat()\r\n        canvas.drawBitmap(\r\n            bmpCharacter,\r\n            Rect(\r\n                offset.x,\r\n                offset.y,\r\n                offset.x + tile,\r\n                offset.y + tile\r\n            ),\r\n            RectF(screenX, screenY, screenX + newTile, screenY + newTile),\r\n            paint\r\n        )\r\n    }\r\n\r\n    private fun drawNextFigure() {\r\n        val offset = Point(\r\n            ((canvasInfo.width - 4 * newTile) / 2).toInt(),\r\n            ((canvasInfo.height - 4 * newTile) / 2).toInt()\r\n        )\r\n        canvasInfo.drawColor(Color.parseColor(\"#242424\"))\r\n        for (cell in state.nextFigure.cells) {\r\n            val screenX = offset.x + (cell.point.x) * newTile\r\n            val screenY = offset.y + (cell.point.y) * newTile\r\n            canvasInfo.drawBitmap(\r\n                bmpKv[cell.view - 1],\r\n                Rect(0, 0, tile, tile),\r\n                RectF(screenX, screenY, screenX + newTile, screenY + newTile),\r\n                paint\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\nfun getOffset(element: Element): Point {\r\n    if (element.getSpaceStatus() == 'R')\r\n        return Point(((element.status['R'] ?: (0 - 1))), 1)\r\n\r\n    if (element.getSpaceStatus() == 'L')\r\n        return Point(((element.status['L'] ?: (0 - 1))), 2)\r\n\r\n    if (element.getSpaceStatus() == 'U')\r\n        return Point(((element.status['U'] ?: (0 - 1))), 3)\r\n\r\n    return Point(0, 0)\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/fiz/tetriswithlife/game/domain/Display.kt b/app/src/main/java/com/fiz/tetriswithlife/game/domain/Display.kt
+--- a/app/src/main/java/com/fiz/tetriswithlife/game/domain/Display.kt	(revision 2aebeeaee63cd5ea64502a987afadb394c21a2a2)
++++ b/app/src/main/java/com/fiz/tetriswithlife/game/domain/Display.kt	(date 1652846127050)
+@@ -31,7 +31,7 @@
+     }
+ 
+ 
+-    private lateinit var state: State
++    private lateinit var gameState: GameState
+     private lateinit var canvas: Canvas
+     private lateinit var canvasInfo: Canvas
+     private lateinit var listener: Listener
+@@ -56,17 +56,17 @@
+     private var newTile = (tile / 1.5).toFloat()
+     private var offset = Point(surface.width, surface.height)
+ 
+-    fun render(state: State, canvas: Canvas) {
+-        this.state = state
++    fun render(gameState: GameState, canvas: Canvas) {
++        this.gameState = gameState
+         this.canvas = canvas
+         canvas.drawColor(Color.parseColor("#161616"))
+         newTile = min(
+-            surface.height / state.grid.height, surface.width / state.grid
++            surface.height / gameState.grid.height, surface.width / gameState.grid
+                 .width
+         ).toFloat()
+         offset = Point(
+-            ((surface.width - state.grid.width * newTile) / 2).toInt(),
+-            ((surface.height - state.grid
++            ((surface.width - gameState.grid.width * newTile) / 2).toInt(),
++            ((surface.height - gameState.grid
+                 .height * newTile) / 2).toInt()
+         )
+         drawGridElements()
+@@ -74,37 +74,37 @@
+         drawCharacter()
+     }
+ 
+-    fun renderInfo(state: State, nextFigureCanvas: Canvas) {
+-        this.state = state
++    fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas) {
++        this.gameState = gameState
+         this.canvasInfo = nextFigureCanvas
+         drawNextFigure()
+ 
+         listener = context as Listener
+-        listener.setScoresTextView(state.scores.toString().padStart(6, '0'))
+-        listener.setRecordTextView(state.record.toString().padStart(6, '0'))
++        listener.setScoresTextView(gameState.scores.toString().padStart(6, '0'))
++        listener.setRecordTextView(gameState.record.toString().padStart(6, '0'))
+ 
+-        listener.pauseButtonClick(state.status)
++        listener.pauseButtonClick(gameState.status)
+ 
+ 
+-        if (state.status != "pause") {
+-            val sec: Double = if (state.character.breath)
++        if (gameState.status != "pause") {
++            val sec: Double = if (gameState.character.breath)
+                 TIMES_BREATH_LOSE
+             else
+-                max(state.character.timeBreath, 0.0)
++                max(gameState.character.timeBreath, 0.0)
+ 
+-            listener.infoBreathTextviewChangeVisibility(state.character.breath)
++            listener.infoBreathTextviewChangeVisibility(gameState.character.breath)
+             val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
+-            listener.breathTextviewChangeVisibilityAndColor(state.character.breath, sec, cl)
++            listener.breathTextviewChangeVisibilityAndColor(gameState.character.breath, sec, cl)
+         }
+     }
+ 
+     private fun drawGridElements() {
+-        for (y in 0 until state.grid.height)
+-            for (x in 0 until state.grid.width) {
++        for (y in 0 until gameState.grid.height)
++            for (x in 0 until gameState.grid.width) {
+                 val screenX = offset.x + x * newTile
+                 val screenY = offset.y + y * newTile
+-                val offsetX = (state.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
+-                val offsetY = (state.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
++                val offsetX = (gameState.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
++                val offsetY = (gameState.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
+ 
+                 canvas.drawBitmap(
+                     bmpFon,
+@@ -114,14 +114,14 @@
+                 )
+             }
+ 
+-        for (y in 0 until state.grid.height)
+-            for (x in 0 until state.grid.width)
+-                if (state.grid.space[y][x].block != 0) {
++        for (y in 0 until gameState.grid.height)
++            for (x in 0 until gameState.grid.width)
++                if (gameState.grid.space[y][x].block != 0) {
+                     val screenX = offset.x + x * newTile
+                     val screenY = offset.y + y * newTile
+-                    val offset: Point = getOffset(state.grid.space[y][x])
++                    val offset: Point = getOffset(gameState.grid.space[y][x])
+                     canvas.drawBitmap(
+-                        bmpKv[state.grid.space[y][x].block - 1],
++                        bmpKv[gameState.grid.space[y][x].block - 1],
+                         Rect(
+                             offset.x * tile,
+                             offset.y * tile,
+@@ -135,11 +135,11 @@
+     }
+ 
+     private fun drawCurrentFigure() {
+-        for (cell in state.currentFigure.figure.cells) {
++        for (cell in gameState.currentFigure.figure.cells) {
+             val screenX =
+-                offset.x + ((cell.point.x + state.currentFigure.position.x) * newTile).toFloat()
++                offset.x + ((cell.point.x + gameState.currentFigure.position.x) * newTile).toFloat()
+             val screenY =
+-                offset.y + ((cell.point.y + state.currentFigure.position.y) * newTile).toFloat()
++                offset.y + ((cell.point.y + gameState.currentFigure.position.y) * newTile).toFloat()
+             var oldY = 0
+             var cY = screenY
+             var nTile = newTile
+@@ -159,9 +159,9 @@
+     }
+ 
+     private fun drawCharacter() {
+-        val offset = state.character.getSprite() * tile
+-        val screenX = this.offset.x + (state.character.position.x * newTile).toFloat()
+-        val screenY = this.offset.y + (state.character.position.y * newTile).toFloat()
++        val offset = gameState.character.getSprite() * tile
++        val screenX = this.offset.x + (gameState.character.position.x * newTile).toFloat()
++        val screenY = this.offset.y + (gameState.character.position.y * newTile).toFloat()
+         canvas.drawBitmap(
+             bmpCharacter,
+             Rect(
+@@ -181,7 +181,7 @@
+             ((canvasInfo.height - 4 * newTile) / 2).toInt()
+         )
+         canvasInfo.drawColor(Color.parseColor("#242424"))
+-        for (cell in state.nextFigure.cells) {
++        for (cell in gameState.nextFigure.cells) {
+             val screenX = offset.x + (cell.point.x) * newTile
+             val screenY = offset.y + (cell.point.y) * newTile
+             canvasInfo.drawBitmap(
+Index: app/src/main/java/com/fiz/tetriswithlife/game/domain/State.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/fiz/tetriswithlife/game/domain/State.kt b/app/src/main/java/com/fiz/tetriswithlife/game/domain/GameState.kt
+rename from app/src/main/java/com/fiz/tetriswithlife/game/domain/State.kt
+rename to app/src/main/java/com/fiz/tetriswithlife/game/domain/GameState.kt
+--- a/app/src/main/java/com/fiz/tetriswithlife/game/domain/State.kt	(revision 2aebeeaee63cd5ea64502a987afadb394c21a2a2)
++++ b/app/src/main/java/com/fiz/tetriswithlife/game/domain/GameState.kt	(date 1652846126993)
+@@ -12,7 +12,7 @@
+ 
+ private const val NUMBER_FRAMES_ELEMENTS = 4
+ 
+-class State(
++class GameState(
+     width: Int,
+     height: Int,
+     private val recordRepository: RecordRepository
+Index: app/src/main/java/com/fiz/tetriswithlife/game/ui/GameViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameViewModel.kt b/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameViewModel.kt
+new file mode 100644
+--- /dev/null	(date 1652846626645)
++++ b/app/src/main/java/com/fiz/tetriswithlife/game/ui/GameViewModel.kt	(date 1652846626645)
+@@ -0,0 +1,9 @@
++package com.fiz.tetriswithlife.game.ui
++
++import androidx.lifecycle.ViewModel
++import dagger.hilt.android.lifecycle.HiltViewModel
++import javax.inject.Inject
++
++@HiltViewModel
++class GameViewModel @Inject constructor():ViewModel() {
++}
+\ No newline at end of file

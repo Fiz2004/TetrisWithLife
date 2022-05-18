@@ -1,35 +1,34 @@
 package com.fiz.tetriswithlife.game.domain
 
-import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.figure.Figure
-import com.fiz.tetriswithlife.game.domain.figure.Point
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Figure
+import com.fiz.tetriswithlife.game.domain.models.Point
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
 private const val NUMBER_FRAMES_ELEMENTS = 4
 
-class State(
+class GameState(
     width: Int,
     height: Int,
-    private val recordRepository: RecordRepository
+    startRecord: Int
 ) : Serializable {
     var grid = Grid(width, height)
     var character = CharacterBreath(grid)
     var scores = 0
-    var record = recordRepository.loadRecord()
+    var record = startRecord
     var status = "playing"
     var nextFigure: Figure = Figure()
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure)
 
-    fun new() {
+    fun new(startRecord: Int) {
         grid = Grid(grid.width, grid.height)
         character = CharacterBreath(grid)
         scores = 0
-        record = recordRepository.loadRecord()
+        record = startRecord
         status = "playing"
         nextFigure = Figure()
         currentFigure = CurrentFigure(grid, nextFigure)
@@ -40,17 +39,17 @@ class State(
         nextFigure = Figure()
     }
 
-    fun update(controller: Controller, deltaTime: Double): Boolean {
+    fun update(controller: Controller, deltaTime: Double, updateRecord: () -> Unit): Boolean {
         if (!character.breath)
             character.timeBreath -= deltaTime
         if (controller.isCannotTimeLast(deltaTime))
             return true
 
-        if (!actionsControl(controller)
+        if (!actionsControl(controller, updateRecord)
             || (!character.breath && (isLose() || isCrushedBeetle()))
             || status == "new game"
         ) {
-            ifRecord()
+            updateRecord()
             return false
         }
         val statusCharacter = character.update(grid)
@@ -65,7 +64,7 @@ class State(
         return true
     }
 
-    private fun actionsControl(controller: Controller): Boolean {
+    private fun actionsControl(controller: Controller, updateRecord: () -> Unit): Boolean {
         val status = currentFigure.moves(controller)
 
         if (status == "endGame"
@@ -76,7 +75,7 @@ class State(
             return false
 
         if (status == "fixation") {
-            fixation()
+            fixation(updateRecord)
             createCurrentFigure()
         }
 
@@ -94,7 +93,7 @@ class State(
         return false
     }
 
-    private fun fixation() {
+    private fun fixation(updateRecord: () -> Unit) {
         val tile = currentFigure.getPositionTile()
         for ((index, value) in tile.withIndex())
             grid.space[value.y][value.x].block =
@@ -107,29 +106,28 @@ class State(
             scores += i * scoresForRow
 
         currentFigure.fixation(scores)
-        ifRecord()
+        updateRecord()
 
         character.deleteRow = 1
         character.isBreath(grid)
     }
 
-    private fun ifRecord() {
-        if (scores > recordRepository.loadRecord()) {
-            record = scores
-            recordRepository.saveRecord(record)
-        }
-    }
-
     private fun changeGridDestroyElement() {
-        val offset = Point(character.move.x, character.move.y)
-        if (offset.x == -1)
-            offset.x = 0
+        val newX = if (character.move.x == -1)
+            0
+        else
+            character.move.x
+
+        val offset = Point(newX, character.move.y)
+
         val tile = Point(
             floor(character.position.x).toInt() + offset.x,
             (character.position.y.roundToInt() + offset.y),
         )
+
         grid.space[tile.y][tile.x].status[character.getDirectionEat()] =
             getStatusDestroyElement() + 1
+
         character.isBreath(grid)
     }
 

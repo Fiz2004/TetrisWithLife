@@ -3,9 +3,11 @@ package com.fiz.tetriswithlife.game.ui
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.fiz.tetriswithlife.R
@@ -14,7 +16,7 @@ import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.Display
 import com.fiz.tetriswithlife.game.domain.GameLoop
-import com.fiz.tetriswithlife.game.domain.State
+import com.fiz.tetriswithlife.game.domain.GameState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -24,6 +26,7 @@ private const val heightCanvas: Int = 25
 
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
+    private val gameViewModel: GameViewModel by viewModels()
     private var gameLoop: GameLoop? = null
     private var job: Job? = null
     private val surfaceReady = mutableListOf(false, false)
@@ -38,25 +41,28 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         binding = ActivityGameBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        val loadState = savedInstanceState?.getSerializable("state")
-        val state: State = if (loadState != null)
-            loadState as State
+
+        val loadState = savedInstanceState?.getSerializable(STATE)
+
+        val gameState: GameState = if (loadState != null)
+            loadState as GameState
         else
-            State(
-                widthCanvas, heightCanvas, recordRepository
+            GameState(
+                widthCanvas, heightCanvas, recordRepository.loadRecord()
             )
 
-        binding.gameSurfaceView.holder.addCallback(object:SurfaceHolder.Callback{
-            override fun surfaceCreated(p0: SurfaceHolder) {            }
+        binding.gameSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(p0: SurfaceHolder) {}
 
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
                 surfaceReady[0] = true
                 display = Display(
                     binding.gameSurfaceView,
-                    this@GameActivity
+                    this@GameActivity,
+                    gameState
                 )
                 if (surfaceReady.all { it })
-                    canStartGame(state)
+                    canStartGame(gameState)
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {            }
@@ -69,7 +75,7 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
                 surfaceReady[1] = true
                 if (surfaceReady.all { it })
-                    canStartGame(state)
+                    canStartGame(gameState)
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {            }
@@ -79,17 +85,27 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         bindListener()
     }
 
-    private fun canStartGame(state: State) {
+    private fun canStartGame(gameState: GameState) {
         job = CoroutineScope(Dispatchers.Default).launch {
             gameLoop = GameLoop(
-                state,
+                gameState,
                 display,
                 Controller(),
                 binding.gameSurfaceView,
-                binding.nextFigureSurfaceView
+                binding.nextFigureSurfaceView,
+                recordRepository
             )
-            gameLoop?.setRunning(true)
-            gameLoop?.run()
+            gameLoop?.running = true
+
+            while (isActive) {
+                if (gameLoop?.running == true) {
+
+                    Log.d("Game", "+")
+
+                    gameLoop?.stateUpdate()
+                    gameLoop?.displayUpdate()
+                }
+            }
         }
     }
 
@@ -160,30 +176,32 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
 
         binding.newGameButton.setOnClickListener {
-            gameLoop?.state?.status = "new game"
+            gameLoop?.gameState?.status = "new game"
         }
         binding.pauseButton.setOnClickListener {
-            gameLoop?.state?.clickPause()
+            gameLoop?.gameState?.clickPause()
         }
         binding.exitButton.setOnClickListener {
             finish()
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        gameLoop?.running = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        gameLoop?.running = false
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        var retry = true
-        gameLoop?.setRunning(false)
-        while (retry) {
-            try {
-                runBlocking {
-                    job?.cancelAndJoin()
-                    job = null
-                }
-                retry = false
-            } catch (e: InterruptedException) {
-                /* for lint */
-            }
+        gameLoop?.running = false
+        runBlocking {
+            job?.cancelAndJoin()
+            job = null
         }
     }
 
@@ -251,10 +269,14 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         gameLoop?.let {
-            outState.putSerializable("state", it.state)
+            outState.putSerializable(STATE, it.gameState)
         }
+        super.onSaveInstanceState(outState)
+    }
+
+    companion object {
+        const val STATE = "state"
     }
 
 }

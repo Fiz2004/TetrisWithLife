@@ -3,6 +3,9 @@ package com.fiz.tetriswithlife.game.domain.figure
 import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Cell
+import com.fiz.tetriswithlife.game.domain.models.Figure
+import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.ceil
 
 private const val START_STEP_MOVE_AUTO = 0.03
@@ -13,11 +16,11 @@ private const val STEP_MOVE_KEY_Y = 4
 class CurrentFigure(
     private val grid: Grid,
     var figure: Figure,
-    getStartX: () -> Int = { (0 until (grid.width - figure.getWidth())).shuffled().first() },
+    getStartX: () -> Int = { (0 until (grid.width - figure.getMaxX())).shuffled().first() },
     private var stepMoveAuto: Double = START_STEP_MOVE_AUTO,
-    val position: Coordinate = Coordinate(
+    var position: Coordinate = Coordinate(
         getStartX().toDouble(),
-        (0 - figure.getHeight()).toDouble()
+        (0 - figure.getMaxY()).toDouble()
     )
 ) {
 
@@ -27,8 +30,7 @@ class CurrentFigure(
 
     fun fixation(scores: Int) {
         val scoresForLevel = 300
-        stepMoveAuto = ADD_STEP_MOVE_AUTO
-        +ADD_STEP_MOVE_AUTO * (scores / scoresForLevel.toFloat())
+        stepMoveAuto = ADD_STEP_MOVE_AUTO + ADD_STEP_MOVE_AUTO * (scores / scoresForLevel.toFloat())
     }
 
     fun isCollission(p: Coordinate): Boolean {
@@ -57,12 +59,12 @@ class CurrentFigure(
 
     private fun moveLeft() {
         if (!isCollission(Coordinate((position.x - STEP_MOVE_KEY_X), position.y)))
-            position.x -= STEP_MOVE_KEY_X
+            position = position.copy(x = position.x - STEP_MOVE_KEY_X)
     }
 
     private fun moveRight() {
         if (!isCollission(Coordinate((position.x + STEP_MOVE_KEY_X), position.y)))
-            position.x += STEP_MOVE_KEY_X
+            position = position.copy(x = position.x + STEP_MOVE_KEY_X)
     }
 
     private fun rotate() {
@@ -89,12 +91,15 @@ class CurrentFigure(
                     .any { (it.y - 1) < 0 }
             )
                 return "endGame"
-            position.y = yMax.toDouble()
+
+            position = position.copy(y = yMax.toDouble())
 
             return "fixation"
         }
 
-        position.y += (if (stepY < 1) stepY else yMax - yStart).toFloat()
+        position =
+            position.copy(y = position.y + (if (stepY < 1) stepY else yMax - yStart).toFloat())
+
         return "fall"
     }
 

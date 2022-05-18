@@ -3,7 +3,7 @@ package com.fiz.tetriswithlife.menu.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doOnTextChanged
+import androidx.core.widget.doAfterTextChanged
 import com.fiz.tetriswithlife.databinding.ActivityOptionsBinding
 import com.fiz.tetriswithlife.menu.data.NameRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,8 +37,8 @@ class OptionsActivity : AppCompatActivity() {
     }
 
     private fun bindListener() {
-        binding.nameEditText.doOnTextChanged { text, start, before, count ->
-            name = text.toString()
+        binding.nameEditText.doAfterTextChanged {
+            name = it.toString()
         }
 
         binding.exitButton.setOnClickListener {
