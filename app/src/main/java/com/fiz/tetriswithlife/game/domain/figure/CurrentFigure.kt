@@ -1,9 +1,9 @@
 package com.fiz.tetriswithlife.game.domain.figure
 
 import com.fiz.tetriswithlife.game.domain.Controller
-import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
 import com.fiz.tetriswithlife.game.domain.models.Cell
+import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import com.fiz.tetriswithlife.game.domain.models.Figure
 import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.ceil

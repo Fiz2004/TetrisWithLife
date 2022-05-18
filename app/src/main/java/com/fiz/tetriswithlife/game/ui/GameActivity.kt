@@ -1,7 +1,6 @@
 package com.fiz.tetriswithlife.game.ui
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceHolder
@@ -13,11 +12,8 @@ import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.Display
 import com.fiz.tetriswithlife.game.domain.GameState
-import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlin.math.floor
-import kotlin.math.max
 
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity() {
@@ -48,8 +44,8 @@ class GameActivity : AppCompatActivity() {
                 display = Display(
                     binding.gameSurfaceView.width,
                     binding.gameSurfaceView.height,
-                    gameViewModel.gameState.value?.grid?.width ?: 0,
-                    gameViewModel.gameState.value?.grid?.height ?: 0,
+                    widthGrid,
+                    heightGrid,
                     bitmapRepository
                 )
 
@@ -95,40 +91,22 @@ class GameActivity : AppCompatActivity() {
         }
 
         binding.scoresTextView.text = resources.getString(
-            R.string.scores_game_textview, gameState.scores.toString().padStart(6, '0')
+            R.string.scores_game_textview, gameState.scoresFormat
         )
         binding.recordTextview.text =
-            resources.getString(
-                R.string.record_game_textview,
-                gameState.record.toString().padStart(6, '0')
-            )
+            resources.getString(R.string.record_game_textview, gameState.recordFormat)
 
-        val textOnButtonPause = if (gameState.status == "pause")
-            R.string.resume_game_button
-        else
-            R.string.pause_game_button
+        binding.pauseButton.text = resources.getString(gameState.textForButtonPause)
 
-        binding.pauseButton.text = resources.getString(textOnButtonPause)
-
-        binding.infoBreathTextView.visibility = if (gameState.character.breath)
+        val visibility = if (gameState.infoBreathTextViewNotVisibility)
             View.INVISIBLE
         else
             View.VISIBLE
 
-        val sec: Double = if (gameState.character.breath)
-            TIMES_BREATH_LOSE
-        else
-            max(gameState.character.timeBreath, 0.0)
-        val cl = ((floor(sec) * 255) / TIMES_BREATH_LOSE).toInt()
-
-        binding.breathTextView.visibility = (if (gameState.character.breath)
-            View.INVISIBLE
-        else
-            View.VISIBLE)
-
-        binding.breathTextView.text = sec.toInt().toString()
-
-        binding.breathTextView.setTextColor(Color.rgb(255, cl, cl))
+        binding.infoBreathTextView.visibility = visibility
+        binding.breathTextView.visibility = visibility
+        binding.breathTextView.setTextColor(gameState.colorForBreathTextView)
+        binding.breathTextView.text = gameState.textForBreathTextView
     }
 
     @SuppressLint("ClickableViewAccessibility")

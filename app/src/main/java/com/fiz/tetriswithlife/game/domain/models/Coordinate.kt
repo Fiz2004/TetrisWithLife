@@ -1,6 +1,4 @@
-package com.fiz.tetriswithlife.game.domain.grid
-
-import com.fiz.tetriswithlife.game.domain.models.Point
+package com.fiz.tetriswithlife.game.domain.models
 
 data class Coordinate(val x: Double, val y: Double) {
     operator fun plus(add: Coordinate): Coordinate {

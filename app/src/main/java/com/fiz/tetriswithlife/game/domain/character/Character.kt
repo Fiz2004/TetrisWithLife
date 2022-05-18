@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.character
 
-import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.*
 
@@ -110,7 +110,7 @@ open class Character(grid: Grid) {
     private fun getDirection(grid: Grid): MutableList<Point> {
         // Проверяем свободен ли выбранный путь при фиксации фигуры
         if (deleteRow == 1
-            && moves == isCanMove(arrayOf(moves.toTypedArray()), grid)
+            && moves == isCanMove(listOf(moves), grid)
         )
             deleteRow = 0
 
@@ -127,42 +127,45 @@ open class Character(grid: Grid) {
         if (((speed.line == 0F && speed.rotate == 0F) && move.x == 1) || move.x == 1) {
             lastDirection = 1
             return isCanMove(
-                arrayOf(*direction.RIGHT_DOWN, *direction.RIGHT, *direction.LEFT), grid
+                direction.RIGHT_DOWN + direction.RIGHT + direction.LEFT, grid
             ).toMutableList()
         }
         // Если двигаемся влево
         if (((speed.line == 0F && speed.rotate == 0F) && move.x == -1) || move.x == -1) {
             lastDirection = -1
-            return isCanMove(arrayOf(*direction.LEFT_DOWN, *direction.LEFT, *direction.RIGHT), grid)
+            return isCanMove(
+                listOf(direction.LEFT_DOWN, direction.LEFT, direction.RIGHT).flatten(),
+                grid
+            )
                 .toMutableList()
         }
 
         if (lastDirection == -1)
             return isCanMove(
-                arrayOf(direction._0D, *direction.LEFT, *direction.RIGHT),
+                listOf(direction._0D) + direction.LEFT + direction.RIGHT,
                 grid
             ).toMutableList()
 
         return isCanMove(
-            arrayOf(direction._0D, *direction.RIGHT, *direction.LEFT),
+            listOf(direction._0D) + direction.RIGHT + direction.LEFT,
             grid
         )
             .toMutableList()
     }
 
-    open fun isCanMove(arrayDirections: Array<Array<Point>>, grid: Grid): Array<Point> {
-        for (directions in arrayDirections)
+    open fun isCanMove(listDirections: List<List<Point>>, grid: Grid): List<Point> {
+        for (directions in listDirections)
             if (isCanDirections(directions, grid))
                 return directions
 
-        return arrayOf(Point(0, 0))
+        return listOf(Point(0, 0))
     }
 
-    private fun isCanDirections(directions: Array<Point>, grid: Grid): Boolean {
-        var addPoint = Point(0, 0)
+    private fun isCanDirections(directions: List<Point>, grid: Grid): Boolean {
+        val addPoint = Point(0, 0)
         for (direction in directions) {
-            addPoint += direction
-            val point = posTile + addPoint
+            val newPoint = addPoint + direction
+            val point = posTile + newPoint
             if (grid.isOutside(point) || grid.isNotFree(point))
                 return false
         }
@@ -219,19 +222,19 @@ data class DIRECTION(
     val D: Point = Point(0, 1),
     val U: Point = Point(0, -1),
     val _0: Point = Point(0, 0),
-    val _0D: Array<Point> = arrayOf(D),
-    val RD: Array<Point> = arrayOf(D, R),
-    val LD: Array<Point> = arrayOf(D, L),
-    val R0: Array<Point> = arrayOf(R),
-    val L0: Array<Point> = arrayOf(L),
-    val RU: Array<Point> = arrayOf(U, R),
-    val LU: Array<Point> = arrayOf(U, L),
-    val RUU: Array<Point> = arrayOf(U, U, R),
-    val LUU: Array<Point> = arrayOf(U, U, L),
-    val LEFT_DOWN: Array<Array<Point>> = arrayOf(_0D, LD, RD),
-    val RIGHT_DOWN: Array<Array<Point>> = arrayOf(_0D, RD, LD),
-    val LEFT: Array<Array<Point>> = arrayOf(L0, LU, LUU),
-    val RIGHT: Array<Array<Point>> = arrayOf(R0, RU, RUU),
+    val _0D: List<Point> = listOf(D),
+    val RD: List<Point> = listOf(D, R),
+    val LD: List<Point> = listOf(D, L),
+    val R0: List<Point> = listOf(R),
+    val L0: List<Point> = listOf(L),
+    val RU: List<Point> = listOf(U, R),
+    val LU: List<Point> = listOf(U, L),
+    val RUU: List<Point> = listOf(U, U, R),
+    val LUU: List<Point> = listOf(U, U, L),
+    val LEFT_DOWN: List<List<Point>> = listOf(_0D, LD, RD),
+    val RIGHT_DOWN: List<List<Point>> = listOf(_0D, RD, LD),
+    val LEFT: List<List<Point>> = listOf(L0, LU, LUU),
+    val RIGHT: List<List<Point>> = listOf(R0, RU, RUU),
 )
 
 fun getFrame(coordinate: Double): Int {

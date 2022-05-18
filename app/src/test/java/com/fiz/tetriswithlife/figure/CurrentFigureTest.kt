@@ -1,8 +1,8 @@
 package com.fiz.tetriswithlife.figure
 
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import com.fiz.tetriswithlife.game.domain.models.Figure
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -16,7 +16,7 @@ internal class CurrentFigureTest {
 
   @Before
   fun setUp() {
-    grid = Grid(5, 10) { 0 }
+    grid = Grid(5, 10, { 0 })
     figure = Figure(getNumberFigure = { 0 })
     currentFigure = CurrentFigure(grid, figure, getStartX = { 0 })
   }

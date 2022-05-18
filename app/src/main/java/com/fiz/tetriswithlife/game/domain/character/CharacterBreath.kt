@@ -10,15 +10,15 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
     var timeBreath = TIMES_BREATH_LOSE
     var breath = true
 
-    private var tempGrid: Array<Array<Int>> = Array(grid.height) {
-        Array(grid.width) {
+    private var tempGrid: MutableList<MutableList<Int>> = MutableList(grid.height) {
+        MutableList(grid.width) {
             0
         }
     }
 
     private fun refreshTempGrid(grid: Grid) {
-        grid.space.forEachIndexed { indexY, arrayOfElements ->
-            arrayOfElements.forEachIndexed { indexX, element ->
+        grid.space.forEachIndexed { indexY, elements ->
+            elements.forEachIndexed { indexX, element ->
                 tempGrid[indexY][indexX] = element.block
             }
         }
@@ -51,7 +51,7 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
 
         tempGrid[tile.y][tile.x] = 1
 
-        for (shiftPoint in arrayOf(Point(0, -1), Point(1, 0), Point(-1, 0), Point(0, 1))) {
+        for (shiftPoint in listOf(Point(0, -1), Point(1, 0), Point(-1, 0), Point(0, 1))) {
             val nextElement = tile + shiftPoint
             if (isInside(nextElement) && isFree(nextElement)
                 && findWay(nextElement, grid)

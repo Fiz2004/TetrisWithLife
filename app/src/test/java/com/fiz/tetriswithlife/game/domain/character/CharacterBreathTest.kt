@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.character
 
-import com.fiz.tetriswithlife.game.domain.grid.Coordinate
 import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import org.junit.Assert.assertFalse
 import org.junit.Test
 

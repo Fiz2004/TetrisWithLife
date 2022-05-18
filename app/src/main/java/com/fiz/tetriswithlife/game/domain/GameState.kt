@@ -1,28 +1,68 @@
 package com.fiz.tetriswithlife.game.domain
 
+import android.graphics.Color
+import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
+import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.grid.Grid
 import com.fiz.tetriswithlife.game.domain.models.Figure
 import com.fiz.tetriswithlife.game.domain.models.Point
 import java.io.Serializable
 import kotlin.math.floor
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 private const val NUMBER_FRAMES_ELEMENTS = 4
 
-class GameState(
-    width: Int,
-    height: Int,
-    startRecord: Int
-) : Serializable {
-    var grid = Grid(width, height)
-    var character = CharacterBreath(grid)
-    var scores = 0
-    var record = startRecord
-    var status = "playing"
-    var nextFigure: Figure = Figure()
+data class GameState(
+    val width: Int,
+    val height: Int,
+    val startRecord: Int,
+    var grid: Grid = Grid(width, height),
+    var character: CharacterBreath = CharacterBreath(grid),
+    var scores: Int = 0,
+    var record: Int = startRecord,
+    var status: String = "playing",
+    var nextFigure: Figure = Figure(),
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure)
+) : Serializable {
+    val scoresFormat
+        get() = scores.toString().padStart(6, '0')
+
+    val recordFormat
+        get() = record.toString().padStart(6, '0')
+
+    val textForButtonPause
+        get() = if (status == "pause")
+            R.string.resume_game_button
+        else
+            R.string.pause_game_button
+
+    val infoBreathTextViewNotVisibility
+        get() = character.breath
+
+    private val sec = if (character.breath)
+        TIMES_BREATH_LOSE
+    else
+        max(character.timeBreath, 0.0)
+
+    val textForBreathTextView: String
+        get() {
+            return sec.toInt().toString()
+        }
+
+    private val color = ((floor(
+        sec
+    ) * 255) / TIMES_BREATH_LOSE).toInt()
+
+    val colorForBreathTextView: Int
+        get() {
+            return Color.rgb(
+                255, color, color
+            )
+        }
+
 
     fun new(startRecord: Int) {
         grid = Grid(grid.width, grid.height)
@@ -100,7 +140,7 @@ class GameState(
                 currentFigure.figure.cells[index].view
         val countRowFull = grid.getCountRowFull()
         if (countRowFull != 0)
-            grid.deleteRows()
+            grid = grid.deleteRows()
         val scoresForRow = 100
         for (i in 1..countRowFull)
             scores += i * scoresForRow

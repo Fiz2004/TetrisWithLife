@@ -38,22 +38,22 @@ open class CharacterEat(grid: Grid) : Character(grid) {
         if (move.x == 0 && move.y == 1)
             return 'U'
 
-        throw Exception("Error: incorrect value function getDirectionEat")
+        throw Exception("Error: incorrect value function getDirectionEat $move.x $move.y")
     }
 
-    override fun isCanMove(arrayDirections: Array<Array<Point>>, grid: Grid): Array<Point> {
-        for (directions in arrayDirections)
+    override fun isCanMove(listDirections: List<List<Point>>, grid: Grid): List<Point> {
+        for (directions in listDirections)
             if (isCanDirections(directions, grid, (0..100).shuffled().first() < PROBABILITY_EAT))
                 return directions
-        return arrayOf(Point(0, 0))
+        return listOf(Point(0, 0))
     }
 
-    private fun isCanDirections(directions: Array<Point>, grid: Grid, isDestroy: Boolean): Boolean {
-        var result = emptyArray<Point>()
+    private fun isCanDirections(directions: List<Point>, grid: Grid, isDestroy: Boolean): Boolean {
+        val result = mutableListOf<Point>()
         var addPoint = Point(0, 0)
         for (direction in directions) {
-            addPoint += direction
-            val point = posTile + addPoint
+            addPoint = addPoint.plus(direction)
+            val point = posTile.plus(addPoint)
 
             if (grid.isOutside(point))
                 return false

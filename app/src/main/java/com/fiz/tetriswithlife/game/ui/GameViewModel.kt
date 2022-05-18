@@ -12,14 +12,14 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.math.min
 
-private const val widthGrid: Int = 13
-private const val heightGrid: Int = 25
+const val widthGrid: Int = 13
+const val heightGrid: Int = 25
 
 @HiltViewModel
 class GameViewModel @Inject constructor(var recordRepository: RecordRepository) : ViewModel() {
-
     var gameState: MutableLiveData<GameState> = MutableLiveData(); private set
-    private val controller = Controller()
+
+    private var controller = Controller()
     private var job: Job? = null
 
     private var prevTime = System.currentTimeMillis()
@@ -41,10 +41,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
 
                 while (isActive) {
                     if (running) {
-
                         stateUpdate()
-
-
                     }
                 }
             }
@@ -82,50 +79,34 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
     }
 
     fun clickLeftButton(event: MotionEvent) {
-        job?.let {
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> controller
-                    .actionLeft()
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> controller
-                    .actionCancel()
-            }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> controller = Controller(left = true)
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> controller = Controller()
         }
     }
 
     fun clickRightButton(event: MotionEvent) {
-        job?.let {
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> controller
-                    .actionRight()
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> controller
-                    .actionCancel()
-            }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> controller = Controller(right = true)
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> controller = Controller()
         }
     }
 
     fun clickDownButton(event: MotionEvent) {
-        job?.let {
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> controller
-                    .actionDown()
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> controller
-                    .actionCancel()
-            }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> controller = Controller(down = true)
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> controller = Controller()
         }
     }
 
     fun clickRotateButton(event: MotionEvent) {
-        job?.let {
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> controller
-                    .actionUp()
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> controller
-                    .actionCancel()
-            }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> controller = Controller(up = true)
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> controller = Controller()
         }
     }
 
