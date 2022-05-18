@@ -23,10 +23,10 @@ data class GameState(
     var character: CharacterBreath = CharacterBreath(grid),
     var scores: Int = 0,
     var record: Int = startRecord,
-    var status: String = "playing",
+    var status: StatusGame = StatusGame.Playing,
     var nextFigure: Figure = Figure(),
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure),
-    val changed:Boolean=false
+    val changed: Boolean = false
 ) : Serializable {
     val scoresFormat
         get() = scores.toString().padStart(6, '0')
@@ -35,7 +35,7 @@ data class GameState(
         get() = record.toString().padStart(6, '0')
 
     val textForButtonPause
-        get() = if (status == "pause")
+        get() = if (status == StatusGame.Pause)
             R.string.resume_game_button
         else
             R.string.pause_game_button
@@ -69,7 +69,7 @@ data class GameState(
         character = CharacterBreath(grid)
         scores = 0
         record = startRecord
-        status = "playing"
+        status = StatusGame.Playing
         nextFigure = Figure()
         currentFigure = CurrentFigure(grid, nextFigure)
     }
@@ -98,7 +98,7 @@ data class GameState(
             return false
         }
 
-        if (status == "new game") {
+        if (this.status == StatusGame.NewGame) {
             updateRecord()
             return false
         }
@@ -116,15 +116,15 @@ data class GameState(
         return true
     }
 
-    private fun isEndGame(status: String, updateRecord: () -> Unit): Boolean {
-        if (status == "endGame"
+    private fun isEndGame(status: CurrentFigure.Companion.StatusMoved, updateRecord: () -> Unit): Boolean {
+        if (status == CurrentFigure.Companion.StatusMoved.EndGame
             // Фигура достигла препятствия
-            || (status == "fall" && isCrushedBeetle())
+            || (status == CurrentFigure.Companion.StatusMoved.Fall && isCrushedBeetle())
         )
         // Стакан заполнен игра окончена
             return true
 
-        if (status == "fixation") {
+        if (status == CurrentFigure.Companion.StatusMoved.Fixation) {
             fixation(updateRecord)
             createCurrentFigure()
         }
@@ -203,7 +203,14 @@ data class GameState(
     }
 
     fun clickPause() {
-        status = if (status == "playing") "pause" else "playing"
+        status = if (status == StatusGame.Playing) StatusGame.Pause else StatusGame.Playing
+    }
 
+    companion object{
+        enum class StatusGame{
+            Playing,Pause,NewGame
+        }
     }
 }
+
+

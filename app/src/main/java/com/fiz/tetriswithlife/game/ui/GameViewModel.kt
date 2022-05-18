@@ -53,7 +53,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
             val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
             if (deltaTime == 0.0) return
 
-            if (gameState.value.status != "pause") {
+            if (gameState.value.status != GameState.Companion.StatusGame.Pause) {
                 var status = true
                 if (ending == 1.0)
                     status = gameState.value.update(controller, deltaTime) {
@@ -67,7 +67,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
                     ending -= deltaTime
             }
 
-            if (ending < 0 || gameState.value.status == "new game") {
+            if (ending < 0 || gameState.value.status == GameState.Companion.StatusGame.NewGame) {
                 gameState.value.new(recordRepository.loadRecord())
                 ending = 1.0
             }
@@ -111,7 +111,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
 
     fun clickNewGameButton() {
         job?.let {
-            gameState.value.status = "new game"
+            gameState.value.status = GameState.Companion.StatusGame.NewGame
         }
     }
 

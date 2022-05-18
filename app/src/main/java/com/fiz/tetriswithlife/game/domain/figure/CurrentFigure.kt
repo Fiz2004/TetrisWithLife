@@ -49,7 +49,7 @@ class CurrentFigure(
         return false
     }
 
-    fun moves(controller: Controller): String {
+    fun moves(controller: Controller): StatusMoved {
         if (controller.left) moveLeft()
         if (controller.right) moveRight()
         if (controller.up) rotate()
@@ -81,7 +81,7 @@ class CurrentFigure(
             figure = figure.copy(cells = oldCells)
     }
 
-    private fun moveDown(stepY: Float): String {
+    private fun moveDown(stepY: Float): StatusMoved {
         val yStart = ceil(position.y)
         val yEnd = ceil(position.y + stepY.toDouble())
         val yMax = getYMax(yStart.toInt(), yEnd.toInt())
@@ -90,17 +90,17 @@ class CurrentFigure(
             if (getPositionTile(Coordinate(position.x, yMax.toDouble()))
                     .any { (it.y - 1) < 0 }
             )
-                return "endGame"
+                return StatusMoved.EndGame
 
             position = position.copy(y = yMax.toDouble())
 
-            return "fixation"
+            return StatusMoved.Fixation
         }
 
         position =
             position.copy(y = position.y + (if (stepY < 1) stepY else yMax - yStart).toFloat())
 
-        return "fall"
+        return StatusMoved.Fall
     }
 
     private fun getYMax(yStart: Int, yEnd: Int): Int {
@@ -117,5 +117,11 @@ class CurrentFigure(
                 return true
 
         return false
+    }
+
+    companion object{
+        enum class StatusMoved {
+            EndGame,Fixation,Fall
+        }
     }
 }
