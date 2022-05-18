@@ -15,11 +15,11 @@ import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.Display
-import com.fiz.tetriswithlife.game.domain.GameLoop
 import com.fiz.tetriswithlife.game.domain.GameState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
+import kotlin.math.min
 
 private const val widthCanvas: Int = 13
 private const val heightCanvas: Int = 25
@@ -27,14 +27,19 @@ private const val heightCanvas: Int = 25
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private val gameViewModel: GameViewModel by viewModels()
-    private var gameLoop: GameLoop? = null
+    private lateinit var gameState: GameState
+    private val controller = Controller()
     private var job: Job? = null
     private val surfaceReady = mutableListOf(false, false)
 
     @Inject
     lateinit var recordRepository: RecordRepository
     private lateinit var binding: ActivityGameBinding
-    private lateinit var display:Display
+    private lateinit var display: Display
+
+    private var prevTime = System.currentTimeMillis()
+    private var ending = 1.0
+    var running = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,14 +47,8 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         val view = binding.root
         setContentView(view)
 
-        val loadState = savedInstanceState?.getSerializable(STATE)
-
-        val gameState: GameState = if (loadState != null)
-            loadState as GameState
-        else
-            GameState(
-                widthCanvas, heightCanvas, recordRepository.loadRecord()
-            )
+        gameState = savedInstanceState?.getSerializable(STATE) as? GameState
+            ?: GameState(widthCanvas, heightCanvas, recordRepository.loadRecord())
 
         binding.gameSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(p0: SurfaceHolder) {}
@@ -62,65 +61,100 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
                     gameState
                 )
                 if (surfaceReady.all { it })
-                    canStartGame(gameState)
+                    canStartGame()
             }
 
-            override fun surfaceDestroyed(p0: SurfaceHolder) {            }
+            override fun surfaceDestroyed(p0: SurfaceHolder) {}
 
         })
 
-        binding.nextFigureSurfaceView.holder.addCallback(object:SurfaceHolder.Callback{
-            override fun surfaceCreated(p0: SurfaceHolder) {            }
+        binding.nextFigureSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(p0: SurfaceHolder) {}
 
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
                 surfaceReady[1] = true
                 if (surfaceReady.all { it })
-                    canStartGame(gameState)
+                    canStartGame()
             }
 
-            override fun surfaceDestroyed(p0: SurfaceHolder) {            }
+            override fun surfaceDestroyed(p0: SurfaceHolder) {}
 
         })
 
         bindListener()
     }
 
-    private fun canStartGame(gameState: GameState) {
+    private fun canStartGame() {
         job = CoroutineScope(Dispatchers.Default).launch {
-            gameLoop = GameLoop(
-                gameState,
-                display,
-                Controller(),
-                binding.gameSurfaceView,
-                binding.nextFigureSurfaceView,
-                recordRepository
-            )
-            gameLoop?.running = true
+            running = true
 
             while (isActive) {
-                if (gameLoop?.running == true) {
+                if (running) {
 
                     Log.d("Game", "+")
 
-                    gameLoop?.stateUpdate()
-                    gameLoop?.displayUpdate()
+                    stateUpdate()
+
+                    displayUpdate()
+
                 }
             }
         }
     }
 
+
+    private fun stateUpdate() {
+        val now = System.currentTimeMillis()
+        val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
+
+        if (gameState.status != "pause") {
+            var status = true
+            if (ending == 1.0)
+                status = gameState.update(controller, deltaTime) {
+                    if (gameState.scores > recordRepository.loadRecord()) {
+                        gameState.record = gameState.scores
+                        recordRepository.saveRecord(gameState.record)
+                    }
+                }
+
+            if (!status || ending != 1.0)
+                ending -= deltaTime
+        }
+
+        if (ending < 0 || gameState.status == "new game") {
+            gameState.new(recordRepository.loadRecord())
+            ending = 1.0
+        }
+
+        prevTime = now
+    }
+
+    private fun displayUpdate() {
+
+        binding.gameSurfaceView.holder.lockCanvas(null)?.let {
+            display.render(gameState, it)
+            binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
+        }
+
+        binding.nextFigureSurfaceView.holder.lockCanvas(null)?.let {
+            display.renderInfo(gameState, it)
+            binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
+        }
+
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun bindListener() {
         binding.leftButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameLoop?.let {
+            job?.let {
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> it.controller
+                    MotionEvent.ACTION_DOWN -> controller
                         .actionLeft()
                     MotionEvent.ACTION_MOVE -> {
                         /* for lint */
                     }
                     MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_CANCEL -> it.controller
+                    MotionEvent.ACTION_CANCEL -> controller
                         .actionCancel()
                 }
             }
@@ -128,15 +162,15 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
 
         binding.rightButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameLoop?.let {
+            job?.let {
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> it.controller
+                    MotionEvent.ACTION_DOWN -> controller
                         .actionRight()
                     MotionEvent.ACTION_MOVE -> {
                         /* for lint */
                     }
                     MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_CANCEL -> it.controller
+                    MotionEvent.ACTION_CANCEL -> controller
                         .actionCancel()
                 }
             }
@@ -144,15 +178,15 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
 
         binding.downButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameLoop?.let {
+            job?.let {
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> it.controller
+                    MotionEvent.ACTION_DOWN -> controller
                         .actionDown()
                     MotionEvent.ACTION_MOVE -> {
                         /* for lint */
                     }
                     MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_CANCEL -> it.controller
+                    MotionEvent.ACTION_CANCEL -> controller
                         .actionCancel()
                 }
             }
@@ -160,15 +194,15 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
 
         binding.rotateButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameLoop?.let {
+            job?.let {
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> it.controller
+                    MotionEvent.ACTION_DOWN -> controller
                         .actionUp()
                     MotionEvent.ACTION_MOVE -> {
                         /* for lint */
                     }
                     MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_CANCEL -> it.controller
+                    MotionEvent.ACTION_CANCEL -> controller
                         .actionCancel()
                 }
             }
@@ -176,10 +210,14 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
         }
 
         binding.newGameButton.setOnClickListener {
-            gameLoop?.gameState?.status = "new game"
+            job?.let {
+                gameState.status = "new game"
+            }
         }
         binding.pauseButton.setOnClickListener {
-            gameLoop?.gameState?.clickPause()
+            job?.let {
+                gameState.clickPause()
+            }
         }
         binding.exitButton.setOnClickListener {
             finish()
@@ -188,17 +226,16 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
 
     override fun onStart() {
         super.onStart()
-        gameLoop?.running = true
+        running = true
     }
 
     override fun onStop() {
         super.onStop()
-        gameLoop?.running = false
+        running = false
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        gameLoop?.running = false
         runBlocking {
             job?.cancelAndJoin()
             job = null
@@ -266,13 +303,6 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
             )
         }
 
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        gameLoop?.let {
-            outState.putSerializable(STATE, it.gameState)
-        }
-        super.onSaveInstanceState(outState)
     }
 
     companion object {
