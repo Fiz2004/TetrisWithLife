@@ -11,9 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
+import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.Display
 import com.fiz.tetriswithlife.game.domain.GameState
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity(), Display.Companion.Listener {
@@ -25,6 +27,9 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
     private lateinit var binding: ActivityGameBinding
 
     private lateinit var display: Display
+
+    @Inject
+    lateinit var bitmapRepository: BitmapRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +48,8 @@ class GameActivity : AppCompatActivity(), Display.Companion.Listener {
                     binding.gameSurfaceView.height,
                     gameViewModel.gameState.grid.width,
                     gameViewModel.gameState.grid.height,
+                    bitmapRepository
                 )
-                display.loadResources(applicationContext)
                 display.initListener(this@GameActivity)
 
                 surfaceReady[0] = true

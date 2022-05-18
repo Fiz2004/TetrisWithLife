@@ -2,7 +2,7 @@ package com.fiz.tetriswithlife.game.domain
 
 import android.content.Context
 import android.graphics.*
-import com.fiz.tetriswithlife.R
+import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.domain.grid.Element
 import com.fiz.tetriswithlife.game.domain.models.Point
@@ -10,7 +10,7 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-private const val NUMBER_IMAGES_FIGURE = 5
+
 private const val NUMBER_COLUMNS_IMAGES_FON = 4
 private const val NUMBER_ROWS_IMAGES_FON = 4
 
@@ -18,7 +18,8 @@ class Display(
     widthSurface: Int,
     heightSurface: Int,
     widthGrid: Int,
-    heightGrid: Int
+    heightGrid: Int,
+    bitmapRepository: BitmapRepository
 ) {
     companion object {
         interface Listener {
@@ -35,41 +36,21 @@ class Display(
 
     private val paint: Paint = Paint()
 
-    private lateinit var bmpFon: Bitmap
-    private lateinit var bmpCharacter: Bitmap
-    private lateinit var bmpKv: List<Bitmap>
+    private var bmpFon: Bitmap = bitmapRepository.bmpFon
+    private var bmpCharacter: Bitmap = bitmapRepository.bmpCharacter
+    private var bmpKv: List<Bitmap> = bitmapRepository.bmpKv
 
-    private var tile: Int = 0
+    private var tile: Int = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
+
     private var newTile = min(
         heightSurface / heightGrid,
         widthSurface / widthGrid
     ).toFloat()
+
     private var offset = Point(
         ((widthSurface - widthGrid * newTile) / 2).toInt(),
         ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
-
-    fun loadResources(context: Context) {
-
-        bmpFon = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
-
-        bmpCharacter =
-            BitmapFactory.decodeResource(context.resources, R.drawable.character)
-
-        bmpKv = run {
-            val result: MutableList<Bitmap> = mutableListOf()
-            for (i in 1..NUMBER_IMAGES_FIGURE)
-                result += BitmapFactory.decodeResource(
-                    context.resources, context.resources.getIdentifier(
-                        "kvadrat$i",
-                        "drawable", context.packageName
-                    )
-                )
-            result
-        }
-
-        tile = bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
-    }
 
     fun initListener(context: Context) {
         listener = context as Listener
