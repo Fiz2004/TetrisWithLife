@@ -1,6 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.grid
 
 import com.fiz.tetriswithlife.game.domain.models.Point
+import java.io.Serializable
 
 private const val NUMBER_IMAGES_BACKGROUND = 16
 
@@ -12,7 +13,7 @@ data class Grid(
             Element(valueFon())
         }
     }
-) {
+) : Serializable {
 
     fun isInside(p: Point): Boolean {
         return p.x in 0 until width && p.y in 0 until height

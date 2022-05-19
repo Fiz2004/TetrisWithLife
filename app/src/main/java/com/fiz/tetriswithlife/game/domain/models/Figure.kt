@@ -1,5 +1,7 @@
 package com.fiz.tetriswithlife.game.domain.models
 
+import java.io.Serializable
+
 private const val NUMBER_IMAGES_FIGURE = 5
 
 /*
@@ -61,7 +63,7 @@ data class Figure(
     private val getNumberFigure: () -> Int = { (FIGURES.indices).shuffled().first() },
     val cells: List<Cell> =
         FIGURES[getNumberFigure()].map { Cell(it, (1..NUMBER_IMAGES_FIGURE).shuffled().first()) }
-) {
+) : Serializable {
 
     fun getMaxX(): Int {
         return cells.maxByOrNull { it.point.x }?.point?.x ?: 0

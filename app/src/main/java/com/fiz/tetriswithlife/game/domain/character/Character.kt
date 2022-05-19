@@ -3,6 +3,7 @@ package com.fiz.tetriswithlife.game.domain.character
 import com.fiz.tetriswithlife.game.domain.grid.Grid
 import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import com.fiz.tetriswithlife.game.domain.models.Point
+import java.io.Serializable
 import kotlin.math.*
 
 //TODO Проверить когда персонажа запирают в одной клетке, игра начинается заново до того как он
@@ -13,7 +14,7 @@ private const val CHARACTER_SPEED_ROTATE = 45
 
 data class Speed(var line: Float, var rotate: Float)
 
-open class Character(grid: Grid) {
+open class Character(grid: Grid) : Serializable {
     // !Сделать определение ширины и высоты жука програмным, чтобы не зависит от вида картинки
     val width = 24
     val height = 24

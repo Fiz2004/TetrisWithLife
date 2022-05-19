@@ -97,11 +97,13 @@ class GameViewModel @Inject constructor(
     }
 
     fun clickNewGameButton() {
-        gameState.value.status = GameState.Companion.StatusCurrentGame.NewGame
+        gameState.value = gameState.value
+            .copy(status = GameState.Companion.StatusCurrentGame.NewGame)
     }
 
     fun clickPauseButton() {
-        gameState.value.clickPause()
+        gameState.value = gameState.value
+            .copy(status = gameState.value.getNewStatus())
     }
 
     fun activityStop() {
