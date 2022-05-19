@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife
 
 import com.fiz.tetriswithlife.game.domain.models.Grid
-import com.fiz.tetriswithlife.game.domain.models.Point
+import com.fiz.tetriswithlife.game.domain.models.Vector
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -16,35 +16,35 @@ class GridTest {
 
     @Test
     fun whenPointIsInside_shouldReturnTrue() {
-        val result = grid.isInside(Point(1, 1))
+        val result = grid.isInside(Vector(1, 1))
 
         assertTrue(result)
     }
 
     @Test
     fun whenPointIsNotInside_shouldReturnFalse() {
-        val result = grid.isInside(Point(7, 1))
+        val result = grid.isInside(Vector(7, 1))
 
         assertFalse(result)
     }
 
     @Test
     fun whenPointIsOutside_shouldReturnTrue() {
-        val result = grid.isOutside(Point(7, 1))
+        val result = grid.isOutside(Vector(7, 1))
 
         assertTrue(result)
     }
 
     @Test
     fun whenPointIsNotOutside_shouldReturnFalse() {
-        val result = grid.isOutside(Point(1, 1))
+        val result = grid.isOutside(Vector(1, 1))
 
         assertFalse(result)
     }
 
     @Test
     fun whenPointFree_shouldReturnTrue() {
-        val result = grid.isFree(Point(1, 1))
+        val result = grid.isFree(Vector(1, 1))
 
         assertTrue(result)
     }
@@ -52,7 +52,7 @@ class GridTest {
     @Test
     fun whenPointNotFree_shouldReturnFalse() {
         grid.space[1][1].block = 1
-        val result = grid.isFree(Point(1, 1))
+        val result = grid.isFree(Vector(1, 1))
 
         assertFalse(result)
     }
@@ -60,13 +60,13 @@ class GridTest {
     @Test
     fun whenPointNotFree_shouldReturnTrue() {
         grid.space[1][1].block = 1
-        val result = grid.isNotFree(Point(1, 1))
+        val result = grid.isNotFree(Vector(1, 1))
         assertTrue(result)
     }
 
     @Test
     fun whenPointFree_shouldReturnFalse() {
-        val result = grid.isNotFree(Point(1, 1))
+        val result = grid.isNotFree(Vector(1, 1))
 
         assertFalse(result)
     }

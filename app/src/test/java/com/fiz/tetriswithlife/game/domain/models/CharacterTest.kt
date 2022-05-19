@@ -1,11 +1,12 @@
-package com.fiz.tetriswithlife.game.domain.character
+package com.fiz.tetriswithlife.game.domain.models
 
-import com.fiz.tetriswithlife.game.domain.models.Grid
-import com.fiz.tetriswithlife.game.domain.models.Coordinate
-import org.junit.Assert.assertFalse
+import com.fiz.tetriswithlife.game.domain.models.character.Location
+import org.junit.Assert
 import org.junit.Test
 
 class CharacterTest {
+
+    val updateGameStateForTimeUseCase = UpdateGameStateForTimeUseCase()
 
     @Test
     fun whenBreathNo_shouldNoFindWay() {
@@ -36,10 +37,17 @@ class CharacterTest {
         grid.space[24][10].block = 1
         grid.space[21][11].block = 1
         grid.space[21][12].block = 1
-        val character = Character(grid)
-        character.position = Coordinate(5.0, 24.0)
-        val result = character.isBreath(grid)
+        val character = Character(
+            Location(Coordinate(5.0, 24.0))
+        )
 
-        assertFalse(result)
+        val isPathUp = updateGameStateForTimeUseCase.isPathUp(
+            character.location.position.posTile,
+            grid,
+            grid.getFullCopySpace()
+        )
+        val result = character.setBreath(isPathUp)
+
+        Assert.assertFalse(result)
     }
 }

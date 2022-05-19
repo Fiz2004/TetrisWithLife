@@ -1,34 +1,63 @@
 package com.fiz.tetriswithlife.game.ui
 
-import com.fiz.tetriswithlife.game.domain.character.Character
+import com.fiz.tetriswithlife.game.domain.models.Controller
 import com.fiz.tetriswithlife.game.domain.models.Grid
-import com.fiz.tetriswithlife.game.domain.models.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.models.Figure
 import java.io.Serializable
 
+private const val SecTimeForRestartForEndGame = 1.0
+
 data class GameState(
-    val width: Int,
-    val height: Int,
-    val startRecord: Int,
-    var grid: Grid = Grid(width, height),
-    var character: Character = Character(grid),
+    var grid: Grid,
     var scores: Int = 0,
-    var record: Int = startRecord,
+    var record: Int,
     val status: StatusCurrentGame = StatusCurrentGame.Playing,
-    var nextFigure: Figure = Figure(),
-    var currentFigure: CurrentFigure = CurrentFigure(nextFigure, width),
-    val changed: Boolean = false
+    val changed: Boolean = false,
+    private var timeToRestart:Double = SecTimeForRestartForEndGame
 ) : Serializable {
 
-    fun isStatusPause(): Boolean {
+    fun update(
+        deltaTime: Double,
+        controller: Controller,
+        loadRecord: () -> Int,
+        updateRecord: (Int) -> Unit
+    ): GameState {
+        if (isStatusPause())
+            return this
+
+        if (timeToRestart < 0 || isStatusNewGame()) {
+            timeToRestart = SecTimeForRestartForEndGame
+            return GameState(grid = Grid(widthGrid, heightGrid), record = loadRecord())
+        }
+
+        val status = when {
+            isStatusNewGame() -> StatusUpdateGame.End
+            isGameContinue() ->
+                grid.updateActors(deltaTime, controller, loadScores = { scores }, plusScores = { score ->
+                    scores += score
+                    checkRecord(updateRecord)
+                })
+            else -> StatusUpdateGame.End
+        }
+
+        if (status == StatusUpdateGame.End)
+            timeToRestart -= deltaTime
+
+        return this
+    }
+
+    private fun isGameContinue(): Boolean {
+        return timeToRestart == SecTimeForRestartForEndGame
+    }
+
+    private fun isStatusPause(): Boolean {
         return status == StatusCurrentGame.Pause
     }
 
-    fun isStatusNewGame(): Boolean {
+    private fun isStatusNewGame(): Boolean {
         return status == StatusCurrentGame.NewGame
     }
 
-    fun checkRecord(updateRecord: (Int) -> Unit) {
+    private fun checkRecord(updateRecord: (Int) -> Unit) {
         if (scores > record) {
             record = scores
             updateRecord(scores)
@@ -43,7 +72,7 @@ data class GameState(
     }
 
     companion object {
-        enum class StatusCurrentGame: Serializable  {
+        enum class StatusCurrentGame : Serializable {
             Playing, Pause, NewGame
         }
 

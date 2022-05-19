@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.models.Controller
+import com.fiz.tetriswithlife.game.domain.models.Grid
 import com.fiz.tetriswithlife.game.domain.useCase.FormatUseCase
-import com.fiz.tetriswithlife.game.domain.useCase.UpdateGameStateForTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,14 +19,13 @@ const val heightGrid: Int = 25
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
-    recordRepository: RecordRepository,
-    private val updateGameStateForTimeUseCase: UpdateGameStateForTimeUseCase,
+    private val recordRepository: RecordRepository,
     private val formatUseCase: FormatUseCase,
     private var controller: Controller
 ) : ViewModel() {
 
     var gameState: MutableStateFlow<GameState> =
-        MutableStateFlow(GameState(widthGrid, heightGrid, recordRepository.loadRecord()))
+        MutableStateFlow(GameState(grid = Grid(widthGrid, heightGrid), record = recordRepository.loadRecord()))
         private set
 
     var uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState()); private set
@@ -62,14 +61,17 @@ class GameViewModel @Inject constructor(
             if (running) {
 
                 val now = System.currentTimeMillis()
-                val deltaTime = min(now - prevTime, 100).toInt() / 1000.0
+                val deltaTime = min(now - prevTime, ((1.0 / 60.0) * 1000).toLong()) / 1000.0
                 if (deltaTime == 0.0) continue
 
-                gameState.value = updateGameStateForTimeUseCase(
-                    gameState.value,
+                gameState.value = gameState.value.update(
                     deltaTime,
-                    controller
-                ).copy(changed = !gameState.value.changed)
+                    controller,
+                    { recordRepository.loadRecord() },
+                    { score: Int ->
+                        if (score > recordRepository.loadRecord())
+                            recordRepository.saveRecord(score)
+                    }).copy(changed = !gameState.value.changed)
 
                 prevTime = now
             }

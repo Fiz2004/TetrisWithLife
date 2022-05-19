@@ -2,7 +2,7 @@ package com.fiz.tetriswithlife.game.domain.useCase
 
 import android.graphics.Color
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
+import com.fiz.tetriswithlife.game.domain.models.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.ui.GameState
 import com.fiz.tetriswithlife.game.ui.UIState
 import javax.inject.Inject
@@ -16,14 +16,14 @@ class FormatUseCase @Inject constructor() {
             scores = getScore(gameState.scores),
             record = getRecord(gameState.record),
             pauseResumeButton = getTextForPauseResumeButton(gameState.status),
-            infoBreathTextViewVisibility = getVisibilityForInfoBreathTextView(gameState.character.breath),
+            infoBreathTextViewVisibility = getVisibilityForInfoBreathTextView(gameState.grid.character.breath.breath),
             textForBreathTextView = getTextForBreathTextView(
-                gameState.character.breath,
-                gameState.character.timeBreath
+                gameState.grid.character.breath.breath,
+                gameState.grid.character.breath.secondsSupplyForBreath
             ),
             colorForBreathTextView = getColorForBreathTextView(
-                gameState.character.breath,
-                gameState.character.timeBreath
+                gameState.grid.character.breath.breath,
+                gameState.grid.character.breath.secondsSupplyForBreath
             ),
         )
     }

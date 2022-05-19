@@ -3,7 +3,7 @@ package com.fiz.tetriswithlife.game.ui
 import android.graphics.*
 import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.models.Element
-import com.fiz.tetriswithlife.game.domain.models.Point
+import com.fiz.tetriswithlife.game.domain.models.Vector
 import kotlin.math.min
 
 
@@ -30,7 +30,7 @@ class Display(
         widthSurface / widthGrid
     ).toFloat()
 
-    private var offset = Point(
+    private var offset = Vector(
         ((widthSurface - widthGrid * newTile) / 2).toInt(),
         ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
@@ -70,7 +70,7 @@ class Display(
                 if (gameState.grid.space[y][x].block != 0) {
                     val screenX = offset.x + x * newTile
                     val screenY = offset.y + y * newTile
-                    val offset: Point = getOffset(gameState.grid.space[y][x])
+                    val offset: Vector = getOffset(gameState.grid.space[y][x])
 
                     canvas.drawBitmap(
                         bmpKv[gameState.grid.space[y][x].block - 1],
@@ -87,11 +87,11 @@ class Display(
     }
 
     private fun drawCurrentFigure(gameState: GameState, canvas: Canvas) {
-        for (cell in gameState.currentFigure.figure.cells) {
+        for (cell in gameState.grid.currentFigure.figure.cells) {
             val screenX =
-                offset.x + ((cell.point.x + gameState.currentFigure.position.x) * newTile).toFloat()
+                offset.x + ((cell.vector.x + gameState.grid.currentFigure.position.x) * newTile).toFloat()
             val screenY =
-                offset.y + ((cell.point.y + gameState.currentFigure.position.y) * newTile).toFloat()
+                offset.y + ((cell.vector.y + gameState.grid.currentFigure.position.y) * newTile).toFloat()
             var oldY = 0
             var cY = screenY
             var nTile = newTile
@@ -111,9 +111,9 @@ class Display(
     }
 
     private fun drawCharacter(gameState: GameState, canvas: Canvas) {
-        val offset = gameState.character.getSprite() * tile
-        val screenX = this.offset.x + (gameState.character.position.x * newTile).toFloat()
-        val screenY = this.offset.y + (gameState.character.position.y * newTile).toFloat()
+        val offset = gameState.grid.character.getSprite() * tile
+        val screenX = this.offset.x + (gameState.grid.character.location.position.x * newTile).toFloat()
+        val screenY = this.offset.y + (gameState.grid.character.location.position.y * newTile).toFloat()
         canvas.drawBitmap(
             bmpCharacter,
             Rect(
@@ -128,14 +128,14 @@ class Display(
     }
 
     private fun drawNextFigure(gameState: GameState, canvasInfo: Canvas) {
-        val offset = Point(
+        val offset = Vector(
             ((canvasInfo.width - 4 * newTile) / 2).toInt(),
             ((canvasInfo.height - 4 * newTile) / 2).toInt()
         )
         canvasInfo.drawColor(Color.parseColor("#242424"))
-        for (cell in gameState.nextFigure.cells) {
-            val screenX = offset.x + (cell.point.x) * newTile
-            val screenY = offset.y + (cell.point.y) * newTile
+        for (cell in gameState.grid.nextFigure.cells) {
+            val screenX = offset.x + (cell.vector.x) * newTile
+            val screenY = offset.y + (cell.vector.y) * newTile
             canvasInfo.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),
@@ -146,15 +146,15 @@ class Display(
     }
 }
 
-fun getOffset(element: Element): Point {
+fun getOffset(element: Element): Vector {
     if (element.getSpaceStatus() == 'R')
-        return Point(((element.status['R'] ?: (0 - 1))), 1)
+        return Vector(((element.status['R'] ?: (0 - 1))), 1)
 
     if (element.getSpaceStatus() == 'L')
-        return Point(((element.status['L'] ?: (0 - 1))), 2)
+        return Vector(((element.status['L'] ?: (0 - 1))), 2)
 
     if (element.getSpaceStatus() == 'U')
-        return Point(((element.status['U'] ?: (0 - 1))), 3)
+        return Vector(((element.status['U'] ?: (0 - 1))), 3)
 
-    return Point(0, 0)
+    return Vector(0, 0)
 }

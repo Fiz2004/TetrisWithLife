@@ -19,8 +19,8 @@ internal class CurrentFigureTest {
     @Before
     fun setUp() {
         grid = Grid(5, 10, { 0 })
-        figure = Figure(getNumberFigure = { 0 })
-        currentFigure = CurrentFigure(figure,grid.width, getStartX = { 0 })
+        figure = Figure(getNumberFigure = 0)
+        currentFigure = CurrentFigure(figure, Coordinate(0.0, (0 - figure.getMaxY()).toDouble()))
     }
 
     @Test

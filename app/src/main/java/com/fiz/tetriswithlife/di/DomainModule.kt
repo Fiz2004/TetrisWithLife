@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.game.di
+package com.fiz.tetriswithlife.di
 
 import com.fiz.tetriswithlife.game.domain.models.Controller
 import dagger.Module
