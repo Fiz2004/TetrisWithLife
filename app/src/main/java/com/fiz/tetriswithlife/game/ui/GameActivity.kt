@@ -14,7 +14,6 @@ import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.BitmapRepository
 import com.fiz.tetriswithlife.game.domain.Display
-import com.fiz.tetriswithlife.game.domain.GameState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -80,43 +79,49 @@ class GameActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                gameViewModel.gameState.collectLatest {
-                    displayUpdate(it)
+
+                launch {
+                    gameViewModel.gameState.collectLatest { gameState ->
+
+                        binding.gameSurfaceView.holder.lockCanvas(null)?.let {
+                            display.render(gameState, it)
+                            binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
+                        }
+
+                        binding.nextFigureSurfaceView.holder.lockCanvas(null)?.let {
+                            display.renderInfo(gameState, it)
+                            binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
+                        }
+
+                    }
+                }
+
+                launch {
+
+                    gameViewModel.uiState.collectLatest { uiState ->
+                        binding.scoresTextView.text = resources.getString(
+                            R.string.scores_game_textview, uiState.scores
+                        )
+
+                        binding.recordTextview.text =
+                            resources.getString(R.string.record_game_textview, uiState.record)
+
+                        binding.pauseButton.text = resources.getString(uiState.pauseResumeButton)
+
+                        val visibility = if (uiState.infoBreathTextViewVisibility)
+                            View.VISIBLE
+                        else
+                            View.INVISIBLE
+
+                        binding.infoBreathTextView.visibility = visibility
+                        binding.breathTextView.visibility = visibility
+
+                        binding.breathTextView.setTextColor(uiState.colorForBreathTextView)
+                        binding.breathTextView.text = uiState.textForBreathTextView
+                    }
                 }
             }
         }
-
-    }
-
-    private fun displayUpdate(gameState: GameState) {
-
-        binding.gameSurfaceView.holder.lockCanvas(null)?.let {
-            display.render(gameState, it)
-            binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
-        }
-
-        binding.nextFigureSurfaceView.holder.lockCanvas(null)?.let {
-            display.renderInfo(gameState, it)
-            binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
-        }
-
-        binding.scoresTextView.text = resources.getString(
-            R.string.scores_game_textview, gameState.scoresFormat
-        )
-        binding.recordTextview.text =
-            resources.getString(R.string.record_game_textview, gameState.recordFormat)
-
-        binding.pauseButton.text = resources.getString(gameState.textForButtonPause)
-
-        val visibility = if (gameState.infoBreathTextViewNotVisibility)
-            View.INVISIBLE
-        else
-            View.VISIBLE
-
-        binding.infoBreathTextView.visibility = visibility
-        binding.breathTextView.visibility = visibility
-        binding.breathTextView.setTextColor(gameState.colorForBreathTextView)
-        binding.breathTextView.text = gameState.textForBreathTextView
     }
 
     @SuppressLint("ClickableViewAccessibility")

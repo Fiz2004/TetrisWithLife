@@ -15,7 +15,7 @@ open class CharacterEat(grid: Grid) : Character(grid) {
 
         if (this.isNewFrame()) {
             if (tempEat == 1)
-                return "eat"
+                return "eatFinish"
 
             return "true"
         }

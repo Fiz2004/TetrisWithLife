@@ -1,24 +1,104 @@
 package com.fiz.tetriswithlife.game.ui
 
+import android.graphics.Color
 import android.view.MotionEvent
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.Controller
-import com.fiz.tetriswithlife.game.domain.GameState
+import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+import kotlin.math.floor
+import kotlin.math.max
 import kotlin.math.min
 
 const val widthGrid: Int = 13
 const val heightGrid: Int = 25
 
+data class UIState(
+    val scores: String = "000000",
+    val record: String = "000000",
+    val pauseResumeButton: Int = 0,
+    val infoBreathTextViewVisibility: Boolean = false,
+    val textForBreathTextView: String = "0",
+    val colorForBreathTextView: Int = 0,
+
+    )
+
+fun scoresFormat(scores: Int): String {
+    return scores.toString().padStart(6, '0')
+}
+
+fun recordFormat(record: Int): String {
+    return record.toString().padStart(6, '0')
+}
+
+fun textForPauseButton(status: GameState.Companion.StatusGame): Int {
+    return if (status == GameState.Companion.StatusGame.Pause)
+        R.string.resume_game_button
+    else
+        R.string.pause_game_button
+}
+
+fun getInfoBreathTextViewVisibility(breath: Boolean): Boolean {
+    return !breath
+}
+
+private fun getSec(breath: Boolean, timeBreath: Double): Double {
+    return if (breath)
+        TIMES_BREATH_LOSE
+    else
+        max(timeBreath, 0.0)
+}
+
+fun getTextForBreathTextView(breath: Boolean, timeBreath: Double): String {
+    val sec = getSec(breath, timeBreath)
+    return sec.toInt().toString()
+}
+
+fun getColorForBreathTextView(breath: Boolean, timeBreath: Double): Int {
+    val sec = getSec(breath, timeBreath)
+    val color = ((floor(
+        sec
+    ) * 255) / TIMES_BREATH_LOSE).toInt()
+    return Color.rgb(
+        255, color, color
+    )
+}
+
 @HiltViewModel
 class GameViewModel @Inject constructor(var recordRepository: RecordRepository) : ViewModel() {
-    var gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState(widthGrid, heightGrid, recordRepository.loadRecord())); private set
+
+    var gameState: MutableStateFlow<GameState> =
+        MutableStateFlow(GameState(widthGrid, heightGrid, recordRepository.loadRecord()))
+        private set
+
+    var uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState()); private set
+
+    init {
+        gameState.onEach {
+            uiState.value = uiState.value.copy(
+                scores = scoresFormat(it.scores),
+                record = recordFormat(it.record),
+                pauseResumeButton = textForPauseButton(it.status),
+                infoBreathTextViewVisibility = getInfoBreathTextViewVisibility(it.character.breath),
+                textForBreathTextView = getTextForBreathTextView(
+                    it.character.breath,
+                    it.character.timeBreath
+                ),
+                colorForBreathTextView = getColorForBreathTextView(
+                    it.character.breath,
+                    it.character.timeBreath
+                ),
+            )
+        }.launchIn(viewModelScope)
+    }
 
     private var controller = Controller()
     private var job: Job? = null
@@ -68,7 +148,7 @@ class GameViewModel @Inject constructor(var recordRepository: RecordRepository) 
             }
 
             if (ending < 0 || gameState.value.status == GameState.Companion.StatusGame.NewGame) {
-                gameState.value.new(recordRepository.loadRecord())
+                gameState.value = GameState(widthGrid, heightGrid, recordRepository.loadRecord())
                 ending = 1.0
             }
 

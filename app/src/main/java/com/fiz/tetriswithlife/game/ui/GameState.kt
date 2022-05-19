@@ -1,16 +1,13 @@
-package com.fiz.tetriswithlife.game.domain
+package com.fiz.tetriswithlife.game.ui
 
-import android.graphics.Color
-import com.fiz.tetriswithlife.R
+import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
-import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.grid.Grid
 import com.fiz.tetriswithlife.game.domain.models.Figure
 import com.fiz.tetriswithlife.game.domain.models.Point
 import java.io.Serializable
 import kotlin.math.floor
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 private const val NUMBER_FRAMES_ELEMENTS = 4
@@ -28,56 +25,6 @@ data class GameState(
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure),
     val changed: Boolean = false
 ) : Serializable {
-    val scoresFormat
-        get() = scores.toString().padStart(6, '0')
-
-    val recordFormat
-        get() = record.toString().padStart(6, '0')
-
-    val textForButtonPause
-        get() = if (status == StatusGame.Pause)
-            R.string.resume_game_button
-        else
-            R.string.pause_game_button
-
-    val infoBreathTextViewNotVisibility
-        get() = character.breath
-
-    private val sec = if (character.breath)
-        TIMES_BREATH_LOSE
-    else
-        max(character.timeBreath, 0.0)
-
-    val textForBreathTextView: String
-        get() {
-            return sec.toInt().toString()
-        }
-
-    private val color = ((floor(
-        sec
-    ) * 255) / TIMES_BREATH_LOSE).toInt()
-
-    val colorForBreathTextView: Int
-        get() {
-            return Color.rgb(
-                255, color, color
-            )
-        }
-
-    fun new(startRecord: Int) {
-        grid = Grid(grid.width, grid.height)
-        character = CharacterBreath(grid)
-        scores = 0
-        record = startRecord
-        status = StatusGame.Playing
-        nextFigure = Figure()
-        currentFigure = CurrentFigure(grid, nextFigure)
-    }
-
-    private fun createCurrentFigure() {
-        currentFigure = CurrentFigure(grid, nextFigure)
-        nextFigure = Figure()
-    }
 
     fun update(controller: Controller, deltaTime: Double, updateRecord: () -> Unit): Boolean {
         if (!character.breath)
@@ -104,11 +51,12 @@ data class GameState(
         }
 
         val statusCharacter = character.update(grid)
-        if (statusCharacter == "eat") {
+        if (statusCharacter == "eatFinish") {
             val tile = character.posTile
             grid.space[tile.y][tile.x].setZero()
             scores += 50
             updateRecord()
+            character.isBreath(grid)
         } else if (statusCharacter == "eatDestroy") {
             changeGridDestroyElement()
         }
@@ -130,6 +78,11 @@ data class GameState(
         }
 
         return false
+    }
+
+    private fun createCurrentFigure() {
+        currentFigure = CurrentFigure(grid, nextFigure)
+        nextFigure = Figure()
     }
 
     private fun isCrushedBeetle(): Boolean {
