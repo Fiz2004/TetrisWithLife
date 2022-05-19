@@ -1,6 +1,8 @@
 package com.fiz.tetriswithlife.game.domain.models
 
-data class Coordinate(val x: Double, val y: Double) {
+import java.io.Serializable
+
+data class Coordinate(val x: Double, val y: Double): Serializable {
     operator fun plus(add: Coordinate): Coordinate {
         return Coordinate(this.x + add.x, this.y + add.y)
     }

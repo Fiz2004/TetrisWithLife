@@ -2,7 +2,7 @@ package com.fiz.tetriswithlife.game.ui
 
 import android.graphics.*
 import com.fiz.tetriswithlife.game.data.BitmapRepository
-import com.fiz.tetriswithlife.game.domain.grid.Element
+import com.fiz.tetriswithlife.game.domain.models.Element
 import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.min
 

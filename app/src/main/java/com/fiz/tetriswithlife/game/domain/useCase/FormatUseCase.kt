@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.game.domain
+package com.fiz.tetriswithlife.game.domain.useCase
 
 import android.graphics.Color
 import com.fiz.tetriswithlife.R

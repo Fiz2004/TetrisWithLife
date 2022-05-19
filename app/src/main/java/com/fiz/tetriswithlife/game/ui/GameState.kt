@@ -1,8 +1,8 @@
 package com.fiz.tetriswithlife.game.ui
 
-import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
-import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.character.Character
+import com.fiz.tetriswithlife.game.domain.models.Grid
+import com.fiz.tetriswithlife.game.domain.models.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.models.Figure
 import java.io.Serializable
 
@@ -11,7 +11,7 @@ data class GameState(
     val height: Int,
     val startRecord: Int,
     var grid: Grid = Grid(width, height),
-    var character: CharacterBreath = CharacterBreath(grid),
+    var character: Character = Character(grid),
     var scores: Int = 0,
     var record: Int = startRecord,
     val status: StatusCurrentGame = StatusCurrentGame.Playing,
@@ -43,7 +43,7 @@ data class GameState(
     }
 
     companion object {
-        enum class StatusCurrentGame {
+        enum class StatusCurrentGame: Serializable  {
             Playing, Pause, NewGame
         }
 

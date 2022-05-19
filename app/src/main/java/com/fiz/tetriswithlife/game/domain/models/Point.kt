@@ -1,6 +1,8 @@
 package com.fiz.tetriswithlife.game.domain.models
 
-data class Point(val x: Int, val y: Int) {
+import java.io.Serializable
+
+data class Point(val x: Int, val y: Int) : Serializable {
     operator fun plus(p: Point): Point {
         return Point(this.x + p.x, this.y + p.y)
     }

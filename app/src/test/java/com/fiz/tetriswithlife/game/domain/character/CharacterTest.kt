@@ -1,11 +1,11 @@
 package com.fiz.tetriswithlife.game.domain.character
 
-import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Grid
 import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import org.junit.Assert.assertFalse
 import org.junit.Test
 
-class CharacterBreathTest {
+class CharacterTest {
 
     @Test
     fun whenBreathNo_shouldNoFindWay() {
@@ -36,7 +36,7 @@ class CharacterBreathTest {
         grid.space[24][10].block = 1
         grid.space[21][11].block = 1
         grid.space[21][12].block = 1
-        val character = CharacterBreath(grid)
+        val character = Character(grid)
         character.position = Coordinate(5.0, 24.0)
         val result = character.isBreath(grid)
 

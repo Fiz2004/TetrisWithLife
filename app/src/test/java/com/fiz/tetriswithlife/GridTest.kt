@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife
 
-import com.fiz.tetriswithlife.game.domain.grid.Grid
+import com.fiz.tetriswithlife.game.domain.models.Grid
 import com.fiz.tetriswithlife.game.domain.models.Point
 import org.junit.Assert.*
 import org.junit.Before
@@ -11,7 +11,7 @@ class GridTest {
 
     @Before
     fun setup() {
-        grid = Grid(5, 10) { 0 }
+        grid = Grid(5, 10, { 0 })
     }
 
     @Test

@@ -1,17 +1,13 @@
-package com.fiz.tetriswithlife.game.domain
+package com.fiz.tetriswithlife.game.domain.useCase
 
-import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.figure.STEP_MOVE_KEY_Y
-import com.fiz.tetriswithlife.game.domain.grid.Grid
-import com.fiz.tetriswithlife.game.domain.models.Cell
-import com.fiz.tetriswithlife.game.domain.models.Coordinate
-import com.fiz.tetriswithlife.game.domain.models.Point
+import com.fiz.tetriswithlife.game.domain.models.*
 import javax.inject.Inject
 import kotlin.math.ceil
 
 const val SecTimeOutInput = 0.08
 
 private const val STEP_MOVE_KEY_X = 1
+private const val STEP_MOVE_KEY_Y = 0.01
 
 class UpdateCurrentFigureUseCase @Inject constructor() {
 
@@ -52,9 +48,8 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
         return true
     }
 
-
     private fun moveLeft(grid: Grid, currentFigure: CurrentFigure) {
-        if (!isCollission(
+        if (!isCollision(
                 grid, currentFigure,
                 Coordinate(
                     (currentFigure.position.x - STEP_MOVE_KEY_X),
@@ -66,8 +61,8 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
                 currentFigure.position.copy(x = currentFigure.position.x - STEP_MOVE_KEY_X)
     }
 
-    fun moveRight(grid: Grid, currentFigure: CurrentFigure) {
-        if (!isCollission(
+    private fun moveRight(grid: Grid, currentFigure: CurrentFigure) {
+        if (!isCollision(
                 grid, currentFigure,
                 Coordinate(
                     (currentFigure.position.x + STEP_MOVE_KEY_X),
@@ -79,7 +74,7 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
                 currentFigure.position.copy(x = currentFigure.position.x + STEP_MOVE_KEY_X)
     }
 
-    fun rotate(grid: Grid, currentFigure: CurrentFigure) {
+    private fun rotate(grid: Grid, currentFigure: CurrentFigure) {
         val oldCells = currentFigure.figure.cells
         currentFigure.figure =
             currentFigure.figure.copy(cells = currentFigure.figure.cells.map { cell ->
@@ -90,7 +85,7 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
                     ), cell.view
                 )
             })
-        if (isCollission(
+        if (isCollision(
                 grid, currentFigure,
                 Coordinate(
                     currentFigure.position.x,
@@ -101,7 +96,7 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
             currentFigure.figure = currentFigure.figure.copy(cells = oldCells)
     }
 
-    fun moveDown(grid: Grid, currentFigure: CurrentFigure, stepY: Float) {
+    private fun moveDown(grid: Grid, currentFigure: CurrentFigure, stepY: Float) {
         val yStart = ceil(currentFigure.position.y)
         val yEnd = ceil(currentFigure.position.y + stepY.toDouble())
         val yMax = getYMax(grid, currentFigure, yStart.toInt(), yEnd.toInt())
@@ -122,7 +117,7 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
 
     private fun getYMax(grid: Grid, currentFigure: CurrentFigure, yStart: Int, yEnd: Int): Int {
         for (y in yStart..yEnd)
-            if (isCollission(
+            if (isCollision(
                     grid,
                     currentFigure,
                     Coordinate(currentFigure.position.x, y.toDouble())
@@ -140,7 +135,7 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
         yEnd: Int
     ): Boolean {
         for (y in yStart..yEnd)
-            if (isCollission(
+            if (isCollision(
                     grid,
                     currentFigure,
                     Coordinate(currentFigure.position.x, y.toDouble())
@@ -151,14 +146,14 @@ class UpdateCurrentFigureUseCase @Inject constructor() {
         return false
     }
 
-    fun isCollission(grid: Grid, currentFigure: CurrentFigure, p: Coordinate): Boolean {
-        if (currentFigure.getPositionTile(p).any { point ->
+    fun isCollision(grid: Grid, currentFigure: CurrentFigure, currentCoordinate: Coordinate): Boolean {
+        if (currentFigure.getPositionTile(currentCoordinate).any { point ->
                 (point.x !in 0 until grid.width)
                         || point.y > grid.height - 1
             })
             return true
 
-        if (currentFigure.getPositionTile(p).any { point ->
+        if (currentFigure.getPositionTile(currentCoordinate).any { point ->
                 grid.isInside(point) && grid.space[point.y][point.x].block != 0
             }
         )

@@ -1,14 +1,9 @@
-package com.fiz.tetriswithlife.game.domain.figure
+package com.fiz.tetriswithlife.game.domain.models
 
-import com.fiz.tetriswithlife.game.domain.models.Coordinate
-import com.fiz.tetriswithlife.game.domain.models.Figure
-import com.fiz.tetriswithlife.game.domain.models.Point
 import java.io.Serializable
 
 private const val START_STEP_MOVE_AUTO = 0.001
 private const val ADD_STEP_MOVE_AUTO = 0.01
-
-const val STEP_MOVE_KEY_Y = 0.01
 
 class CurrentFigure(
     var figure: Figure,
@@ -31,7 +26,7 @@ class CurrentFigure(
         stepMoveAuto = ADD_STEP_MOVE_AUTO + ADD_STEP_MOVE_AUTO * (scores / scoresForLevel.toFloat())
     }
 
-    companion object{
+    companion object {
         enum class StatusMoved {
             Fixation, Fall
         }

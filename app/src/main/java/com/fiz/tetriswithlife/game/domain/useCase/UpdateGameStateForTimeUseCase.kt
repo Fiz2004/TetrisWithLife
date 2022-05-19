@@ -1,8 +1,9 @@
-package com.fiz.tetriswithlife.game.domain
+package com.fiz.tetriswithlife.game.domain.useCase
 
 import com.fiz.tetriswithlife.game.data.RecordRepository
 import com.fiz.tetriswithlife.game.domain.character.StatusCharacter
-import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
+import com.fiz.tetriswithlife.game.domain.models.Controller
+import com.fiz.tetriswithlife.game.domain.models.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.models.Figure
 import com.fiz.tetriswithlife.game.domain.models.Point
 import com.fiz.tetriswithlife.game.ui.GameState
@@ -18,6 +19,7 @@ private const val NUMBER_FRAMES_ELEMENTS = 4
 
 class UpdateGameStateForTimeUseCase @Inject constructor(
     private val updateCurrentFigureUseCase: UpdateCurrentFigureUseCase,
+    private val updateCharacterUseCase: UpdateCharacterUseCase,
     private val recordRepository: RecordRepository
 ) {
     private var timeToRestart = SecTimeForRestartForEndGame
@@ -64,25 +66,7 @@ class UpdateGameStateForTimeUseCase @Inject constructor(
     ): GameState.Companion.StatusUpdateGame {
 
         updateCurrentFigureUseCase(gameState.grid, gameState.currentFigure, deltaTime, controller)
-        updateCharacter(gameState, deltaTime, updateRecord)
-
-        if (isEndGame(gameState, updateRecord)) {
-            gameState.checkRecord(updateRecord)
-            return GameState.Companion.StatusUpdateGame.End
-        }
-
-        return GameState.Companion.StatusUpdateGame.Continue
-    }
-
-
-
-    private fun updateCharacter(
-        gameState: GameState,
-        deltaTime: Double,
-        updateRecord: (Int) -> Unit
-    ) {
-
-        val statusCharacter = gameState.character.update(gameState.grid, deltaTime)
+        val statusCharacter=updateCharacterUseCase(gameState.grid,gameState.character, deltaTime)
 
         if (statusCharacter == StatusCharacter.EatFinish) {
             val tile = gameState.character.posTile
@@ -95,6 +79,43 @@ class UpdateGameStateForTimeUseCase @Inject constructor(
         if (statusCharacter == StatusCharacter.Eat) {
             changeGridDestroyElement(gameState)
         }
+
+        if (isEndGame(gameState, updateRecord)) {
+            gameState.checkRecord(updateRecord)
+            return GameState.Companion.StatusUpdateGame.End
+        }
+
+        return GameState.Companion.StatusUpdateGame.Continue
+    }
+
+    private fun changeGridDestroyElement(gameState: GameState) {
+        val newX = if (gameState.character.move.x == -1)
+            0
+        else
+            gameState.character.move.x
+
+        val offset = Point(newX, gameState.character.move.y)
+
+        val tile = Point(
+            floor(gameState.character.position.x).toInt() + offset.x,
+            (gameState.character.position.y.roundToInt() + offset.y),
+        )
+
+        gameState.grid.space[tile.y][tile.x].status[gameState.character.getDirectionEat()] =
+            getStatusDestroyElement(gameState) + 1
+
+        gameState.character.isBreath(gameState.grid)
+    }
+
+    private fun getStatusDestroyElement(gameState: GameState): Int {
+        if (gameState.character.angle == 0F)
+            return floor((gameState.character.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
+                .toInt()
+        if (gameState.character.angle == 180F)
+            return 3 - floor((gameState.character.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
+                .toInt()
+
+        return 0
     }
 
     private fun isEndGame(
@@ -112,7 +133,6 @@ class UpdateGameStateForTimeUseCase @Inject constructor(
 
         return false
     }
-
 
     private fun isLose(gameState: GameState): Boolean {
         if (gameState.grid.isNotFree(gameState.character.posTile) && gameState.character.eat == 0)
@@ -149,13 +169,12 @@ class UpdateGameStateForTimeUseCase @Inject constructor(
         return false
     }
 
-
     private fun createCurrentFigure(gameState: GameState) {
         gameState.currentFigure = CurrentFigure(gameState.nextFigure, gameState.grid.width)
         gameState.nextFigure = Figure()
     }
 
-    fun isCrushedBeetle(gameState: GameState): Boolean {
+    private fun isCrushedBeetle(gameState: GameState): Boolean {
         val tile = gameState.character.posTile
         for (elem in gameState.currentFigure.getPositionTile())
             if (elem == tile
@@ -185,34 +204,5 @@ class UpdateGameStateForTimeUseCase @Inject constructor(
         gameState.character.isBreath(gameState.grid)
     }
 
-    fun changeGridDestroyElement(gameState: GameState) {
-        val newX = if (gameState.character.move.x == -1)
-            0
-        else
-            gameState.character.move.x
-
-        val offset = Point(newX, gameState.character.move.y)
-
-        val tile = Point(
-            floor(gameState.character.position.x).toInt() + offset.x,
-            (gameState.character.position.y.roundToInt() + offset.y),
-        )
-
-        gameState.grid.space[tile.y][tile.x].status[gameState.character.getDirectionEat()] =
-            getStatusDestroyElement(gameState) + 1
-
-        gameState.character.isBreath(gameState.grid)
-    }
-
-    private fun getStatusDestroyElement(gameState: GameState): Int {
-        if (gameState.character.angle == 0F)
-            return floor((gameState.character.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
-                .toInt()
-        if (gameState.character.angle == 180F)
-            return 3 - floor((gameState.character.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
-                .toInt()
-
-        return 0
-    }
 }
 

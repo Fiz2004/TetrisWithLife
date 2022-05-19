@@ -1,6 +1,5 @@
-package com.fiz.tetriswithlife.game.domain.grid
+package com.fiz.tetriswithlife.game.domain.models
 
-import com.fiz.tetriswithlife.game.domain.models.Point
 import java.io.Serializable
 
 private const val NUMBER_IMAGES_BACKGROUND = 16

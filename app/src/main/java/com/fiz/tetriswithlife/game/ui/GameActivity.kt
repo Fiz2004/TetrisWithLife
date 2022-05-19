@@ -180,10 +180,9 @@ class GameActivity : AppCompatActivity() {
         gameViewModel.activityStop()
     }
 
-    // Сериализация не проходит
     override fun onSaveInstanceState(outState: Bundle) {
         gameViewModel.gameState.value.let {
-//            outState.putSerializable(STATE, it)
+            outState.putSerializable(STATE, it)
         }
         super.onSaveInstanceState(outState)
     }

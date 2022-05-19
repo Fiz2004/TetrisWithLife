@@ -3,9 +3,9 @@ package com.fiz.tetriswithlife.game.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fiz.tetriswithlife.game.data.RecordRepository
-import com.fiz.tetriswithlife.game.domain.Controller
-import com.fiz.tetriswithlife.game.domain.FormatUseCase
-import com.fiz.tetriswithlife.game.domain.UpdateGameStateForTimeUseCase
+import com.fiz.tetriswithlife.game.domain.models.Controller
+import com.fiz.tetriswithlife.game.domain.useCase.FormatUseCase
+import com.fiz.tetriswithlife.game.domain.useCase.UpdateGameStateForTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.game.domain
+package com.fiz.tetriswithlife.game.domain.models
 
 data class Controller(
     val down: Boolean = false,
