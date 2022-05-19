@@ -1,5 +1,7 @@
 package com.fiz.tetriswithlife.game.domain
 
+const val SecTimeOutInput = 0.08
+
 data class Controller(
     val down: Boolean = false,
     val up: Boolean = false,
@@ -8,15 +10,15 @@ data class Controller(
 ) {
     private var timeLast: Double = 0.0
 
-    fun isCannotTimeLast(deltaTime: Double): Boolean {
+    fun isCanTimeLast(deltaTime: Double): Boolean {
         if (timeLast == 0.0) {
-            timeLast = 0.08
+            timeLast = SecTimeOutInput
         } else {
             timeLast -= deltaTime
             if (timeLast < 0.0)
                 timeLast = 0.0
-            return true
+            return false
         }
-        return false
+        return true
     }
 }

@@ -8,21 +8,21 @@ private const val PROBABILITY_EAT = 20
 open class CharacterEat(grid: Grid) : Character(grid) {
     var eat = 0
 
-    override fun update(grid: Grid): String {
+    override fun update(grid: Grid, deltaTime: Double): StatusCharacter {
         val tempEat = this.eat
         eat = 0
-        val statusUpdate = super.update(grid)
+        val statusUpdate = super.update(grid, deltaTime)
 
         if (this.isNewFrame()) {
             if (tempEat == 1)
-                return "eatFinish"
+                return StatusCharacter.EatFinish
 
-            return "true"
+            return StatusCharacter.Nothing
         }
 
         if (tempEat == 1 && this.isMoveStraight()) {
             eat = 1
-            return "eatDestroy"
+            return StatusCharacter.Eat
         }
 
         return statusUpdate
@@ -98,4 +98,8 @@ open class CharacterEat(grid: Grid) : Character(grid) {
 
         return Point(0, 0)
     }
+}
+
+enum class StatusCharacter {
+    Nothing, Eat, EatFinish
 }

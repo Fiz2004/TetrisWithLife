@@ -39,13 +39,13 @@ open class Character(grid: Grid) {
         get() = sin(angle * (Math.PI / 180)).roundToInt()
 
 
-    open fun update(grid: Grid): String {
+    open fun update(grid: Grid, deltaTime: Double): StatusCharacter {
         changePosition()
 
         if (isNewFrame())
             return updateNewFrame(grid)
 
-        return "true"
+        return StatusCharacter.Nothing
     }
 
     private fun changePosition() {
@@ -63,15 +63,15 @@ open class Character(grid: Grid) {
     }
 
     fun isNewFrame(): Boolean {
-        return (position.x % 1 < (1 / CHARACTER_SPEED_LINE)
-                || position.x % 1 > (1 - (1 / CHARACTER_SPEED_LINE))
-                ) && (position.y % 1 < (1 / CHARACTER_SPEED_LINE)
-                || position.y % 1 > (1 - (1 / CHARACTER_SPEED_LINE))
+        return (position.x % 1 < (1 / 10000.0)
+                || position.x % 1 > (1 - (1 / 10000.0))
+                ) && (position.y % 1 < (1 / 10000.0)
+                || position.y % 1 > (1 - (1 / 10000.0))
                 ) && ((angle / CHARACTER_SPEED_ROTATE) % 2 < 0.01
                 || (angle / CHARACTER_SPEED_ROTATE) % 2 > 1.99)
     }
 
-    private fun updateNewFrame(grid: Grid): String {
+    private fun updateNewFrame(grid: Grid): StatusCharacter {
         moves = getDirection(grid)
 
         if (move.x == moves[0].x && move.y == moves[0].y) {
@@ -83,7 +83,7 @@ open class Character(grid: Grid) {
 
         speed = getSpeedAngle()
 
-        return "true"
+        return StatusCharacter.Nothing
     }
 
     fun isMoveStraight(): Boolean {
@@ -99,7 +99,7 @@ open class Character(grid: Grid) {
         if (cos(angle * (Math.PI / 180)).roundToInt() == move.x
             && sin(angle * (Math.PI / 180)).roundToInt() == move.y
         )
-            return Speed((1 / 10.0).toFloat(), 0F)
+            return Speed((1 / 1000.0).toFloat(), 0F)
 
         if (angle == tempAngle.toFloat())
             return Speed(0F, 0F)

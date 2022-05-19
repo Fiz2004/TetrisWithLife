@@ -10,6 +10,12 @@ class CharacterBreath(grid: Grid) : CharacterEat(grid) {
     var timeBreath = TIMES_BREATH_LOSE
     var breath = true
 
+    override fun update(grid: Grid, deltaTime: Double): StatusCharacter {
+        if (!breath)
+            timeBreath -= deltaTime
+        return super.update(grid, deltaTime)
+    }
+
     private var tempGrid: MutableList<MutableList<Int>> = MutableList(grid.height) {
         MutableList(grid.width) {
             0

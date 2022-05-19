@@ -1,6 +1,9 @@
 package com.fiz.tetriswithlife.game.domain
 
 import com.fiz.tetriswithlife.game.data.RecordRepository
+import com.fiz.tetriswithlife.game.domain.character.StatusCharacter
+import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
+import com.fiz.tetriswithlife.game.domain.figure.STEP_MOVE_KEY_Y
 import com.fiz.tetriswithlife.game.ui.GameState
 import com.fiz.tetriswithlife.game.ui.heightGrid
 import com.fiz.tetriswithlife.game.ui.widthGrid
@@ -48,45 +51,79 @@ class UpdateGameStateForTimeUseCase @Inject constructor(
 
     }
 
-    fun updateGameState(
+    private fun updateGameState(
         gameState: GameState, controller: Controller,
         deltaTime: Double,
         updateRecord: (Int) -> Unit
     ): GameState.Companion.StatusUpdateGame {
-        if (!gameState.character.breath)
-            gameState.character.timeBreath -= deltaTime
 
-        if (controller.isCannotTimeLast(deltaTime))
-            return GameState.Companion.StatusUpdateGame.Continue
+        updateCurrentFigure(gameState.currentFigure, deltaTime, controller)
+        updateCharacter(gameState, deltaTime, updateRecord)
 
-        val status = gameState.currentFigure.moves(controller)
-
-        if (gameState.isEndGame(status, updateRecord)) {
+        if (isEndGame(gameState, updateRecord)) {
             gameState.checkRecord(updateRecord)
             return GameState.Companion.StatusUpdateGame.End
         }
 
-        if (!gameState.character.breath && (gameState.isLose() || gameState.isCrushedBeetle())) {
-            gameState.checkRecord(updateRecord)
-            return GameState.Companion.StatusUpdateGame.End
+        return GameState.Companion.StatusUpdateGame.Continue
+    }
+
+    private fun updateCurrentFigure(
+        currentFigure: CurrentFigure,
+        deltaTime: Double,
+        controller: Controller
+    ) {
+        if (controller.isCanTimeLast(deltaTime)) {
+            if (controller.left)
+                currentFigure.moveLeft()
+
+            if (controller.right)
+                currentFigure.moveRight()
+
+            if (controller.up)
+                currentFigure.rotate()
         }
 
-        if (gameState.status == GameState.Companion.StatusCurrentGame.NewGame) {
-            gameState.checkRecord(updateRecord)
-            return GameState.Companion.StatusUpdateGame.End
-        }
+        val step: Float =
+            if (controller.down) STEP_MOVE_KEY_Y.toFloat() else currentFigure.stepMoveAuto.toFloat()
 
-        val statusCharacter = gameState.character.update(gameState.grid)
-        if (statusCharacter == "eatFinish") {
+        currentFigure.moveDown(step)
+    }
+
+    private fun updateCharacter(
+        gameState: GameState,
+        deltaTime: Double,
+        updateRecord: (Int) -> Unit
+    ) {
+
+        val statusCharacter = gameState.character.update(gameState.grid, deltaTime)
+
+        if (statusCharacter == StatusCharacter.EatFinish) {
             val tile = gameState.character.posTile
             gameState.grid.space[tile.y][tile.x].setZero()
             gameState.scores += 50
             gameState.checkRecord(updateRecord)
             gameState.character.isBreath(gameState.grid)
-        } else if (statusCharacter == "eatDestroy") {
-            gameState.changeGridDestroyElement()
         }
 
-        return GameState.Companion.StatusUpdateGame.Continue
+        if (statusCharacter == StatusCharacter.Eat) {
+            gameState.changeGridDestroyElement()
+        }
+    }
+
+    private fun isEndGame(
+        gameState: GameState,
+        updateRecord: (Int) -> Unit
+    ): Boolean {
+        if (gameState.isEndGame(updateRecord))
+            return true
+
+        if (!gameState.character.breath && (gameState.isLose() || gameState.isCrushedBeetle()))
+            return true
+
+        if (gameState.isStatusNewGame())
+            return true
+
+        return false
     }
 }

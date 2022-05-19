@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife.game.domain.figure
 
-import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.grid.Grid
 import com.fiz.tetriswithlife.game.domain.models.Cell
 import com.fiz.tetriswithlife.game.domain.models.Coordinate
@@ -8,20 +7,21 @@ import com.fiz.tetriswithlife.game.domain.models.Figure
 import com.fiz.tetriswithlife.game.domain.models.Point
 import kotlin.math.ceil
 
-private const val START_STEP_MOVE_AUTO = 0.03
-private const val ADD_STEP_MOVE_AUTO = 0.1
+private const val START_STEP_MOVE_AUTO = 0.001
+private const val ADD_STEP_MOVE_AUTO = 0.01
 private const val STEP_MOVE_KEY_X = 1
-private const val STEP_MOVE_KEY_Y = 4
+const val STEP_MOVE_KEY_Y = 0.01
 
 class CurrentFigure(
     private val grid: Grid,
     var figure: Figure,
     getStartX: () -> Int = { (0 until (grid.width - figure.getMaxX())).shuffled().first() },
-    private var stepMoveAuto: Double = START_STEP_MOVE_AUTO,
+    var stepMoveAuto: Double = START_STEP_MOVE_AUTO,
     var position: Coordinate = Coordinate(
         getStartX().toDouble(),
         (0 - figure.getMaxY()).toDouble()
-    )
+    ),
+    var statusLastMovedDown: StatusMoved = StatusMoved.Fall
 ) {
 
     fun getPositionTile(p: Coordinate = Coordinate(position.x, position.y)): List<Point> {
@@ -49,25 +49,17 @@ class CurrentFigure(
         return false
     }
 
-    fun moves(controller: Controller): StatusMoved {
-        if (controller.left) moveLeft()
-        if (controller.right) moveRight()
-        if (controller.up) rotate()
-        val step: Float = if (controller.down) STEP_MOVE_KEY_Y.toFloat() else stepMoveAuto.toFloat()
-        return moveDown(step)
-    }
-
-    private fun moveLeft() {
+    fun moveLeft() {
         if (!isCollission(Coordinate((position.x - STEP_MOVE_KEY_X), position.y)))
             position = position.copy(x = position.x - STEP_MOVE_KEY_X)
     }
 
-    private fun moveRight() {
+    fun moveRight() {
         if (!isCollission(Coordinate((position.x + STEP_MOVE_KEY_X), position.y)))
             position = position.copy(x = position.x + STEP_MOVE_KEY_X)
     }
 
-    private fun rotate() {
+    fun rotate() {
         val oldCells = figure.cells
         figure = figure.copy(cells = figure.cells.map { cell ->
             Cell(
@@ -81,26 +73,23 @@ class CurrentFigure(
             figure = figure.copy(cells = oldCells)
     }
 
-    private fun moveDown(stepY: Float): StatusMoved {
+    fun moveDown(stepY: Float) {
         val yStart = ceil(position.y)
         val yEnd = ceil(position.y + stepY.toDouble())
         val yMax = getYMax(yStart.toInt(), yEnd.toInt())
 
         if (isCheckCollisionIfMoveDown(yStart.toInt(), yEnd.toInt())) {
-            if (getPositionTile(Coordinate(position.x, yMax.toDouble()))
-                    .any { (it.y - 1) < 0 }
-            )
-                return StatusMoved.EndGame
 
             position = position.copy(y = yMax.toDouble())
 
-            return StatusMoved.Fixation
+            statusLastMovedDown = StatusMoved.Fixation
+            return
         }
 
         position =
             position.copy(y = position.y + (if (stepY < 1) stepY else yMax - yStart).toFloat())
 
-        return StatusMoved.Fall
+        statusLastMovedDown = StatusMoved.Fall
     }
 
     private fun getYMax(yStart: Int, yEnd: Int): Int {
@@ -121,7 +110,7 @@ class CurrentFigure(
 
     companion object{
         enum class StatusMoved {
-            EndGame,Fixation,Fall
+            Fixation, Fall
         }
     }
 }

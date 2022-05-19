@@ -41,17 +41,20 @@ data class GameState(
     }
 
     fun isEndGame(
-        status: CurrentFigure.Companion.StatusMoved,
         updateRecord: (Int) -> Unit
     ): Boolean {
-        if (status == CurrentFigure.Companion.StatusMoved.EndGame
-            // Фигура достигла препятствия
-            || (status == CurrentFigure.Companion.StatusMoved.Fall && isCrushedBeetle())
+
+        if ((currentFigure.statusLastMovedDown == CurrentFigure.Companion.StatusMoved.Fixation &&
+                    (currentFigure.getPositionTile()
+                        .any { (it.y - 1) < 0 }
+                            ))// Фигура достигла препятствия
+            || (currentFigure.statusLastMovedDown == CurrentFigure.Companion.StatusMoved.Fall && isCrushedBeetle())
         )
         // Стакан заполнен игра окончена
             return true
 
-        if (status == CurrentFigure.Companion.StatusMoved.Fixation) {
+
+        if (currentFigure.statusLastMovedDown == CurrentFigure.Companion.StatusMoved.Fixation) {
             fixation(updateRecord)
             createCurrentFigure()
         }
