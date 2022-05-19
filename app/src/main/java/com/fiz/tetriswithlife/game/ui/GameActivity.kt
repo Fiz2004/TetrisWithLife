@@ -13,7 +13,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
 import com.fiz.tetriswithlife.game.data.BitmapRepository
-import com.fiz.tetriswithlife.game.domain.Display
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

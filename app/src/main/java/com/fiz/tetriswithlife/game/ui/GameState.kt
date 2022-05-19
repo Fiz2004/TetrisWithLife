@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife.game.ui
 
-import com.fiz.tetriswithlife.game.domain.Controller
 import com.fiz.tetriswithlife.game.domain.character.CharacterBreath
 import com.fiz.tetriswithlife.game.domain.figure.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.grid.Grid
@@ -26,56 +25,22 @@ data class GameState(
     val changed: Boolean = false
 ) : Serializable {
 
-    fun update(
-        controller: Controller,
-        deltaTime: Double,
-        updateRecord: (Int) -> Unit
-    ): StatusUpdateGame {
-        if (!character.breath)
-            character.timeBreath -= deltaTime
-
-        if (controller.isCannotTimeLast(deltaTime))
-            return StatusUpdateGame.Continue
-
-        val status = currentFigure.moves(controller)
-
-        if (isEndGame(status, updateRecord)) {
-            checkRecord(updateRecord)
-            return StatusUpdateGame.End
-        }
-
-        if (!character.breath && (isLose() || isCrushedBeetle())) {
-            checkRecord(updateRecord)
-            return StatusUpdateGame.End
-        }
-
-        if (this.status == StatusCurrentGame.NewGame) {
-            checkRecord(updateRecord)
-            return StatusUpdateGame.End
-        }
-
-        val statusCharacter = character.update(grid)
-        if (statusCharacter == "eatFinish") {
-            val tile = character.posTile
-            grid.space[tile.y][tile.x].setZero()
-            scores += 50
-            checkRecord(updateRecord)
-            character.isBreath(grid)
-        } else if (statusCharacter == "eatDestroy") {
-            changeGridDestroyElement()
-        }
-
-        return StatusUpdateGame.Continue
+    fun isStatusPause(): Boolean {
+        return status == StatusCurrentGame.Pause
     }
 
-    private fun checkRecord(updateRecord: (Int) -> Unit) {
+    fun isStatusNewGame(): Boolean {
+        return status == StatusCurrentGame.NewGame
+    }
+
+    fun checkRecord(updateRecord: (Int) -> Unit) {
         if (scores > record) {
             record = scores
             updateRecord(scores)
         }
     }
 
-    private fun isEndGame(
+    fun isEndGame(
         status: CurrentFigure.Companion.StatusMoved,
         updateRecord: (Int) -> Unit
     ): Boolean {
@@ -99,7 +64,7 @@ data class GameState(
         nextFigure = Figure()
     }
 
-    private fun isCrushedBeetle(): Boolean {
+    fun isCrushedBeetle(): Boolean {
         val tile = character.posTile
         for (elem in currentFigure.getPositionTile())
             if (elem == tile
@@ -129,7 +94,7 @@ data class GameState(
         character.isBreath(grid)
     }
 
-    private fun changeGridDestroyElement() {
+    fun changeGridDestroyElement() {
         val newX = if (character.move.x == -1)
             0
         else
@@ -159,7 +124,7 @@ data class GameState(
         return 0
     }
 
-    private fun isLose(): Boolean {
+    fun isLose(): Boolean {
         if (this.grid.isNotFree(character.posTile) && character.eat == 0)
             return true
 

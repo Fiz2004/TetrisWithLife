@@ -4,31 +4,50 @@ import android.graphics.Color
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.game.domain.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.ui.GameState
+import com.fiz.tetriswithlife.game.ui.UIState
 import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
 
 class FormatUseCase @Inject constructor() {
-    fun getScore(scores: Int): String {
+
+    operator fun invoke(uiState: UIState, gameState: GameState): UIState {
+        return uiState.copy(
+            scores = getScore(gameState.scores),
+            record = getRecord(gameState.record),
+            pauseResumeButton = getTextForPauseResumeButton(gameState.status),
+            infoBreathTextViewVisibility = getVisibilityForInfoBreathTextView(gameState.character.breath),
+            textForBreathTextView = getTextForBreathTextView(
+                gameState.character.breath,
+                gameState.character.timeBreath
+            ),
+            colorForBreathTextView = getColorForBreathTextView(
+                gameState.character.breath,
+                gameState.character.timeBreath
+            ),
+        )
+    }
+
+    private fun getScore(scores: Int): String {
         return scores.toString().padStart(6, '0')
     }
 
-    fun getRecord(record: Int): String {
+    private fun getRecord(record: Int): String {
         return record.toString().padStart(6, '0')
     }
 
-    fun getTextForPauseResumeButton(status: GameState.Companion.StatusCurrentGame): Int {
+    private fun getTextForPauseResumeButton(status: GameState.Companion.StatusCurrentGame): Int {
         return if (status == GameState.Companion.StatusCurrentGame.Pause)
             R.string.resume_game_button
         else
             R.string.pause_game_button
     }
 
-    fun getVisibilityForInfoBreathTextView(breath: Boolean): Boolean {
+    private fun getVisibilityForInfoBreathTextView(breath: Boolean): Boolean {
         return !breath
     }
 
-    fun getTextForBreathTextView(breath: Boolean, timeBreath: Double): String {
+    private fun getTextForBreathTextView(breath: Boolean, timeBreath: Double): String {
         val sec = getSec(breath, timeBreath)
         return sec.toInt().toString()
     }
@@ -40,7 +59,7 @@ class FormatUseCase @Inject constructor() {
             max(timeBreath, 0.0)
     }
 
-    fun getColorForBreathTextView(breath: Boolean, timeBreath: Double): Int {
+    private fun getColorForBreathTextView(breath: Boolean, timeBreath: Double): Int {
         val sec = getSec(breath, timeBreath)
         val color = ((floor(
             sec
