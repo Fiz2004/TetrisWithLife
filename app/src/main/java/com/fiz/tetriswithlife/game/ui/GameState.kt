@@ -20,34 +20,38 @@ data class GameState(
     var character: CharacterBreath = CharacterBreath(grid),
     var scores: Int = 0,
     var record: Int = startRecord,
-    var status: StatusGame = StatusGame.Playing,
+    var status: StatusCurrentGame = StatusCurrentGame.Playing,
     var nextFigure: Figure = Figure(),
     var currentFigure: CurrentFigure = CurrentFigure(grid, nextFigure),
     val changed: Boolean = false
 ) : Serializable {
 
-    fun update(controller: Controller, deltaTime: Double, updateRecord: () -> Unit): Boolean {
+    fun update(
+        controller: Controller,
+        deltaTime: Double,
+        updateRecord: (Int) -> Unit
+    ): StatusUpdateGame {
         if (!character.breath)
             character.timeBreath -= deltaTime
 
         if (controller.isCannotTimeLast(deltaTime))
-            return true
+            return StatusUpdateGame.Continue
 
         val status = currentFigure.moves(controller)
 
         if (isEndGame(status, updateRecord)) {
-            updateRecord()
-            return false
+            checkRecord(updateRecord)
+            return StatusUpdateGame.End
         }
 
         if (!character.breath && (isLose() || isCrushedBeetle())) {
-            updateRecord()
-            return false
+            checkRecord(updateRecord)
+            return StatusUpdateGame.End
         }
 
-        if (this.status == StatusGame.NewGame) {
-            updateRecord()
-            return false
+        if (this.status == StatusCurrentGame.NewGame) {
+            checkRecord(updateRecord)
+            return StatusUpdateGame.End
         }
 
         val statusCharacter = character.update(grid)
@@ -55,16 +59,26 @@ data class GameState(
             val tile = character.posTile
             grid.space[tile.y][tile.x].setZero()
             scores += 50
-            updateRecord()
+            checkRecord(updateRecord)
             character.isBreath(grid)
         } else if (statusCharacter == "eatDestroy") {
             changeGridDestroyElement()
         }
 
-        return true
+        return StatusUpdateGame.Continue
     }
 
-    private fun isEndGame(status: CurrentFigure.Companion.StatusMoved, updateRecord: () -> Unit): Boolean {
+    private fun checkRecord(updateRecord: (Int) -> Unit) {
+        if (scores > record) {
+            record = scores
+            updateRecord(scores)
+        }
+    }
+
+    private fun isEndGame(
+        status: CurrentFigure.Companion.StatusMoved,
+        updateRecord: (Int) -> Unit
+    ): Boolean {
         if (status == CurrentFigure.Companion.StatusMoved.EndGame
             // Фигура достигла препятствия
             || (status == CurrentFigure.Companion.StatusMoved.Fall && isCrushedBeetle())
@@ -96,7 +110,7 @@ data class GameState(
         return false
     }
 
-    private fun fixation(updateRecord: () -> Unit) {
+    private fun fixation(updateRecord: (Int) -> Unit) {
         val tile = currentFigure.getPositionTile()
         for ((index, value) in tile.withIndex())
             grid.space[value.y][value.x].block =
@@ -109,7 +123,7 @@ data class GameState(
             scores += i * scoresForRow
 
         currentFigure.fixation(scores)
-        updateRecord()
+        checkRecord(updateRecord)
 
         character.deleteRow = 1
         character.isBreath(grid)
@@ -156,12 +170,19 @@ data class GameState(
     }
 
     fun clickPause() {
-        status = if (status == StatusGame.Playing) StatusGame.Pause else StatusGame.Playing
+        status = if (status == StatusCurrentGame.Playing)
+            StatusCurrentGame.Pause
+        else
+            StatusCurrentGame.Playing
     }
 
-    companion object{
-        enum class StatusGame{
-            Playing,Pause,NewGame
+    companion object {
+        enum class StatusCurrentGame {
+            Playing, Pause, NewGame
+        }
+
+        enum class StatusUpdateGame {
+            Continue, End
         }
     }
 }

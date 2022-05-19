@@ -39,7 +39,9 @@ class GameActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        gameViewModel.tryLoadState(savedInstanceState?.getSerializable(STATE) as? GameState)
+        (savedInstanceState?.getSerializable(STATE) as? GameState)?.let {
+            gameViewModel.loadState(it)
+        }
 
         binding.gameSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(p0: SurfaceHolder) {}
@@ -127,22 +129,38 @@ class GameActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun bindListener() {
         this.binding.leftButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameViewModel.clickLeftButton(event)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> gameViewModel.clickLeftButton()
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> gameViewModel.clickCancel()
+            }
             true
         }
 
         binding.rightButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameViewModel.clickRightButton(event)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> gameViewModel.clickRightButton()
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> gameViewModel.clickCancel()
+            }
             true
         }
 
         binding.downButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameViewModel.clickDownButton(event)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> gameViewModel.clickDownButton()
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> gameViewModel.clickCancel()
+            }
             true
         }
 
         binding.rotateButton.setOnTouchListener { _: View, event: MotionEvent ->
-            gameViewModel.clickRotateButton(event)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> gameViewModel.clickRotateButton()
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> gameViewModel.clickCancel()
+            }
             true
         }
 
