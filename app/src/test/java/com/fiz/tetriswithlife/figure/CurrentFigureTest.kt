@@ -1,10 +1,9 @@
 package com.fiz.tetriswithlife.figure
 
 import com.fiz.tetriswithlife.game.domain.models.Coordinate
-import com.fiz.tetriswithlife.game.domain.models.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.models.Figure
 import com.fiz.tetriswithlife.game.domain.models.Grid
-import com.fiz.tetriswithlife.game.domain.useCase.UpdateCurrentFigureUseCase
+import com.fiz.tetriswithlife.game.domain.models.figure.CurrentFigure
+import com.fiz.tetriswithlife.game.domain.models.figure.Figure
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -14,7 +13,6 @@ internal class CurrentFigureTest {
     private lateinit var grid: Grid
     private lateinit var figure: Figure
     private lateinit var currentFigure: CurrentFigure
-    private val updateCurrentFigureUseCase= UpdateCurrentFigureUseCase()
 
     @Before
     fun setUp() {
@@ -27,21 +25,21 @@ internal class CurrentFigureTest {
     fun whenNotCollision_shouldReturnFalse() {
         val coordinate = Coordinate(0.0, 0.0)
 
-        assertFalse(updateCurrentFigureUseCase.isCollision(grid,currentFigure,coordinate))
+        assertFalse(grid.isCollision(coordinate))
     }
 
     @Test
     fun whenCoordinateOutsideGridForX_shouldReturnTrue() {
         val coordinate = Coordinate(12.0, 0.0)
 
-        assertTrue(updateCurrentFigureUseCase.isCollision(grid,currentFigure,coordinate))
+        assertTrue(grid.isCollision(coordinate))
     }
 
     @Test
     fun whenCoordinateOutsideGridForMinusY_shouldReturnFalse() {
         val coordinate = Coordinate(0.0, -2.0)
 
-        assertFalse(updateCurrentFigureUseCase.isCollision(grid,currentFigure,coordinate))
+        assertFalse(grid.isCollision(coordinate))
     }
 
     @Test
@@ -49,6 +47,6 @@ internal class CurrentFigureTest {
         grid.space[9][3].block = 1
         val coordinate = Coordinate(0.0, 9.0)
 
-        assertTrue(updateCurrentFigureUseCase.isCollision(grid,currentFigure,coordinate))
+        assertTrue(grid.isCollision(coordinate))
     }
 }

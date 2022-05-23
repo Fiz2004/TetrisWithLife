@@ -6,10 +6,8 @@ import org.junit.Test
 
 class CharacterTest {
 
-    val updateGameStateForTimeUseCase = UpdateGameStateForTimeUseCase()
-
     @Test
-    fun whenBreathNo_shouldNoFindWay() {
+    fun whenNoWayUp_shouldNoFindWay() {
         val grid = Grid(13, 25)
         grid.space[12][0].block = 1
         grid.space[12][1].block = 1
@@ -41,13 +39,11 @@ class CharacterTest {
             Location(Coordinate(5.0, 24.0))
         )
 
-        val isPathUp = updateGameStateForTimeUseCase.isPathUp(
+        val isPathUp = grid.isPathUp(
             character.location.position.posTile,
-            grid,
             grid.getFullCopySpace()
         )
-        val result = character.setBreath(isPathUp)
 
-        Assert.assertFalse(result)
+        Assert.assertFalse(isPathUp)
     }
 }

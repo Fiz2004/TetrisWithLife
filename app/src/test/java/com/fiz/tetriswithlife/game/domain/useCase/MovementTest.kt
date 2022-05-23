@@ -1,15 +1,17 @@
 package com.fiz.tetriswithlife.game.domain.useCase
 
-import com.fiz.tetriswithlife.game.domain.models.*
+import com.fiz.tetriswithlife.game.domain.models.Character
+import com.fiz.tetriswithlife.game.domain.models.Coordinate
+import com.fiz.tetriswithlife.game.domain.models.Grid
+import com.fiz.tetriswithlife.game.domain.models.Vector
 import com.fiz.tetriswithlife.game.domain.models.character.Location
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class UpdateCharacterUseCaseTest {
+class MovementTest {
 
-    private val updateCharacterUseCase = UpdateCharacterUseCase()
     lateinit var grid: Grid
     lateinit var character: Character
 
@@ -23,11 +25,12 @@ class UpdateCharacterUseCaseTest {
     fun whenCharacterCanDirectionsFreeNoEat_shouldReturnTrue() {
         val directions = listOf(Vector(-1, 0))
 
-        val canMove = updateCharacterUseCase.isCanDirectionsAndSetCharacterEat(
+        val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
+            character.location.position.posTile,
             directions,
             grid,
-            character,
-            false
+            false,
+            {}
         )
 
         assertTrue(canMove)
@@ -39,11 +42,12 @@ class UpdateCharacterUseCaseTest {
         val directions = listOf(Vector(-1, 0))
         grid.space[9][4].block = 5
 
-        val canMove = updateCharacterUseCase.isCanDirectionsAndSetCharacterEat(
+        val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
+            character.location.position.posTile,
             directions,
             grid,
-            character,
-            false
+            false,
+            {}
         )
 
         assertFalse(canMove)
@@ -55,11 +59,12 @@ class UpdateCharacterUseCaseTest {
         val directions = listOf(Vector(-1, 0))
         grid.space[9][4].block = 5
 
-        val canMove = updateCharacterUseCase.isCanDirectionsAndSetCharacterEat(
+        val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
+            character.location.position.posTile,
             directions,
             grid,
-            character,
-            true
+            true,
+            { character.eat = true }
         )
 
         assertTrue(canMove)

@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife.game.domain.models
 
+import com.fiz.tetriswithlife.game.domain.models.figure.Figure
 import org.junit.Assert
 import org.junit.Test
 

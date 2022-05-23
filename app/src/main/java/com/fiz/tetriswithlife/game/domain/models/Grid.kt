@@ -171,7 +171,7 @@ data class Grid(
         return GameState.Companion.StatusUpdateGame.Continue
     }
 
-    private fun isCollision(coordinate: Coordinate): Boolean {
+    fun isCollision(coordinate: Coordinate): Boolean {
         if (currentFigure.getPositionTile(coordinate).any { point ->
                 (point.x !in 0 until width)
                         || point.y > height - 1
@@ -338,7 +338,7 @@ data class Grid(
         return tempSpace[p.y][p.x] == 0
     }
 
-    private fun isPathUp(tile: Vector, tempSpace: MutableList<MutableList<Int>>): Boolean {
+    fun isPathUp(tile: Vector, tempSpace: MutableList<MutableList<Int>>): Boolean {
         if (tile.y == 0)
             return true
 

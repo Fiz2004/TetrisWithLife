@@ -128,7 +128,7 @@ class Movement : Serializable {
         return listOf(Vector(0, 0))
     }
 
-    private fun isCanDirectionsAndSetCharacterEat(
+    fun isCanDirectionsAndSetCharacterEat(
         posTile: Vector,
         directions: List<Vector>,
         grid: Grid,
