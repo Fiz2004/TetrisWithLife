@@ -17,6 +17,8 @@ import kotlin.math.min
 const val widthGrid: Int = 13
 const val heightGrid: Int = 25
 
+private const val mSecFromFPS60=((1.0 / 60.0) * 1000.0).toLong()
+
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val recordRepository: RecordRepository,
@@ -38,8 +40,6 @@ class GameViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    private var running = false
-
     fun loadState(gameState: GameState) {
         this.gameState.value = gameState
     }
@@ -54,14 +54,12 @@ class GameViewModel @Inject constructor(
     }
 
     private fun gameLoop(): suspend CoroutineScope.() -> Unit = {
-        running = true
         var prevTime = System.currentTimeMillis()
 
         while (isActive) {
-            if (running) {
 
                 val now = System.currentTimeMillis()
-                val deltaTime = min(now - prevTime, ((1.0 / 60.0) * 1000).toLong()) / 1000.0
+                val deltaTime = min(now - prevTime, mSecFromFPS60) / 1000.0
                 if (deltaTime == 0.0) continue
 
                 gameState.value = gameState.value.update(
@@ -74,7 +72,6 @@ class GameViewModel @Inject constructor(
                     }).copy(changed = !gameState.value.changed)
 
                 prevTime = now
-            }
         }
     }
 
@@ -109,7 +106,9 @@ class GameViewModel @Inject constructor(
     }
 
     fun activityStop() {
-        running = false
+        viewModelScope.launch(Dispatchers.Default) {
+            job?.cancelAndJoin()
+        }
     }
 }
 
