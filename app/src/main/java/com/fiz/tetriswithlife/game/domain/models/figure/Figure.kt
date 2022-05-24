@@ -66,6 +66,14 @@ data class Figure(
         FIGURES[getNumberFigure].map { Cell(it, (1..NUMBER_IMAGES_FIGURE).shuffled().first()) }
 ) : Serializable {
 
+    fun getWidth(): Int {
+        return cells.filter { it.vector.x != 0 }.size
+    }
+
+    fun getHeight(): Int {
+        return cells.filter { it.vector.y != 0 }.size
+    }
+
     fun getMaxX(): Int {
         return cells.maxByOrNull { it.vector.x }?.vector?.x ?: 0
     }

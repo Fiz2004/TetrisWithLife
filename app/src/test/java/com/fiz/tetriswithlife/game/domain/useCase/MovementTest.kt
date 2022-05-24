@@ -1,9 +1,9 @@
 package com.fiz.tetriswithlife.game.domain.useCase
 
-import com.fiz.tetriswithlife.game.domain.models.Character
 import com.fiz.tetriswithlife.game.domain.models.Coordinate
 import com.fiz.tetriswithlife.game.domain.models.Grid
 import com.fiz.tetriswithlife.game.domain.models.Vector
+import com.fiz.tetriswithlife.game.domain.models.character.Character
 import com.fiz.tetriswithlife.game.domain.models.character.Location
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

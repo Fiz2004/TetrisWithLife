@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife.game.domain.models
 
+import com.fiz.tetriswithlife.game.domain.models.character.Character
 import com.fiz.tetriswithlife.game.domain.models.character.Location
 import com.fiz.tetriswithlife.game.domain.models.figure.CurrentFigure
 import com.fiz.tetriswithlife.game.domain.models.figure.Figure
@@ -285,6 +286,7 @@ data class Grid(
 
     private fun isCrushedBeetle(): Boolean {
         val tile = character.location.position.posTile
+
         for (elem in currentFigure.getPositionTile())
             if (elem == tile
                 || (isNotFree(tile) && !character.eat)

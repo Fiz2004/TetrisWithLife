@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife.game.domain.models
 
+import com.fiz.tetriswithlife.game.domain.models.character.Character
 import com.fiz.tetriswithlife.game.domain.models.character.Location
 import org.junit.Assert
 import org.junit.Test

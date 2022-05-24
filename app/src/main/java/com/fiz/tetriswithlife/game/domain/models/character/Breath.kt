@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife.game.domain.models.character
 
-import com.fiz.tetriswithlife.game.domain.models.TIMES_BREATH_LOSE
 import java.io.Serializable
 
 class Breath : Serializable {

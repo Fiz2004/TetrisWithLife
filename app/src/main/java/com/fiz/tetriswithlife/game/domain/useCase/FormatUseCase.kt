@@ -2,7 +2,7 @@ package com.fiz.tetriswithlife.game.domain.useCase
 
 import android.graphics.Color
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.game.domain.models.TIMES_BREATH_LOSE
+import com.fiz.tetriswithlife.game.domain.models.character.TIMES_BREATH_LOSE
 import com.fiz.tetriswithlife.game.ui.GameState
 import com.fiz.tetriswithlife.game.ui.UIState
 import javax.inject.Inject
@@ -61,11 +61,11 @@ class FormatUseCase @Inject constructor() {
 
     private fun getColorForBreathTextView(breath: Boolean, timeBreath: Double): Int {
         val sec = getSec(breath, timeBreath)
-        val color = ((floor(
+        val color = 255 - ((floor(
             sec
         ) * 255) / TIMES_BREATH_LOSE).toInt()
-        return Color.rgb(
-            255, color, color
+        return Color.argb(
+            color, 255, 0, 0
         )
     }
 }

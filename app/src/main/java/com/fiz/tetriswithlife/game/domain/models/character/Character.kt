@@ -1,6 +1,7 @@
-package com.fiz.tetriswithlife.game.domain.models
+package com.fiz.tetriswithlife.game.domain.models.character
 
-import com.fiz.tetriswithlife.game.domain.models.character.*
+import com.fiz.tetriswithlife.game.domain.models.Grid
+import com.fiz.tetriswithlife.game.domain.models.Vector
 import java.io.Serializable
 import kotlin.math.floor
 
@@ -29,23 +30,27 @@ data class Character(
 
     fun move(deltaTime: Double) {
         if (movement.isNotRotated())
-            location.addPosition(movement.speed.line*deltaTime)
+            location.addPosition(movement.speed.line.toDouble())
         else
             location.angle += Angle(movement.speed.rotate)
     }
 
     fun isNewFrame(): Boolean {
-        val deviantLine = 1.0 / 10000.0
-        val deviantAngle = 1.0 / 100
+        val deviantLine = 1.0 / 2000.0
+        val deviantAngle = 1.0 / 100.0
 
-        val isNewFrameByX = location.position.x % 1 !in (deviantLine..1 - deviantLine)
+        val isNewFrameByX =
+            location.position.x % 1 < deviantLine || location.position.x % 1 > 1 - deviantLine
 
-        val isNewFrameByY = location.position.y % 1 !in (deviantLine..1 - deviantLine)
+        val isNewFrameByY =
+            location.position.y % 1 < deviantLine || location.position.y % 1 > 1 - deviantLine
 
         val isNewFrameByRotate =
             (location.angle.angle / 45) % 2 !in (deviantAngle..2 - deviantAngle)
 
-        return isNewFrameByX && isNewFrameByY && isNewFrameByRotate
+        val result = isNewFrameByX && isNewFrameByY && isNewFrameByRotate
+
+        return result
     }
 
     fun updateByNewFrame(grid: Grid) {

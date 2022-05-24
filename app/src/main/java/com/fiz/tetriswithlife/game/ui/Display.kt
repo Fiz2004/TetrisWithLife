@@ -35,16 +35,16 @@ class Display(
         ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
 
-    fun render(gameState: GameState, canvas: Canvas) {
+    fun render(gameState: GameState, canvas: Canvas, color: Int) {
 
-        canvas.drawColor(Color.parseColor("#161616"))
+        canvas.drawColor(color)
         drawGridElements(gameState, canvas)
         drawCurrentFigure(gameState, canvas)
         drawCharacter(gameState, canvas)
     }
 
-    fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas) {
-        drawNextFigure(gameState, nextFigureCanvas)
+    fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas, color: Int) {
+        drawNextFigure(gameState, nextFigureCanvas, color)
     }
 
     private fun drawGridElements(gameState: GameState, canvas: Canvas) {
@@ -127,19 +127,36 @@ class Display(
         )
     }
 
-    private fun drawNextFigure(gameState: GameState, canvasInfo: Canvas) {
-        val offset = Vector(
-            ((canvasInfo.width - 4 * newTile) / 2).toInt(),
-            ((canvasInfo.height - 4 * newTile) / 2).toInt()
-        )
-        canvasInfo.drawColor(Color.parseColor("#242424"))
+    private fun drawNextFigure(gameState: GameState, canvasInfo: Canvas, color: Int) {
+
+        val oneTile = min(
+            canvasInfo.width / 4,
+            canvasInfo.height / 4
+        ).toFloat()
+
+        val x = gameState.grid.nextFigure.getWidth()
+        val ostX = 4 - x
+        val porX = ostX / 2
+        val pixX = porX * oneTile
+
+        val y = gameState.grid.nextFigure.getHeight()
+        val ostY = 4 - y
+        val porY = ostY / 2
+        val pixY = porY * oneTile
+
+        val offset =
+            Vector(pixX.toInt(), pixY.toInt())
+
+        canvasInfo.drawColor(color)
+
+
         for (cell in gameState.grid.nextFigure.cells) {
-            val screenX = offset.x + (cell.vector.x) * newTile
-            val screenY = offset.y + (cell.vector.y) * newTile
+            val screenX = offset.x + (cell.vector.x) * oneTile
+            val screenY = offset.y + (cell.vector.y) * oneTile
             canvasInfo.drawBitmap(
                 bmpKv[cell.view - 1],
                 Rect(0, 0, tile, tile),
-                RectF(screenX, screenY, screenX + newTile, screenY + newTile),
+                RectF(screenX, screenY, screenX + oneTile, screenY + oneTile),
                 paint
             )
         }

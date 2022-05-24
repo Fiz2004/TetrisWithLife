@@ -1,12 +1,14 @@
 package com.fiz.tetriswithlife.game.ui
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.use
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,24 +25,32 @@ class GameActivity : AppCompatActivity() {
 
     private val gameViewModel: GameViewModel by viewModels()
 
+    private val binding: ActivityGameBinding by lazy {
+        ActivityGameBinding.inflate(layoutInflater)
+    }
+
     private var surfaceReady = mutableListOf(false, false)
 
-    private lateinit var binding: ActivityGameBinding
-
     private lateinit var display: Display
+
+    private var colorBackground: Int = 0
 
     @Inject
     lateinit var bitmapRepository: BitmapRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityGameBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
 
-        (savedInstanceState?.getSerializable(STATE) as? GameState)?.let {
-            gameViewModel.loadState(it)
+        colorBackground = obtainStyledAttributes(
+            intArrayOf(R.attr.backgroundColor)
+        ).use {
+            it.getColor(0, Color.MAGENTA)
         }
+
+        val loadGameState =
+            savedInstanceState?.getSerializable(STATE) as? GameState
+        gameViewModel.loadState(loadGameState)
 
         binding.gameSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(p0: SurfaceHolder) {}
@@ -85,12 +95,12 @@ class GameActivity : AppCompatActivity() {
                     gameViewModel.gameState.collectLatest { gameState ->
 
                         binding.gameSurfaceView.holder.lockCanvas(null)?.let {
-                            display.render(gameState, it)
+                            display.render(gameState, it, colorBackground)
                             binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
                         }
 
                         binding.nextFigureSurfaceView.holder.lockCanvas(null)?.let {
-                            display.renderInfo(gameState, it)
+                            display.renderInfo(gameState, it, colorBackground)
                             binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
                         }
 
@@ -115,10 +125,12 @@ class GameActivity : AppCompatActivity() {
                             View.INVISIBLE
 
                         binding.infoBreathTextView.visibility = visibility
-                        binding.breathTextView.visibility = visibility
 
-                        binding.breathTextView.setTextColor(uiState.colorForBreathTextView)
-                        binding.breathTextView.text = uiState.textForBreathTextView
+                        binding.infoBreathTextView.setTextColor(uiState.colorForBreathTextView)
+                        binding.infoBreathTextView.text = resources.getString(
+                            R.string.infobreath_game_textview,
+                            uiState.textForBreathTextView
+                        )
                     }
                 }
             }
@@ -177,13 +189,11 @@ class GameActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         surfaceReady = mutableListOf(false, false)
-        gameViewModel.activityStop()
+        gameViewModel.stopGame()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        gameViewModel.gameState.value.let {
-            outState.putSerializable(STATE, it)
-        }
+        outState.putSerializable(STATE, gameViewModel.gameState.value)
         super.onSaveInstanceState(outState)
     }
 
@@ -192,6 +202,3 @@ class GameActivity : AppCompatActivity() {
     }
 
 }
-
-
-

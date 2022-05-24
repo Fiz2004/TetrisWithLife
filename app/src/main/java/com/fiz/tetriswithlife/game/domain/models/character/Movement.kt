@@ -8,7 +8,7 @@ private const val BASE_SPEED_ROTATE_FOR_SECOND = 45F
 
 private const val PROBABILITY_EAT_PERCENT = 20
 
-private const val BASE_SPEED_FOR_SECOND = 1F
+private const val BASE_SPEED_FOR_SECOND = 1F / 1000
 
 class Movement : Serializable {
     var speed = Speed(0F, 0F)
@@ -82,31 +82,42 @@ class Movement : Serializable {
     }
 
     private fun getNewDirection(posTile: Vector, grid: Grid, eating: () -> Unit): List<Vector> {
+
         val presetDirection = PresetDirection()
         deleteRow = 0
-
-        var listDirections: List<List<Vector>> =
-            listOf(presetDirection._0D) + presetDirection.RIGHT + presetDirection.LEFT
-
         // Если двигаемся вправо
         if (((speed.line == 0F && speed.rotate == 0F) && move.x == 1) || move.x == 1) {
             lastDirection = 1
-            listDirections = listOf(presetDirection.RIGHT_DOWN + presetDirection.RIGHT + presetDirection.LEFT).flatten()
+            return isCanMove(
+                posTile,
+                listOf(presetDirection.RIGHT_DOWN + presetDirection.RIGHT + presetDirection.LEFT).flatten(),
+                grid,
+                eating
+            )
         }
         // Если двигаемся влево
         if (((speed.line == 0F && speed.rotate == 0F) && move.x == -1) || move.x == -1) {
             lastDirection = -1
-            listDirections = listOf(
-                presetDirection.LEFT_DOWN,
-                presetDirection.LEFT,
-                presetDirection.RIGHT
-            ).flatten()
+            return isCanMove(
+                posTile,
+                listOf(presetDirection.LEFT_DOWN + presetDirection.LEFT + presetDirection.RIGHT).flatten(),
+                grid,
+                eating
+            )
         }
 
         if (lastDirection == -1)
-            listDirections = listOf(presetDirection._0D) + presetDirection.LEFT + presetDirection.RIGHT
+            return isCanMove(
+                posTile,
+                listOf(presetDirection._0D) + presetDirection.LEFT + presetDirection.RIGHT,
+                grid, eating
+            )
 
-        return isCanMove(posTile, listDirections, grid, eating)
+        return isCanMove(
+            posTile,
+            listOf(presetDirection._0D) + presetDirection.RIGHT + presetDirection.LEFT,
+            grid, eating
+        )
     }
 
     private fun isCanMove(

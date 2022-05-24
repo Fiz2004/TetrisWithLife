@@ -38,19 +38,24 @@ class GameViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private var job: Job? = null
+    private var gameJob: Job? = null
 
-    fun loadState(gameState: GameState) {
-        this.gameState.value = gameState
+    fun loadState(gameState: GameState?) {
+        this.gameState.value = gameState ?: return
     }
 
     fun startGame() {
 
         viewModelScope.launch(Dispatchers.Default) {
-            job?.cancelAndJoin()
-            job = viewModelScope.launch(Dispatchers.Default, block = gameLoop())
+            gameJob = viewModelScope.launch(Dispatchers.Default, block = gameLoop())
         }
 
+    }
+
+    fun stopGame() {
+        viewModelScope.launch(Dispatchers.Default) {
+            gameJob?.cancelAndJoin()
+        }
     }
 
     private fun gameLoop(): suspend CoroutineScope.() -> Unit = {
@@ -58,20 +63,20 @@ class GameViewModel @Inject constructor(
 
         while (isActive) {
 
-                val now = System.currentTimeMillis()
-                val deltaTime = min(now - prevTime, mSecFromFPS60) / 1000.0
-                if (deltaTime == 0.0) continue
+            val now = System.currentTimeMillis()
+            val deltaTime = min(now - prevTime, mSecFromFPS60) / 1000.0
+            if (deltaTime == 0.0) continue
 
-                gameState.value = gameState.value.update(
-                    deltaTime,
-                    controller,
-                    { recordRepository.loadRecord() },
-                    { score: Int ->
-                        if (score > recordRepository.loadRecord())
-                            recordRepository.saveRecord(score)
-                    }).copy(changed = !gameState.value.changed)
+            gameState.value = gameState.value.update(
+                deltaTime,
+                controller,
+                { recordRepository.loadRecord() },
+                { score: Int ->
+                    if (score > recordRepository.loadRecord())
+                        recordRepository.saveRecord(score)
+                }).copy(changed = !gameState.value.changed)
 
-                prevTime = now
+            prevTime = now
         }
     }
 
@@ -105,10 +110,5 @@ class GameViewModel @Inject constructor(
             .copy(status = gameState.value.getNewStatus())
     }
 
-    fun activityStop() {
-        viewModelScope.launch(Dispatchers.Default) {
-            job?.cancelAndJoin()
-        }
-    }
 }
 
