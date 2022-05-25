@@ -7,7 +7,7 @@
     android:padding="@dimen/mainPadding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".game.ui.GameActivity">
+    tools:context=".gameScreen.ui.GameActivity">
 
     <SurfaceView
         android:id="@+id/gameSurfaceView"
@@ -38,6 +38,8 @@
         android:layout_marginVertical="@dimen/buttonPadding"
         android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/new_game_game_button"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:layout_constraintBottom_toTopOf="@+id/pauseButton"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent" />
@@ -50,6 +52,8 @@
         android:layout_marginVertical="@dimen/buttonPadding"
         android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/pause_game_button"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:layout_constraintBottom_toTopOf="@+id/exitButton"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent" />
@@ -62,6 +66,8 @@
         android:layout_marginTop="@dimen/buttonPadding"
         android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/exit_game_button"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent" />
@@ -112,6 +118,8 @@
         android:layout_marginEnd="@dimen/halfButtonPadding"
         android:layout_marginBottom="@dimen/buttonPadding"
         android:text="@string/left_game_button"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:icon="@drawable/ic_baseline_keyboard_arrow_left_24"
         app:layout_constraintBottom_toTopOf="@+id/downButton"
         app:layout_constraintEnd_toStartOf="@+id/rightButton"
@@ -125,6 +133,8 @@
         android:layout_marginStart="@dimen/halfButtonPadding"
         android:layout_marginBottom="@dimen/buttonPadding"
         android:text="@string/right_game_button"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:icon="@drawable/ic_baseline_keyboard_arrow_right_24"
         app:iconGravity="end"
         app:layout_constraintBottom_toTopOf="@+id/downButton"
@@ -140,6 +150,8 @@
         android:layout_height="wrap_content"
         android:drawableBottom="@drawable/ic_baseline_keyboard_arrow_down_24"
         android:text="@string/down_game_button"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/gameSurfaceView" />
@@ -151,6 +163,8 @@
         android:layout_marginStart="@dimen/buttonPadding"
         android:layout_marginBottom="@dimen/buttonPadding"
         android:padding="0dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:layout_height="wrap_content"
         android:drawableTop="@drawable/ic_baseline_rotate_right_24"
         android:text="@string/rotate_game_button"

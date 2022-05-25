@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.di
 
-import com.fiz.tetriswithlife.game.domain.models.Controller
+import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

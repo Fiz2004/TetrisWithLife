@@ -10,13 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TetrisWithLife">
         <activity
-            android:name=".menu.ui.OptionsActivity"
+            android:name=".menuScreen.ui.OptionsActivity"
             android:exported="false" />
         <activity
-            android:name=".game.ui.GameActivity"
+            android:name=".gameScreen.ui.GameActivity"
             android:exported="false" />
         <activity
-            android:name=".menu.ui.MainActivity"
+            android:name=".menuScreen.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

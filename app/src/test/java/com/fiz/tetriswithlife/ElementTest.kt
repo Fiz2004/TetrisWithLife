@@ -1,7 +1,8 @@
 package com.fiz.tetriswithlife
 
-import com.fiz.tetriswithlife.game.domain.models.Element
+import com.fiz.tetriswithlife.gameScreen.game.Element
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -10,33 +11,32 @@ class ElementTest {
 
     @Before
     fun setup() {
-        element = Element(0, 0, mutableMapOf('L' to 1, 'R' to 2, 'U' to 3))
+        element = Element(0, 0, Element.Companion.StatusElement.Left(1))
     }
 
     @Test
     fun whenAllSpaceZero_shouldReturnL() {
-        val result = element.getSpaceStatus()
 
-        assertEquals('L', result)
+        val result = element.status is Element.Companion.StatusElement.Left
+
+        assertTrue(result)
     }
 
     @Test
     fun whenAllSpaceZero_shouldReturnAllZero() {
         element.setZero()
+        val result = element.status is Element.Companion.StatusElement.Whole
 
         assertEquals(0, element.block)
-        assertEquals(0, element.status['L'])
-        assertEquals(0, element.status['R'])
-        assertEquals(0, element.status['U'])
+        assertTrue(result)
     }
 
     @Test
     fun whenSetElement_shouldReturnElement() {
-        element.setElement(Element(5, 2, mutableMapOf('L' to 2, 'R' to 1, 'U' to 4)))
+        val result = element.status as Element.Companion.StatusElement.Left
+        val damage = result.damage
 
-        assertEquals(2, element.block)
-        assertEquals(2, element.status['L'])
-        assertEquals(1, element.status['R'])
-        assertEquals(4, element.status['U'])
+        assertEquals(0, element.block)
+        assertEquals(1, damage)
     }
 }
