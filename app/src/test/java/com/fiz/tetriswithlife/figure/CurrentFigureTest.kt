@@ -1,9 +1,9 @@
 package com.fiz.tetriswithlife.figure
 
-import com.fiz.tetriswithlife.game.domain.models.Coordinate
-import com.fiz.tetriswithlife.game.domain.models.Grid
-import com.fiz.tetriswithlife.game.domain.models.figure.CurrentFigure
-import com.fiz.tetriswithlife.game.domain.models.figure.Figure
+import com.fiz.tetriswithlife.gameScreen.domain.models.Coordinate
+import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
+import com.fiz.tetriswithlife.gameScreen.domain.models.figure.CurrentFigure
+import com.fiz.tetriswithlife.gameScreen.domain.models.figure.Figure
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before

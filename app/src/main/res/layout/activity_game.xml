@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="?attr/backgroundColor"
     android:padding="@dimen/mainPadding"
-    tools:context=".game.ui.GameActivity">
+    tools:context=".gameScreen.ui.GameActivity">
 
     <Button
         android:id="@+id/newGameButton"

@@ -7,7 +7,7 @@
     android:padding="@dimen/mainPadding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".game.ui.GameActivity">
+    tools:context=".gameScreen.ui.GameActivity">
 
     <SurfaceView
         android:id="@+id/gameSurfaceView"
