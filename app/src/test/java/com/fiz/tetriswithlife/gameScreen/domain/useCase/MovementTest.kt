@@ -1,6 +1,7 @@
 package com.fiz.tetriswithlife.gameScreen.domain.useCase
 
 import com.fiz.tetriswithlife.gameScreen.domain.models.Coordinate
+import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
 import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.Character
@@ -12,12 +13,12 @@ import org.junit.Test
 
 class MovementTest {
 
-    lateinit var grid: Grid
+    lateinit var game: Game
     lateinit var character: Character
 
     @Before
     fun setUp() {
-        grid = Grid(10, 10)
+        game = Game(Grid(10, 10))
         character = Character(Location(Coordinate(5.0, 9.0)))
     }
 
@@ -28,7 +29,7 @@ class MovementTest {
         val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
             character.location.position.posTile,
             directions,
-            grid,
+            game,
             false,
             {}
         )
@@ -40,12 +41,12 @@ class MovementTest {
     @Test
     fun whenCharacterCanDirectionsNotFreeNoEat_shouldReturnFalse() {
         val directions = listOf(Vector(-1, 0))
-        grid.space[9][4].block = 5
+        game.grid.space[9][4].block = 5
 
         val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
             character.location.position.posTile,
             directions,
-            grid,
+            game,
             false,
             {}
         )
@@ -57,12 +58,12 @@ class MovementTest {
     @Test
     fun whenCharacterCanDirectionsNotFreeCanEat_shouldReturnTrue() {
         val directions = listOf(Vector(-1, 0))
-        grid.space[9][4].block = 5
+        game.grid.space[9][4].block = 5
 
         val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
             character.location.position.posTile,
             directions,
-            grid,
+            game,
             true,
             { character.eat = true }
         )

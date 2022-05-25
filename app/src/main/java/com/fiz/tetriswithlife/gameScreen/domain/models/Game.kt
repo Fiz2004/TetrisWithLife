@@ -21,12 +21,16 @@ data class Grid(
         List(width) {
             Element(valueFon())
         }
-    },
+    }
+)
+
+data class Game(
+    val grid: Grid,
     var character: Character = Character(
         Location(
             Coordinate(
-                (0 until width).shuffled().first().toDouble(),
-                (height - 1).toDouble()
+                (0 until grid.width).shuffled().first().toDouble(),
+                (grid.height - 1).toDouble()
             )
         )
     ),
@@ -149,7 +153,7 @@ data class Grid(
 
             if (isEatenBefore) {
                 val tile = character.location.position.posTile
-                space[tile.y][tile.x].setZero()
+                grid.space[tile.y][tile.x].setZero()
                 plusScores(50)
                 val isPathUp = isPathUp(
                     character.location.position.posTile,
@@ -174,13 +178,13 @@ data class Grid(
 
     fun isCollision(coordinate: Coordinate): Boolean {
         if (currentFigure.getPositionTile(coordinate).any { point ->
-                (point.x !in 0 until width)
-                        || point.y > height - 1
+                (point.x !in 0 until grid.width)
+                        || point.y > grid.height - 1
             })
             return true
 
         if (currentFigure.getPositionTile(coordinate).any { point ->
-                isInside(point) && space[point.y][point.x].block != 0
+                isInside(point) && grid.space[point.y][point.x].block != 0
             }
         )
             return true
@@ -205,7 +209,7 @@ data class Grid(
             (character.location.position.y.roundToInt() + offset.y),
         )
 
-        space[tile.y][tile.x].status[character.getDirectionEat()] =
+        grid.space[tile.y][tile.x].status[character.getDirectionEat()] =
             getStatusDestroyElement() + 1
 
         val isPathUp = isPathUp(
@@ -274,7 +278,7 @@ data class Grid(
         currentFigure = CurrentFigure(
             nextFigure,
             Coordinate(
-                (0 until (width - nextFigure.getMaxX())).shuffled().first()
+                (0 until (grid.width - nextFigure.getMaxX())).shuffled().first()
                     .toDouble(),
                 (0 - nextFigure.getMaxY()).toDouble()
             )
@@ -299,7 +303,7 @@ data class Grid(
     ) {
         val tile = currentFigure.getPositionTile()
         for ((index, value) in tile.withIndex())
-            space[value.y][value.x].block =
+            grid.space[value.y][value.x].block =
                 currentFigure.figure.cells[index].view
         val countRowFull = getCountRowFull()
         if (countRowFull != 0)
@@ -322,7 +326,7 @@ data class Grid(
 
     fun getFullCopySpace(): MutableList<MutableList<Int>> {
         val result: MutableList<MutableList<Int>> = mutableListOf()
-        space.forEachIndexed { indexY, elements ->
+        grid.space.forEachIndexed { indexY, elements ->
             result.add(mutableListOf())
             elements.forEach { element ->
                 result[indexY].add(element.block)
@@ -356,24 +360,24 @@ data class Grid(
     }
 
     fun isInside(p: Vector): Boolean {
-        return p.x in 0 until width && p.y in 0 until height
+        return p.x in 0 until grid.width && p.y in 0 until grid.height
     }
 
     fun isOutside(p: Vector): Boolean {
-        return p.x !in 0 until width || p.y !in 0 until height
+        return p.x !in 0 until grid.width || p.y !in 0 until grid.height
     }
 
     fun isFree(p: Vector): Boolean {
-        return this.space[p.y][p.x].block == 0
+        return this.grid.space[p.y][p.x].block == 0
     }
 
     fun isNotFree(p: Vector): Boolean {
-        return this.space[p.y][p.x].block != 0
+        return this.grid.space[p.y][p.x].block != 0
     }
 
     fun getCountRowFull(): Int {
         var result = 0
-        for (row in space)
+        for (row in grid.space)
             if (row.all { it.block != 0 })
                 result += 1
 
@@ -381,26 +385,26 @@ data class Grid(
     }
 
     fun deleteRows() {
-        for ((index, value) in space.withIndex())
+        for ((index, value) in grid.space.withIndex())
             if (value.all { it.block != 0 }) {
                 for (i in index downTo 1)
-                    for (j in 0 until width)
-                        space[i][j].setElement(space[i - 1][j])
-                space[0].forEach { it.setZero() }
+                    for (j in 0 until grid.width)
+                        grid.space[i][j].setElement(grid.space[i - 1][j])
+                grid.space[0].forEach { it.setZero() }
             }
     }
 
     fun newGame() {
-        space = List(height) {
-            List(width) {
-                Element(valueFon())
+        grid.space = List(grid.height) {
+            List(grid.width) {
+                Element(grid.valueFon())
             }
         }
         character = Character(
             Location(
                 Coordinate(
-                    (0 until width).shuffled().first().toDouble(),
-                    (height - 1).toDouble()
+                    (0 until grid.width).shuffled().first().toDouble(),
+                    (grid.height - 1).toDouble()
                 )
             )
         )

@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.character
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
+import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
 import java.io.Serializable
 import kotlin.math.floor
@@ -53,10 +53,15 @@ data class Character(
         return result
     }
 
-    fun updateByNewFrame(grid: Grid) {
+    fun updateByNewFrame(game: Game) {
         eat = false
 
-        movement.updateByNewFrame(location.position.posTile,grid,location.angle.angle,isMoveStraight()) { eat = true }
+        movement.updateByNewFrame(
+            location.position.posTile,
+            game,
+            location.angle.angle,
+            isMoveStraight()
+        ) { eat = true }
     }
 
     fun setBreath(value: Boolean) {

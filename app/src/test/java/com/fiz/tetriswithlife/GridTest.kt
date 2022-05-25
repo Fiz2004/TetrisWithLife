@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife
 
+import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
 import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
 import org.junit.Assert.*
@@ -7,73 +8,73 @@ import org.junit.Before
 import org.junit.Test
 
 class GridTest {
-    private lateinit var grid: Grid
+    private lateinit var game: Game
 
     @Before
     fun setup() {
-        grid = Grid(5, 10, { 0 })
+        game = Game(Grid(5, 10, { 0 }))
     }
 
     @Test
     fun whenPointIsInside_shouldReturnTrue() {
-        val result = grid.isInside(Vector(1, 1))
+        val result = game.isInside(Vector(1, 1))
 
         assertTrue(result)
     }
 
     @Test
     fun whenPointIsNotInside_shouldReturnFalse() {
-        val result = grid.isInside(Vector(7, 1))
+        val result = game.isInside(Vector(7, 1))
 
         assertFalse(result)
     }
 
     @Test
     fun whenPointIsOutside_shouldReturnTrue() {
-        val result = grid.isOutside(Vector(7, 1))
+        val result = game.isOutside(Vector(7, 1))
 
         assertTrue(result)
     }
 
     @Test
     fun whenPointIsNotOutside_shouldReturnFalse() {
-        val result = grid.isOutside(Vector(1, 1))
+        val result = game.isOutside(Vector(1, 1))
 
         assertFalse(result)
     }
 
     @Test
     fun whenPointFree_shouldReturnTrue() {
-        val result = grid.isFree(Vector(1, 1))
+        val result = game.isFree(Vector(1, 1))
 
         assertTrue(result)
     }
 
     @Test
     fun whenPointNotFree_shouldReturnFalse() {
-        grid.space[1][1].block = 1
-        val result = grid.isFree(Vector(1, 1))
+        game.grid.space[1][1].block = 1
+        val result = game.isFree(Vector(1, 1))
 
         assertFalse(result)
     }
 
     @Test
     fun whenPointNotFree_shouldReturnTrue() {
-        grid.space[1][1].block = 1
-        val result = grid.isNotFree(Vector(1, 1))
+        game.grid.space[1][1].block = 1
+        val result = game.isNotFree(Vector(1, 1))
         assertTrue(result)
     }
 
     @Test
     fun whenPointFree_shouldReturnFalse() {
-        val result = grid.isNotFree(Vector(1, 1))
+        val result = game.isNotFree(Vector(1, 1))
 
         assertFalse(result)
     }
 
     @Test
     fun whenRowNotFull_shouldReturnZero() {
-        val result = grid.getCountRowFull()
+        val result = game.getCountRowFull()
 
         assertEquals(0, result)
     }
@@ -81,8 +82,8 @@ class GridTest {
     @Test
     fun whenRowFullOne_shouldReturnOne() {
         for (i in 0 until 5)
-            grid.space[9][i].block = 1
-        val result = grid.getCountRowFull()
+            game.grid.space[9][i].block = 1
+        val result = game.getCountRowFull()
 
         assertEquals(1, result)
     }
@@ -90,10 +91,10 @@ class GridTest {
     @Test
     fun whenRowFullTwo_shouldReturnTwo() {
         for (i in 0 until 5) {
-            grid.space[5][i].block = 1
-            grid.space[9][i].block = 1
+            game.grid.space[5][i].block = 1
+            game.grid.space[9][i].block = 1
         }
-        val result = grid.getCountRowFull()
+        val result = game.getCountRowFull()
 
         assertEquals(2, result)
     }
@@ -101,9 +102,9 @@ class GridTest {
     @Test
     fun whenRowFull_shouldCheckRowClean() {
         for (i in 0 until 5)
-            grid.space[9][i].block = 1
-        grid.deleteRows()
+            game.grid.space[9][i].block = 1
+        game.deleteRows()
 
-        assertEquals(0, grid.space[9][0].block)
+        assertEquals(0, game.grid.space[9][0].block)
     }
 }

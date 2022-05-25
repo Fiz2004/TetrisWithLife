@@ -2,61 +2,35 @@ package com.fiz.tetriswithlife.gameScreen.ui
 
 import android.graphics.Color
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.gameScreen.domain.models.Element
-import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
-import com.fiz.tetriswithlife.gameScreen.domain.models.character.Character
+import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.TIMES_BREATH_LOSE
-import com.fiz.tetriswithlife.gameScreen.domain.models.figure.CurrentFigure
-import com.fiz.tetriswithlife.gameScreen.domain.models.figure.Figure
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.max
 
 const val SecTimeForRestartForEndGame = 1.0
 
-data class GridState(
-    val width: Int,
-    val height: Int,
-    val space: List<List<Element>>,
-    val character: Character,
-    val nextFigure: Figure,
-    val currentFigure: CurrentFigure
-) : Serializable {
-    companion object {
-        fun fromGrid(grid: Grid): GridState {
-            return GridState(
-                width = grid.width,
-                height = grid.height,
-                space = grid.space,
-                character = grid.character,
-                nextFigure = grid.nextFigure,
-                currentFigure = grid.currentFigure
-            )
-        }
-    }
-}
-
-data class GameState(
-    val gridState: GridState,
+data class ViewState(
+    val gameState: Game,
     val scores: Int = 0,
     val record: Int,
     val status: StatusCurrentGame = StatusCurrentGame.Playing,
-    val changed: Boolean = false,
-    var timeToRestart: Double = SecTimeForRestartForEndGame
+    var timeToRestart: Double = SecTimeForRestartForEndGame,
+    val changed: Boolean = false
 ) : Serializable {
 
     val textForScores: String = getScore(scores)
     val textForRecord: String = getRecord(record)
     val textResourceForPauseResumeButton: Int = getTextForPauseResumeButton(status)
     val visibilityForInfoBreathTextView: Boolean =
-        getVisibilityForInfoBreathTextView(gridState.character.breath.breath)
+        getVisibilityForInfoBreathTextView(gameState.character.breath.breath)
     val textForInfoBreathTextView: String = getTextForBreathTextView(
-        gridState.character.breath.breath,
-        gridState.character.breath.secondsSupplyForBreath
+        gameState.character.breath.breath,
+        gameState.character.breath.secondsSupplyForBreath
     )
     val colorForInfoBreathTextView: Int = getColorForBreathTextView(
-        gridState.character.breath.breath,
-        gridState.character.breath.secondsSupplyForBreath
+        gameState.character.breath.breath,
+        gameState.character.breath.secondsSupplyForBreath
     )
 
     fun isNewGame(): Boolean {

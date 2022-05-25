@@ -49,9 +49,9 @@ class GameActivity : AppCompatActivity() {
             it.getColor(0, Color.MAGENTA)
         }
 
-        val loadGameState =
-            savedInstanceState?.getSerializable(STATE) as? GameState
-        gameViewModel.loadState(loadGameState)
+        val loadViewState =
+            savedInstanceState?.getSerializable(STATE) as? ViewState
+        gameViewModel.loadState(loadViewState)
 
         binding.gameSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(p0: SurfaceHolder) {}
@@ -91,37 +91,37 @@ class GameActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    gameViewModel.gameState.collectLatest { gameState ->
+                gameViewModel.viewState.collectLatest { gameState ->
 
-                        binding.gameSurfaceView.holder.lockCanvas()?.let {
-                            display.render(gameState, it, colorBackground)
-                            binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
-                        }
+                    binding.gameSurfaceView.holder.lockCanvas()?.let {
+                        display.render(gameState, it, colorBackground)
+                        binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
+                    }
 
-                        binding.nextFigureSurfaceView.holder.lockCanvas()?.let {
-                            display.renderInfo(gameState, it, colorBackground)
-                            binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
-                        }
+                    binding.nextFigureSurfaceView.holder.lockCanvas()?.let {
+                        display.renderInfo(gameState, it, colorBackground)
+                        binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
+                    }
 
-                        binding.scoresTextView.text = resources.getString(
-                            R.string.scores_game_textview, gameState.textForScores
+                    binding.scoresTextView.text = resources.getString(
+                        R.string.scores_game_textview, gameState.textForScores
+                    )
+
+                    binding.recordTextview.text =
+                        resources.getString(
+                            R.string.record_game_textview,
+                            gameState.textForRecord
                         )
 
-                        binding.recordTextview.text =
-                            resources.getString(
-                                R.string.record_game_textview,
-                                gameState.textForRecord
-                            )
+                    binding.pauseButton.text =
+                        resources.getString(gameState.textResourceForPauseResumeButton)
 
-                        binding.pauseButton.text =
-                            resources.getString(gameState.textResourceForPauseResumeButton)
+                    binding.infoBreathTextView.setVisible(gameState.visibilityForInfoBreathTextView)
 
-                        binding.infoBreathTextView.setVisible(gameState.visibilityForInfoBreathTextView)
-
-                        binding.infoBreathTextView.setTextColor(gameState.colorForInfoBreathTextView)
-                        binding.infoBreathTextView.text = resources.getString(
-                            R.string.infobreath_game_textview,
-                            gameState.textForInfoBreathTextView
+                    binding.infoBreathTextView.setTextColor(gameState.colorForInfoBreathTextView)
+                    binding.infoBreathTextView.text = resources.getString(
+                        R.string.infobreath_game_textview,
+                        gameState.textForInfoBreathTextView
                         )
 
                     }
@@ -185,7 +185,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putSerializable(STATE, gameViewModel.gameState.value)
+        outState.putSerializable(STATE, gameViewModel.viewState.value)
         super.onSaveInstanceState(outState)
     }
 

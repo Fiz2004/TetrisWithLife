@@ -35,27 +35,27 @@ class Display(
         ((heightSurface - heightGrid * newTile) / 2).toInt()
     )
 
-    fun render(gameState: GameState, canvas: Canvas, color: Int) {
+    fun render(viewState: ViewState, canvas: Canvas, color: Int) {
 
         canvas.drawColor(color)
-        drawGridElements(gameState, canvas)
-        drawCurrentFigure(gameState, canvas)
-        drawCharacter(gameState, canvas)
+        drawGridElements(viewState, canvas)
+        drawCurrentFigure(viewState, canvas)
+        drawCharacter(viewState, canvas)
     }
 
-    fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas, color: Int) {
-        drawNextFigure(gameState, nextFigureCanvas, color)
+    fun renderInfo(viewState: ViewState, nextFigureCanvas: Canvas, color: Int) {
+        drawNextFigure(viewState, nextFigureCanvas, color)
     }
 
-    private fun drawGridElements(gameState: GameState, canvas: Canvas) {
-        for (y in 0 until gameState.gridState.height)
-            for (x in 0 until gameState.gridState.width) {
+    private fun drawGridElements(viewState: ViewState, canvas: Canvas) {
+        for (y in 0 until viewState.gameState.grid.height)
+            for (x in 0 until viewState.gameState.grid.width) {
                 val screenX = offset.x + x * newTile
                 val screenY = offset.y + y * newTile
                 val offsetX =
-                    (gameState.gridState.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
+                    (viewState.gameState.grid.space[y][x].background / NUMBER_COLUMNS_IMAGES_FON) * tile
                 val offsetY =
-                    (gameState.gridState.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
+                    (viewState.gameState.grid.space[y][x].background % NUMBER_ROWS_IMAGES_FON) * tile
 
                 canvas.drawBitmap(
                     bmpFon,
@@ -65,15 +65,15 @@ class Display(
                 )
             }
 
-        for (y in 0 until gameState.gridState.height)
-            for (x in 0 until gameState.gridState.width)
-                if (gameState.gridState.space[y][x].block != 0) {
+        for (y in 0 until viewState.gameState.grid.height)
+            for (x in 0 until viewState.gameState.grid.width)
+                if (viewState.gameState.grid.space[y][x].block != 0) {
                     val screenX = offset.x + x * newTile
                     val screenY = offset.y + y * newTile
-                    val offset: Vector = getOffset(gameState.gridState.space[y][x])
+                    val offset: Vector = getOffset(viewState.gameState.grid.space[y][x])
 
                     canvas.drawBitmap(
-                        bmpKv[gameState.gridState.space[y][x].block - 1],
+                        bmpKv[viewState.gameState.grid.space[y][x].block - 1],
                         Rect(
                             offset.x * tile,
                             offset.y * tile,
@@ -86,12 +86,12 @@ class Display(
                 }
     }
 
-    private fun drawCurrentFigure(gameState: GameState, canvas: Canvas) {
-        for (cell in gameState.gridState.currentFigure.figure.cells) {
+    private fun drawCurrentFigure(viewState: ViewState, canvas: Canvas) {
+        for (cell in viewState.gameState.currentFigure.figure.cells) {
             val screenX =
-                offset.x + ((cell.vector.x + gameState.gridState.currentFigure.position.x) * newTile).toFloat()
+                offset.x + ((cell.vector.x + viewState.gameState.currentFigure.position.x) * newTile).toFloat()
             val screenY =
-                offset.y + ((cell.vector.y + gameState.gridState.currentFigure.position.y) * newTile).toFloat()
+                offset.y + ((cell.vector.y + viewState.gameState.currentFigure.position.y) * newTile).toFloat()
             var oldY = 0
             var cY = screenY
             var nTile = newTile
@@ -110,12 +110,12 @@ class Display(
         }
     }
 
-    private fun drawCharacter(gameState: GameState, canvas: Canvas) {
-        val offset = gameState.gridState.character.getSprite() * tile
+    private fun drawCharacter(viewState: ViewState, canvas: Canvas) {
+        val offset = viewState.gameState.character.getSprite() * tile
         val screenX =
-            this.offset.x + (gameState.gridState.character.location.position.x * newTile).toFloat()
+            this.offset.x + (viewState.gameState.character.location.position.x * newTile).toFloat()
         val screenY =
-            this.offset.y + (gameState.gridState.character.location.position.y * newTile).toFloat()
+            this.offset.y + (viewState.gameState.character.location.position.y * newTile).toFloat()
         canvas.drawBitmap(
             bmpCharacter,
             Rect(
@@ -129,19 +129,19 @@ class Display(
         )
     }
 
-    private fun drawNextFigure(gameState: GameState, canvasInfo: Canvas, color: Int) {
+    private fun drawNextFigure(viewState: ViewState, canvasInfo: Canvas, color: Int) {
 
         val oneTile = min(
             canvasInfo.width / 4,
             canvasInfo.height / 4
         ).toFloat()
 
-        val x = gameState.gridState.nextFigure.getWidth()
+        val x = viewState.gameState.nextFigure.getWidth()
         val ostX = 4 - x
         val porX = ostX / 2
         val pixX = porX * oneTile
 
-        val y = gameState.gridState.nextFigure.getHeight()
+        val y = viewState.gameState.nextFigure.getHeight()
         val ostY = 4 - y
         val porY = ostY / 2
         val pixY = porY * oneTile
@@ -152,7 +152,7 @@ class Display(
         canvasInfo.drawColor(color)
 
 
-        for (cell in gameState.gridState.nextFigure.cells) {
+        for (cell in viewState.gameState.nextFigure.cells) {
             val screenX = offset.x + (cell.vector.x) * oneTile
             val screenY = offset.y + (cell.vector.y) * oneTile
             canvasInfo.drawBitmap(

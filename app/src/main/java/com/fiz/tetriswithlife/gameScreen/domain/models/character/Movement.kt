@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.character
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
+import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
 import java.io.Serializable
 
@@ -10,15 +10,17 @@ private const val PROBABILITY_EAT_PERCENT = 20
 
 private const val BASE_SPEED_FOR_SECOND = 1F / 1000
 
-class Movement : Serializable {
-    var speed = Speed(0F, 0F)
+data class Movement(
+    var speed: Speed = Speed(0F, 0F),
 
-    var move: Vector = Vector(0, 0)
+    var move: Vector = Vector(0, 0),
 
-    var deleteRow = 0
-    var lastDirection = 1
+    var deleteRow: Int = 0,
+    var lastDirection: Int = 1,
 
     private var moves: MutableList<Vector> = mutableListOf()
+) : Serializable {
+
 
     fun getDirectionEat(): Char {
         return move.getDirectionEat()
@@ -28,28 +30,34 @@ class Movement : Serializable {
         return speed.isNotRotated()
     }
 
-    fun updateByNewFrame(posTile: Vector, grid: Grid, angle: Float, isMoveStraight: Boolean, eating: () -> Unit) {
-        moves = getDirection(posTile, grid, eating).toMutableList()
+    fun updateByNewFrame(
+        posTile: Vector,
+        game: Game,
+        angle: Float,
+        isMoveStraight: Boolean,
+        eating: () -> Unit
+    ) {
+        moves = getDirection(posTile, game, eating).toMutableList()
 
         move = getMoveFromMoves(isMoveStraight)
 
         speed = getSpeed(angle, move)
     }
 
-    private fun getDirection(posTile: Vector, grid: Grid, eating: () -> Unit): List<Vector> {
+    private fun getDirection(posTile: Vector, game: Game, eating: () -> Unit): List<Vector> {
         // Проверяем свободен ли выбранный путь при фиксации фигуры
         if (deleteRow == 1
             && moves == isCanMove(
                 posTile,
                 listOf(moves),
-                grid,
+                game,
                 eating
             )
         )
             deleteRow = 0
 
         if (moves.isEmpty() || deleteRow == 1)
-            return getNewDirection(posTile, grid, eating)
+            return getNewDirection(posTile, game, eating)
 
         return moves
     }
@@ -81,7 +89,7 @@ class Movement : Serializable {
         return Speed(0F, signAtClockwise * BASE_SPEED_ROTATE_FOR_SECOND)
     }
 
-    private fun getNewDirection(posTile: Vector, grid: Grid, eating: () -> Unit): List<Vector> {
+    private fun getNewDirection(posTile: Vector, game: Game, eating: () -> Unit): List<Vector> {
 
         val presetDirection = PresetDirection()
         deleteRow = 0
@@ -91,7 +99,7 @@ class Movement : Serializable {
             return isCanMove(
                 posTile,
                 listOf(presetDirection.RIGHT_DOWN + presetDirection.RIGHT + presetDirection.LEFT).flatten(),
-                grid,
+                game,
                 eating
             )
         }
@@ -101,7 +109,7 @@ class Movement : Serializable {
             return isCanMove(
                 posTile,
                 listOf(presetDirection.LEFT_DOWN + presetDirection.LEFT + presetDirection.RIGHT).flatten(),
-                grid,
+                game,
                 eating
             )
         }
@@ -110,20 +118,20 @@ class Movement : Serializable {
             return isCanMove(
                 posTile,
                 listOf(presetDirection._0D) + presetDirection.LEFT + presetDirection.RIGHT,
-                grid, eating
+                game, eating
             )
 
         return isCanMove(
             posTile,
             listOf(presetDirection._0D) + presetDirection.RIGHT + presetDirection.LEFT,
-            grid, eating
+            game, eating
         )
     }
 
     private fun isCanMove(
         posTile: Vector,
         listDirections: List<List<Vector>>,
-        grid: Grid,
+        game: Game,
         eating: () -> Unit
 
     ): List<Vector> {
@@ -131,7 +139,7 @@ class Movement : Serializable {
             if (isCanDirectionsAndSetCharacterEat(
                     posTile,
                     directions,
-                    grid,
+                    game,
                     eating = eating
                 )
             )
@@ -142,7 +150,7 @@ class Movement : Serializable {
     fun isCanDirectionsAndSetCharacterEat(
         posTile: Vector,
         directions: List<Vector>,
-        grid: Grid,
+        game: Game,
         isDestroy: Boolean = (0..100).shuffled().first() < PROBABILITY_EAT_PERCENT,
         eating: () -> Unit
     ): Boolean {
@@ -153,12 +161,12 @@ class Movement : Serializable {
             currentVector += direction
             val checkingPosition = posTile + currentVector
 
-            if (grid.isOutside(checkingPosition))
+            if (game.isOutside(checkingPosition))
                 return false
 
             result += direction
 
-            if (grid.isNotFree(checkingPosition)) {
+            if (game.isNotFree(checkingPosition)) {
                 val isCanEatHorizontally = currentVector.y == 0 && isDestroy
                 if (isCanEatHorizontally) {
                     eating()

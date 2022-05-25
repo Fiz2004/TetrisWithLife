@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fiz.tetriswithlife.gameScreen.data.RecordRepository
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
+import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -22,12 +23,12 @@ class GameViewModel @Inject constructor(
     private var controller: Controller
 ) : ViewModel() {
 
-    var grid: Grid = Grid(widthGrid, heightGrid)
+    var game: Game = Game(grid = Grid(widthGrid, heightGrid))
 
-    var gameState: MutableStateFlow<GameState> =
+    var viewState: MutableStateFlow<ViewState> =
         MutableStateFlow(
-            GameState(
-                gridState = GridState.fromGrid(grid),
+            ViewState(
+                gameState = game,
                 record = recordRepository.loadRecord()
             )
         )
@@ -35,8 +36,8 @@ class GameViewModel @Inject constructor(
 
     private var gameJob: Job? = null
 
-    fun loadState(gameState: GameState?) {
-        this.gameState.value = gameState ?: return
+    fun loadState(viewState: ViewState?) {
+        this.viewState.value = viewState ?: return
     }
 
     fun startGame() {
@@ -61,29 +62,30 @@ class GameViewModel @Inject constructor(
     }
 
     private fun update(deltaTime: Double) {
-        if (gameState.value.isStatusPause())
+        if (viewState.value.isStatusPause())
             return
 
-        if (gameState.value.isNewGame()) {
-            grid.newGame()
-            gameState.value = gameState.value
+        if (viewState.value.isNewGame()) {
+            game.newGame()
+            viewState.value = viewState.value
                 .copy(
-                    gridState = GridState.fromGrid(grid),
+                    status = ViewState.Companion.StatusCurrentGame.Playing,
+                    gameState = game,
                     timeToRestart = SecTimeForRestartForEndGame,
-                    changed = !gameState.value.changed
+                    changed = !viewState.value.changed
                 )
         }
 
-        val status = when (gameState.value.isGameContinue()) {
+        val status = when (viewState.value.isGameContinue()) {
             true -> {
-                grid.updateActors(deltaTime, controller, plusScores = { score: Int ->
+                game.updateActors(deltaTime, controller, plusScores = { score: Int ->
                     if (score > recordRepository.loadRecord()) {
                         recordRepository.saveRecord(score)
-                        gameState.value =
-                            gameState.value
+                        viewState.value =
+                            viewState.value
                                 .copy(
                                     record = recordRepository.loadRecord(),
-                                    changed = !gameState.value.changed
+                                    changed = !viewState.value.changed
                                 )
 
                     }
@@ -96,12 +98,12 @@ class GameViewModel @Inject constructor(
         }
 
         if (status == StatusUpdateGame.End)
-            gameState.value.gameEnd(deltaTime)
+            viewState.value.gameEnd(deltaTime)
 
-        gameState.value = gameState.value
+        viewState.value = viewState.value
             .copy(
-                gridState = GridState.fromGrid(grid),
-                changed = !gameState.value.changed
+                gameState = game,
+                changed = !viewState.value.changed
             )
     }
 
@@ -129,13 +131,13 @@ class GameViewModel @Inject constructor(
     }
 
     fun clickNewGameButton() {
-        gameState.value = gameState.value
-            .copy(status = GameState.Companion.StatusCurrentGame.NewGame)
+        viewState.value = viewState.value
+            .copy(status = ViewState.Companion.StatusCurrentGame.NewGame)
     }
 
     fun clickPauseButton() {
-        gameState.value = gameState.value
-            .copy(status = gameState.value.getNewStatus())
+        viewState.value = viewState.value
+            .copy(status = viewState.value.getNewStatus())
     }
 
     companion object {
