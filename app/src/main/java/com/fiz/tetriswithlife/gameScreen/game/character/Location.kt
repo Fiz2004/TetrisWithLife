@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.character
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Coordinate
+import com.fiz.tetriswithlife.gameScreen.game.Coordinate
 import java.io.Serializable
 
 data class Location(var position: Coordinate) : Serializable {

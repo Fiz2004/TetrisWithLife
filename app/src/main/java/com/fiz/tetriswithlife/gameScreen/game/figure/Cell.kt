@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.figure
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable
 
 data class Cell(val vector: Vector, val view: Int) : Serializable {

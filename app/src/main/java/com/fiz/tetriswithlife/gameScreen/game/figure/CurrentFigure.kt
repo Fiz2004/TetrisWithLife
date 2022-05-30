@@ -1,14 +1,13 @@
-package com.fiz.tetriswithlife.gameScreen.domain.models.figure
+package com.fiz.tetriswithlife.gameScreen.game.figure
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Coordinate
-import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
+import com.fiz.tetriswithlife.gameScreen.domain.models.figure.Figure
+import com.fiz.tetriswithlife.gameScreen.game.Coordinate
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable
 import kotlin.math.ceil
 
 private const val START_STEP_MOVE_AUTO = 1.0
 private const val ADD_STEP_MOVE_AUTO = 3.0
-
-const val SecTimeOutInput = 0.08
 
 private const val STEP_MOVE_KEY_X = 1
 private const val STEP_MOVE_KEY_Y = 10.0

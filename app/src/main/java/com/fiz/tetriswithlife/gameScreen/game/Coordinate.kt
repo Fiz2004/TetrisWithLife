@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.gameScreen.domain.models
+package com.fiz.tetriswithlife.gameScreen.game
 
 import java.io.Serializable
 import kotlin.math.roundToInt

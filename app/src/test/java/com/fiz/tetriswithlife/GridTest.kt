@@ -1,8 +1,8 @@
 package com.fiz.tetriswithlife
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Game
-import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
-import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
+import com.fiz.tetriswithlife.gameScreen.game.Game
+import com.fiz.tetriswithlife.gameScreen.game.Grid
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

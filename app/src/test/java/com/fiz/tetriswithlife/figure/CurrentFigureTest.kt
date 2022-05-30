@@ -1,10 +1,10 @@
 package com.fiz.tetriswithlife.figure
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Coordinate
-import com.fiz.tetriswithlife.gameScreen.domain.models.Game
-import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
-import com.fiz.tetriswithlife.gameScreen.domain.models.figure.CurrentFigure
 import com.fiz.tetriswithlife.gameScreen.domain.models.figure.Figure
+import com.fiz.tetriswithlife.gameScreen.game.Coordinate
+import com.fiz.tetriswithlife.gameScreen.game.Game
+import com.fiz.tetriswithlife.gameScreen.game.Grid
+import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before

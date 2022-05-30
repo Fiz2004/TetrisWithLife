@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.figure
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable
 
 private const val NUMBER_IMAGES_FIGURE = 5

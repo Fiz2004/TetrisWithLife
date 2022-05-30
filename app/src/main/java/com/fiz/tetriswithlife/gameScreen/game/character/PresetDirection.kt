@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.character
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 
 data class PresetDirection(
     val L: Vector = Vector(-1, 0),

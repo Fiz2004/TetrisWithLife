@@ -1,6 +1,6 @@
 package com.fiz.tetriswithlife
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Element
+import com.fiz.tetriswithlife.gameScreen.game.Element
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

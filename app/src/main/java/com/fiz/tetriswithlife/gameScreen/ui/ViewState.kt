@@ -2,16 +2,20 @@ package com.fiz.tetriswithlife.gameScreen.ui
 
 import android.graphics.Color
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.gameScreen.domain.models.Game
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.TIMES_BREATH_LOSE
+import com.fiz.tetriswithlife.gameScreen.game.Game
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.max
 
 const val SecTimeForRestartForEndGame = 1.0
 
+data class GameState(
+    val game: Game
+)
+
 data class ViewState(
-    val gameState: Game,
+    val gameState: GameState,
     val scores: Int = 0,
     val record: Int,
     val status: StatusCurrentGame = StatusCurrentGame.Playing,
@@ -23,14 +27,14 @@ data class ViewState(
     val textForRecord: String = getRecord(record)
     val textResourceForPauseResumeButton: Int = getTextForPauseResumeButton(status)
     val visibilityForInfoBreathTextView: Boolean =
-        getVisibilityForInfoBreathTextView(gameState.character.breath.breath)
+        getVisibilityForInfoBreathTextView(gameState.game.character.breath.breath)
     val textForInfoBreathTextView: String = getTextForBreathTextView(
-        gameState.character.breath.breath,
-        gameState.character.breath.secondsSupplyForBreath
+        gameState.game.character.breath.breath,
+        gameState.game.character.breath.secondsSupplyForBreath
     )
     val colorForInfoBreathTextView: Int = getColorForBreathTextView(
-        gameState.character.breath.breath,
-        gameState.character.breath.secondsSupplyForBreath
+        gameState.game.character.breath.breath,
+        gameState.game.character.breath.secondsSupplyForBreath
     )
 
     fun isNewGame(): Boolean {

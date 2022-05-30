@@ -1,28 +1,17 @@
-package com.fiz.tetriswithlife.gameScreen.domain.models
+package com.fiz.tetriswithlife.gameScreen.game
 
+import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.Character
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.Location
-import com.fiz.tetriswithlife.gameScreen.domain.models.figure.CurrentFigure
 import com.fiz.tetriswithlife.gameScreen.domain.models.figure.Figure
+import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
 import com.fiz.tetriswithlife.gameScreen.ui.GameViewModel
 import com.fiz.tetriswithlife.gameScreen.ui.widthGrid
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-private const val NUMBER_IMAGES_BACKGROUND = 16
-
 private const val NUMBER_FRAMES_ELEMENTS = 4
-
-data class Grid(
-    val width: Int, val height: Int,
-    val valueFon: () -> Int = { (0 until NUMBER_IMAGES_BACKGROUND).shuffled().first() },
-    var space: List<List<Element>> = List(height) {
-        List(width) {
-            Element(valueFon())
-        }
-    }
-)
 
 data class Game(
     val grid: Grid,

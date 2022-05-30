@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fiz.tetriswithlife.gameScreen.data.RecordRepository
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
-import com.fiz.tetriswithlife.gameScreen.domain.models.Game
-import com.fiz.tetriswithlife.gameScreen.domain.models.Grid
+import com.fiz.tetriswithlife.gameScreen.game.Game
+import com.fiz.tetriswithlife.gameScreen.game.Grid
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +28,7 @@ class GameViewModel @Inject constructor(
     var viewState: MutableStateFlow<ViewState> =
         MutableStateFlow(
             ViewState(
-                gameState = game,
+                gameState = GameState(game),
                 record = recordRepository.loadRecord()
             )
         )
@@ -70,7 +70,6 @@ class GameViewModel @Inject constructor(
             viewState.value = viewState.value
                 .copy(
                     status = ViewState.Companion.StatusCurrentGame.Playing,
-                    gameState = game,
                     timeToRestart = SecTimeForRestartForEndGame,
                     changed = !viewState.value.changed
                 )
@@ -90,7 +89,6 @@ class GameViewModel @Inject constructor(
 
                     }
                 })
-                StatusUpdateGame.Continue
             }
             false -> {
                 StatusUpdateGame.End
@@ -102,7 +100,6 @@ class GameViewModel @Inject constructor(
 
         viewState.value = viewState.value
             .copy(
-                gameState = game,
                 changed = !viewState.value.changed
             )
     }

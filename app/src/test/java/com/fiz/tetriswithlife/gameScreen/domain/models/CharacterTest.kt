@@ -2,6 +2,9 @@ package com.fiz.tetriswithlife.gameScreen.domain.models
 
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.Character
 import com.fiz.tetriswithlife.gameScreen.domain.models.character.Location
+import com.fiz.tetriswithlife.gameScreen.game.Coordinate
+import com.fiz.tetriswithlife.gameScreen.game.Game
+import com.fiz.tetriswithlife.gameScreen.game.Grid
 import org.junit.Assert
 import org.junit.Test
 

@@ -1,7 +1,7 @@
 package com.fiz.tetriswithlife.gameScreen.domain.models.character
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.Game
-import com.fiz.tetriswithlife.gameScreen.domain.models.Vector
+import com.fiz.tetriswithlife.gameScreen.game.Game
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable
 
 private const val BASE_SPEED_ROTATE_FOR_SECOND = 45F
