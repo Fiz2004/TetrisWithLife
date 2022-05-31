@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.gameScreen.domain.models.character
+package com.fiz.tetriswithlife.gameScreen.game.character
 
 import com.fiz.tetriswithlife.gameScreen.game.Game
 import com.fiz.tetriswithlife.gameScreen.game.Vector

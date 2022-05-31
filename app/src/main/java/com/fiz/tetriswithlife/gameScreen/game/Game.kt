@@ -1,10 +1,10 @@
 package com.fiz.tetriswithlife.gameScreen.game
 
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
-import com.fiz.tetriswithlife.gameScreen.domain.models.character.Character
-import com.fiz.tetriswithlife.gameScreen.domain.models.character.Location
-import com.fiz.tetriswithlife.gameScreen.domain.models.figure.Figure
+import com.fiz.tetriswithlife.gameScreen.game.character.Character
+import com.fiz.tetriswithlife.gameScreen.game.character.Location
 import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
+import com.fiz.tetriswithlife.gameScreen.game.figure.Figure
 import com.fiz.tetriswithlife.gameScreen.ui.GameViewModel
 import com.fiz.tetriswithlife.gameScreen.ui.widthGrid
 import java.io.Serializable

@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.gameScreen.domain.models.figure
+package com.fiz.tetriswithlife.gameScreen.game.figure
 
 import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable

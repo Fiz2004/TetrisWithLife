@@ -2,10 +2,13 @@ package com.fiz.tetriswithlife.gameScreen.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fiz.tetriswithlife.gameScreen.data.BitmapRepository
 import com.fiz.tetriswithlife.gameScreen.data.RecordRepository
+import com.fiz.tetriswithlife.gameScreen.domain.RefreshGameStateFromGame
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
 import com.fiz.tetriswithlife.gameScreen.game.Game
 import com.fiz.tetriswithlife.gameScreen.game.Grid
+import com.fiz.tetriswithlife.gameScreen.game.Vector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +18,11 @@ import kotlin.math.min
 const val widthGrid: Int = 13
 const val heightGrid: Int = 25
 
-private const val mSecFromFPS60=((1.0 / 60.0) * 1000.0).toLong()
+private const val NUMBER_COLUMNS_IMAGES_FON = 4
+private const val NUMBER_ROWS_IMAGES_FON = 4
+
+private const val mSecFromFPS60 = ((1.0 / 60.0) * 1000.0).toLong()
+
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -23,12 +30,14 @@ class GameViewModel @Inject constructor(
     private var controller: Controller
 ) : ViewModel() {
 
+    private var refreshGameStateFromGame: RefreshGameStateFromGame = RefreshGameStateFromGame()
+
     var game: Game = Game(grid = Grid(widthGrid, heightGrid))
 
     var viewState: MutableStateFlow<ViewState> =
         MutableStateFlow(
             ViewState(
-                gameState = GameState(game),
+                gameState = refreshGameStateFromGame(game),
                 record = recordRepository.loadRecord()
             )
         )
@@ -36,11 +45,21 @@ class GameViewModel @Inject constructor(
 
     private var gameJob: Job? = null
 
-    fun loadState(viewState: ViewState?) {
-        this.viewState.value = viewState ?: return
+    private var surfaceReady = mutableListOf(false, false)
+
+    @Inject
+    lateinit var bitmapRepository: BitmapRepository
+
+    fun loadGame(game: Game?, loadStateStatus: ViewState.Companion.StatusCurrentGame?) {
+        this.game = game ?: return
+        viewState.value = viewState.value
+            .copy(
+                status = loadStateStatus ?: return
+            )
     }
 
-    fun startGame() {
+    private fun startGame(refreshGameStateFromGame: RefreshGameStateFromGame) {
+        this.refreshGameStateFromGame = refreshGameStateFromGame
         viewModelScope.launch(Dispatchers.Default) {
             gameJob = viewModelScope.launch(Dispatchers.Default, block = gameLoop())
         }
@@ -69,9 +88,9 @@ class GameViewModel @Inject constructor(
             game.newGame()
             viewState.value = viewState.value
                 .copy(
+                    gameState = refreshGameStateFromGame(game),
                     status = ViewState.Companion.StatusCurrentGame.Playing,
                     timeToRestart = SecTimeForRestartForEndGame,
-                    changed = !viewState.value.changed
                 )
         }
 
@@ -83,8 +102,8 @@ class GameViewModel @Inject constructor(
                         viewState.value =
                             viewState.value
                                 .copy(
+                                    gameState = refreshGameStateFromGame(game),
                                     record = recordRepository.loadRecord(),
-                                    changed = !viewState.value.changed
                                 )
 
                     }
@@ -95,16 +114,22 @@ class GameViewModel @Inject constructor(
             }
         }
 
-        if (status == StatusUpdateGame.End)
-            viewState.value.gameEnd(deltaTime)
+        if (status == StatusUpdateGame.End) {
+            val newTimeToRestart = viewState.value.timeToRestart - deltaTime
+            viewState.value = viewState.value
+                .copy(
+                    timeToRestart = newTimeToRestart,
+                )
+        }
 
         viewState.value = viewState.value
             .copy(
-                changed = !viewState.value.changed
+                gameState = refreshGameStateFromGame(game),
             )
     }
 
     fun stopGame() {
+        surfaceReady = mutableListOf(false, false)
         viewModelScope.launch(Dispatchers.Default) {
             gameJob?.cancelAndJoin()
         }
@@ -129,12 +154,52 @@ class GameViewModel @Inject constructor(
 
     fun clickNewGameButton() {
         viewState.value = viewState.value
-            .copy(status = ViewState.Companion.StatusCurrentGame.NewGame)
+            .copy(
+                gameState = refreshGameStateFromGame(game),
+                status = ViewState.Companion.StatusCurrentGame.NewGame
+            )
     }
 
     fun clickPauseButton() {
         viewState.value = viewState.value
-            .copy(status = viewState.value.getNewStatus())
+            .copy(
+                gameState = refreshGameStateFromGame(game),
+                status = viewState.value.getNewStatus()
+            )
+    }
+
+    fun gameSurfaceReady(width: Int, height: Int) {
+
+        refreshGameStateFromGame.tile =
+            bitmapRepository.bmpFon.width / NUMBER_COLUMNS_IMAGES_FON
+
+        refreshGameStateFromGame.newTile = min(
+            height / heightGrid,
+            width / widthGrid
+        ).toFloat()
+
+        refreshGameStateFromGame.offset = Vector(
+            ((width - widthGrid * refreshGameStateFromGame.newTile) / 2).toInt(),
+            ((height - heightGrid * refreshGameStateFromGame.newTile) / 2).toInt()
+        )
+
+        surfaceReady[0] = true
+        if (surfaceReady.all { it }) {
+            startGame(refreshGameStateFromGame)
+        }
+    }
+
+    fun nextFigureReady(width: Int, height: Int) {
+
+        refreshGameStateFromGame.oneTileInfo = min(
+            width / 4,
+            height / 4
+        ).toFloat()
+
+        surfaceReady[1] = true
+        if (surfaceReady.all { it }) {
+            startGame(refreshGameStateFromGame)
+        }
     }
 
     companion object {

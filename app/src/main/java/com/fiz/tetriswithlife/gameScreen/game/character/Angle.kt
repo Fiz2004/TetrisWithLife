@@ -1,4 +1,4 @@
-package com.fiz.tetriswithlife.gameScreen.domain.models.character
+package com.fiz.tetriswithlife.gameScreen.game.character
 
 import java.io.Serializable
 import kotlin.math.cos

@@ -2,39 +2,33 @@ package com.fiz.tetriswithlife.gameScreen.ui
 
 import android.graphics.Color
 import com.fiz.tetriswithlife.R
-import com.fiz.tetriswithlife.gameScreen.domain.models.character.TIMES_BREATH_LOSE
-import com.fiz.tetriswithlife.gameScreen.game.Game
+import com.fiz.tetriswithlife.gameScreen.game.character.TIMES_BREATH_LOSE
 import java.io.Serializable
 import kotlin.math.floor
 import kotlin.math.max
 
 const val SecTimeForRestartForEndGame = 1.0
 
-data class GameState(
-    val game: Game
-)
-
 data class ViewState(
     val gameState: GameState,
     val scores: Int = 0,
     val record: Int,
     val status: StatusCurrentGame = StatusCurrentGame.Playing,
-    var timeToRestart: Double = SecTimeForRestartForEndGame,
-    val changed: Boolean = false
-) : Serializable {
+    var timeToRestart: Double = SecTimeForRestartForEndGame
+) {
 
     val textForScores: String = getScore(scores)
     val textForRecord: String = getRecord(record)
     val textResourceForPauseResumeButton: Int = getTextForPauseResumeButton(status)
     val visibilityForInfoBreathTextView: Boolean =
-        getVisibilityForInfoBreathTextView(gameState.game.character.breath.breath)
+        getVisibilityForInfoBreathTextView(gameState.characterUi.breath)
     val textForInfoBreathTextView: String = getTextForBreathTextView(
-        gameState.game.character.breath.breath,
-        gameState.game.character.breath.secondsSupplyForBreath
+        gameState.characterUi.breath,
+        gameState.characterUi.secondsSupplyForBreath
     )
     val colorForInfoBreathTextView: Int = getColorForBreathTextView(
-        gameState.game.character.breath.breath,
-        gameState.game.character.breath.secondsSupplyForBreath
+        gameState.characterUi.breath,
+        gameState.characterUi.secondsSupplyForBreath
     )
 
     fun isNewGame(): Boolean {
@@ -99,10 +93,6 @@ data class ViewState(
         return Color.argb(
             color, 255, 0, 0
         )
-    }
-
-    fun gameEnd(deltaTime: Double) {
-        timeToRestart -= deltaTime
     }
 
     companion object {

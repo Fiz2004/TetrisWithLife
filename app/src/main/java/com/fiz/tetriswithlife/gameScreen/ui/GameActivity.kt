@@ -3,6 +3,7 @@ package com.fiz.tetriswithlife.gameScreen.ui
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.View
@@ -14,11 +15,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
-import com.fiz.tetriswithlife.gameScreen.data.BitmapRepository
+import com.fiz.tetriswithlife.gameScreen.game.Game
 import com.fiz.tetriswithlife.util.setVisible
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,14 +33,10 @@ class GameActivity : AppCompatActivity() {
         ActivityGameBinding.inflate(layoutInflater)
     }
 
-    private var surfaceReady = mutableListOf(false, false)
-
-    private lateinit var display: Display
+    @Inject
+    lateinit var display: Display
 
     private var colorBackground: Int = 0
-
-    @Inject
-    lateinit var bitmapRepository: BitmapRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,25 +48,20 @@ class GameActivity : AppCompatActivity() {
             it.getColor(0, Color.MAGENTA)
         }
 
-        val loadViewState =
-            savedInstanceState?.getSerializable(STATE) as? ViewState
-        gameViewModel.loadState(loadViewState)
+        val loadGame =
+            savedInstanceState?.getSerializable(GAME) as? Game
+        val loadStateStatus =
+            savedInstanceState?.getSerializable(STATE_STATUS) as? ViewState.Companion.StatusCurrentGame
+        gameViewModel.loadGame(loadGame, loadStateStatus)
 
         binding.gameSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(p0: SurfaceHolder) {}
 
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
-                display = Display(
-                    binding.gameSurfaceView.width,
-                    binding.gameSurfaceView.height,
-                    widthGrid,
-                    heightGrid,
-                    bitmapRepository
+                gameViewModel.gameSurfaceReady(
+                    width = binding.gameSurfaceView.width,
+                    height = binding.gameSurfaceView.height
                 )
-
-                surfaceReady[0] = true
-                if (surfaceReady.all { it })
-                    gameViewModel.startGame()
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {}
@@ -78,9 +72,10 @@ class GameActivity : AppCompatActivity() {
             override fun surfaceCreated(p0: SurfaceHolder) {}
 
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
-                surfaceReady[1] = true
-                if (surfaceReady.all { it })
-                    gameViewModel.startGame()
+                gameViewModel.nextFigureReady(
+                    width = binding.nextFigureSurfaceView.width,
+                    height = binding.nextFigureSurfaceView.height
+                )
             }
 
             override fun surfaceDestroyed(p0: SurfaceHolder) {}
@@ -89,42 +84,54 @@ class GameActivity : AppCompatActivity() {
 
         bindListener()
 
+
+        var lastTime = System.currentTimeMillis()
+        var deltaTime = 60
+
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                gameViewModel.viewState.collectLatest { gameState ->
+                withContext(Dispatchers.Main) {
+                    gameViewModel.viewState.collectLatest { gameState ->
 
-                    binding.gameSurfaceView.holder.lockCanvas()?.let {
-                        display.render(gameState, it, colorBackground)
-                        binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
-                    }
+                        val now = System.currentTimeMillis()
+                        deltaTime = ((deltaTime + now - lastTime) / 2).toInt()
 
-                    binding.nextFigureSurfaceView.holder.lockCanvas()?.let {
-                        display.renderInfo(gameState, it, colorBackground)
-                        binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
-                    }
+                        Log.d("FPS", (1000 / deltaTime).toString())
 
-                    binding.scoresTextView.text = resources.getString(
-                        R.string.scores_game_textview, gameState.textForScores
-                    )
+                        binding.gameSurfaceView.holder.lockCanvas()?.let {
+                            display.render(gameState, it, colorBackground)
+                            binding.gameSurfaceView.holder.unlockCanvasAndPost(it)
+                        }
 
-                    binding.recordTextview.text =
-                        resources.getString(
-                            R.string.record_game_textview,
-                            gameState.textForRecord
+                        binding.nextFigureSurfaceView.holder.lockCanvas()?.let {
+                            display.renderInfo(gameState, it, colorBackground)
+                            binding.nextFigureSurfaceView.holder.unlockCanvasAndPost(it)
+                        }
+
+                        binding.scoresTextView.text = getString(
+                            R.string.scores_game_textview, gameState.textForScores
                         )
 
-                    binding.pauseButton.text =
-                        resources.getString(gameState.textResourceForPauseResumeButton)
+                        binding.recordTextview.text =
+                            getString(
+                                R.string.record_game_textview,
+                                gameState.textForRecord
+                            )
 
-                    binding.infoBreathTextView.setVisible(gameState.visibilityForInfoBreathTextView)
+                        binding.pauseButton.text =
+                            getString(gameState.textResourceForPauseResumeButton)
 
-                    binding.infoBreathTextView.setTextColor(gameState.colorForInfoBreathTextView)
-                    binding.infoBreathTextView.text = resources.getString(
-                        R.string.infobreath_game_textview,
-                        gameState.textForInfoBreathTextView
+                        binding.infoBreathTextView.setVisible(gameState.visibilityForInfoBreathTextView)
+
+                        binding.infoBreathTextView.setTextColor(gameState.colorForInfoBreathTextView)
+                        binding.infoBreathTextView.text = getString(
+                            R.string.infobreath_game_textview,
+                            gameState.textForInfoBreathTextView
                         )
 
+                        lastTime = now
                     }
+                }
             }
         }
     }
@@ -180,17 +187,18 @@ class GameActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        surfaceReady = mutableListOf(false, false)
         gameViewModel.stopGame()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putSerializable(STATE, gameViewModel.viewState.value)
+        outState.putSerializable(GAME, gameViewModel.game)
+        outState.putSerializable(STATE_STATUS, gameViewModel.viewState.value.status)
         super.onSaveInstanceState(outState)
     }
 
     companion object {
-        const val STATE = "state"
+        const val GAME = "game"
+        const val STATE_STATUS = "state"
     }
 
 }

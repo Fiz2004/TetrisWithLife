@@ -1,11 +1,11 @@
 package com.fiz.tetriswithlife.gameScreen.domain.useCase
 
-import com.fiz.tetriswithlife.gameScreen.domain.models.character.Character
-import com.fiz.tetriswithlife.gameScreen.domain.models.character.Location
 import com.fiz.tetriswithlife.gameScreen.game.Coordinate
 import com.fiz.tetriswithlife.gameScreen.game.Game
 import com.fiz.tetriswithlife.gameScreen.game.Grid
 import com.fiz.tetriswithlife.gameScreen.game.Vector
+import com.fiz.tetriswithlife.gameScreen.game.character.Character
+import com.fiz.tetriswithlife.gameScreen.game.character.Location
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
