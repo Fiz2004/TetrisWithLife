@@ -67,19 +67,19 @@ data class Figure(
 ) : Serializable {
 
     fun getWidth(): Int {
-        return cells.filter { it.vector.x != 0 }.size
+        return cells.map { it.vector.x }.distinct().size
     }
 
     fun getHeight(): Int {
-        return cells.filter { it.vector.y != 0 }.size
+        return cells.map { it.vector.y }.distinct().size
     }
 
     fun getMaxX(): Int {
-        return cells.maxByOrNull { it.vector.x }?.vector?.x ?: 0
+        return cells.maxOf { it.vector.x }
     }
 
     fun getMaxY(): Int {
-        return cells.maxByOrNull { it.vector.y }?.vector?.y ?: 0
+        return cells.maxOf { it.vector.y }
     }
 
     fun getCellsRotate(): List<Cell> {

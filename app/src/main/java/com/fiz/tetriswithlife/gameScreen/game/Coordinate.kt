@@ -8,14 +8,22 @@ data class Coordinate(val x: Double, val y: Double): Serializable {
         return Coordinate(this.x + add.x, this.y + add.y)
     }
 
+    operator fun times(tile: Int): Coordinate {
+        return Coordinate(this.x * tile, this.y * tile)
+    }
+
+    operator fun times(tile: Double): Coordinate {
+        return Coordinate(this.x * tile, this.y * tile)
+    }
+
     fun toPoint(): Vector {
         return Vector(x.toInt(), y.toInt())
     }
 
-    val posTileX: Int
+    private val posTileX: Int
         get() = x.roundToInt()
 
-    val posTileY: Int
+    private val posTileY: Int
         get() = y.roundToInt()
 
     val posTile

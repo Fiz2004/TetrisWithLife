@@ -1,11 +1,10 @@
 package com.fiz.tetriswithlife.gameScreen.domain.useCase
 
+import com.fiz.tetriswithlife.gameScreen.domain.repositories.RecordRepository
 import com.fiz.tetriswithlife.gameScreen.game.Coordinate
 import com.fiz.tetriswithlife.gameScreen.game.Game
-import com.fiz.tetriswithlife.gameScreen.game.Grid
-import com.fiz.tetriswithlife.gameScreen.game.Vector
 import com.fiz.tetriswithlife.gameScreen.game.character.Character
-import com.fiz.tetriswithlife.gameScreen.game.character.Location
+import io.mockk.mockk
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -18,37 +17,29 @@ class MovementTest {
 
     @Before
     fun setUp() {
-        game = Game(Grid(10, 10))
-        character = Character(Location(Coordinate(5.0, 9.0)))
+        val recordRepository = mockk<RecordRepository>()
+        val game = Game(10, 10, recordRepository)
+        character = Character.create(game.grid, Coordinate(5.0, 9.0))
     }
 
     @Test
     fun whenCharacterCanDirectionsFreeNoEat_shouldReturnTrue() {
-        val directions = listOf(Vector(-1, 0))
+        val directions = listOf(Character.Companion.Direction.Left)
 
-        val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
-            character.location.position.posTile,
-            directions,
-            game,
-            false,
-            {}
-        )
-
+        val canMove =
+            game.isCanDirectionsAndSetCharacterEat(directions, false)
         assertTrue(canMove)
         assertFalse(character.eat)
     }
 
     @Test
     fun whenCharacterCanDirectionsNotFreeNoEat_shouldReturnFalse() {
-        val directions = listOf(Vector(-1, 0))
+        val directions = listOf(Character.Companion.Direction.Left)
         game.grid.space[9][4].block = 5
 
-        val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
-            character.location.position.posTile,
+        val canMove = game.isCanDirectionsAndSetCharacterEat(
             directions,
-            game,
-            false,
-            {}
+            false
         )
 
         assertFalse(canMove)
@@ -57,16 +48,14 @@ class MovementTest {
 
     @Test
     fun whenCharacterCanDirectionsNotFreeCanEat_shouldReturnTrue() {
-        val directions = listOf(Vector(-1, 0))
+        val directions = listOf(Character.Companion.Direction.Left)
         game.grid.space[9][4].block = 5
 
-        val canMove = character.movement.isCanDirectionsAndSetCharacterEat(
-            character.location.position.posTile,
-            directions,
-            game,
-            true,
-            { character.eat = true }
-        )
+        val canMove =
+            game.isCanDirectionsAndSetCharacterEat(
+                directions,
+                true
+            )
 
         assertTrue(canMove)
         assertTrue(character.eat)

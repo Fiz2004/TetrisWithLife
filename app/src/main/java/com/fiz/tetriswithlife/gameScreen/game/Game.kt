@@ -1,61 +1,100 @@
 package com.fiz.tetriswithlife.gameScreen.game
 
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
+import com.fiz.tetriswithlife.gameScreen.domain.repositories.RecordRepository
 import com.fiz.tetriswithlife.gameScreen.game.character.Character
-import com.fiz.tetriswithlife.gameScreen.game.character.Location
+import com.fiz.tetriswithlife.gameScreen.game.character.PresetDirection
 import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
 import com.fiz.tetriswithlife.gameScreen.game.figure.Figure
-import com.fiz.tetriswithlife.gameScreen.ui.GameViewModel
-import com.fiz.tetriswithlife.gameScreen.ui.widthGrid
+import com.fiz.tetriswithlife.gameScreen.ui.SecTimeForRestartForEndGame
 import java.io.Serializable
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.roundToInt
 
+const val WIDTH_GRID: Int = 13
+const val HEIGHT_GRID: Int = 25
+
+const val PROBABILITY_EAT_PERCENT = 20
+
 private const val NUMBER_FRAMES_ELEMENTS = 4
+private const val mSEC_FROM_FPS_60 = ((1.0 / 60.0) * 1000.0).toLong()
+private const val SEC_TIME_OUT_INPUT = 0.08
 
-data class Game(
-    val grid: Grid,
-    var character: Character = Character(
-        Location(
-            Coordinate(
-                (0 until grid.width).shuffled().first().toDouble(),
-                (grid.height - 1).toDouble()
-            )
-        )
-    ),
-    var nextFigure: Figure = Figure(),
-    var currentFigure: CurrentFigure = run {
-        val figure = Figure()
-        CurrentFigure(
-            figure,
-            Coordinate(
-                (0 until (widthGrid - figure.getMaxX())).shuffled().first().toDouble(),
-                (0 - figure.getMaxY()).toDouble()
-            )
-        )
-    },
+@Singleton
+class Game @Inject constructor(
+    var width: Int = WIDTH_GRID,
+    var height: Int = HEIGHT_GRID,
+    private val recordRepository: RecordRepository
+) {
+    lateinit var grid: Grid
+    lateinit var character: Character
+    lateinit var nextFigure: Figure
+    lateinit var currentFigure: CurrentFigure
+    var status: StatusGame = StatusGame.Playing
     var scores: Int = 0
-) : Serializable {
+    var lastTime: Long = System.currentTimeMillis()
+    var timeToRestart: Double = SecTimeForRestartForEndGame
+    var timeLastUpdateController: Double = 0.0
+    var isDeleteRow: Boolean = false
 
-    fun updateActors(
+    init {
+        newGame()
+    }
+
+    fun update(controller: Controller) {
+        val deltaTime = getDeltaTime()
+        if (deltaTime == 0.0) return
+
+        gameTick(deltaTime, controller)
+    }
+
+    private fun getDeltaTime(): Double {
+        val now = System.currentTimeMillis()
+        val deltaTime = min(now - lastTime, mSEC_FROM_FPS_60) / 1000.0
+        lastTime = now
+        return deltaTime
+    }
+
+    private fun gameTick(
         deltaTime: Double,
-        controller: Controller,
-        plusScores: (Int) -> Unit
-    ): GameViewModel.Companion.StatusUpdateGame {
+        controller: Controller
+    ) {
+        if (status == StatusGame.Pause) return
 
+        if (timeToRestart == SecTimeForRestartForEndGame)
+            actorsUpdate(deltaTime, controller)
+
+        if (status == StatusGame.End)
+            timeToRestart -= deltaTime
+
+        if (timeToRestart < 0)
+            newGame()
+    }
+
+    private fun actorsUpdate(
+        deltaTime: Double,
+        controller: Controller
+    ) {
         currentFigureUpdate(deltaTime, controller)
 
-        characterUpdate(deltaTime, plusScores)
+        characterUpdate(deltaTime)
 
-        return getStatusGame(plusScores)
+        status = getStatusGame()
 
+        if (status == StatusGame.Playing && currentFigure.isStatusLastMovedDownFixation) {
+            fixation()
+            createCurrentFigure()
+        }
     }
 
     private fun currentFigureUpdate(
         deltaTime: Double,
         controller: Controller
     ) {
-        if (controller.isCanTimeLast(deltaTime)) {
+        if (isCanTimeLast(deltaTime)) {
             currentFigureMoveLeft(controller)
 
             currentFigureMoveRight(controller)
@@ -66,28 +105,40 @@ data class Game(
         currentFigureMoveDown(controller, deltaTime)
     }
 
+    private fun isCanTimeLast(deltaTime: Double): Boolean {
+        if (timeLastUpdateController == 0.0) {
+            timeLastUpdateController = SEC_TIME_OUT_INPUT
+            return true
+        }
+
+        timeLastUpdateController -= deltaTime
+        if (timeLastUpdateController < 0.0)
+            timeLastUpdateController = 0.0
+        return false
+    }
+
     private fun currentFigureMoveLeft(controller: Controller) {
         if (controller.left) {
-            val newPosition = currentFigure.getPositionMoveLeft()
-            if (isNotCollision(newPosition))
-                currentFigure.position = newPosition
+            val newPosition = currentFigure.positionIfMoveLeft
+            if (!isCollision(newPosition))
+                currentFigure.setPosition(newPosition)
         }
     }
 
     private fun currentFigureMoveRight(controller: Controller) {
         if (controller.right) {
-            val newPosition = currentFigure.getPositionMoveRight()
-            if (isNotCollision(newPosition))
-                currentFigure.position = newPosition
+            val newPosition = currentFigure.positionIfMoveRight
+            if (!isCollision(newPosition))
+                currentFigure.setPosition(newPosition)
         }
     }
 
     private fun currentFigureRotate(controller: Controller) {
         if (controller.up) {
             val oldFigure = currentFigure.figure
-            currentFigure.figure = currentFigure.getFigureRotate()
+            currentFigure.setFigure(currentFigure.getFigureRotate())
             if (isCollision(currentFigure.position))
-                currentFigure = currentFigure.copy(figure = oldFigure)
+                currentFigure.setFigure(oldFigure)
         }
     }
 
@@ -97,13 +148,13 @@ data class Game(
     }
 
     private fun moveDown(stepY: Double) {
-        val yStart = currentFigure.getTileY()
+        val yStart = currentFigure.tileY
         val yEnd = currentFigure.getTileYIfMoveDownByStep(stepY)
         val yMax = getYByCollisionIfMoveDown(yStart, yEnd)
 
         if (yMax == yEnd) {
 
-            val addPositionY: Double = if (stepY < 1)
+            val addPositionY = if (stepY < 1)
                 stepY
             else
                 (yMax - yStart).toDouble()
@@ -118,7 +169,7 @@ data class Game(
     }
 
     private fun getYByCollisionIfMoveDown(yStart: Int, yEnd: Int): Int {
-        for (y in yStart..yEnd) {
+        (yStart..yEnd).forEach { y ->
             val coordinate = Coordinate(currentFigure.position.x, y.toDouble())
             if (isCollision(coordinate))
                 return y - 1
@@ -127,201 +178,238 @@ data class Game(
         return yEnd
     }
 
-    private fun characterUpdate(
-        deltaTime: Double,
-        plusScores: (Int) -> Unit
-    ) {
+    fun isCollision(coordinate: Coordinate): Boolean {
+        return currentFigure.getPositionTile(coordinate)
+            .any { point ->
+                grid.isCollision(point)
+            }
+    }
 
-        character.updateBreath(deltaTime)
-
+    private fun characterUpdate(deltaTime: Double) {
+        character.breath.updateBreath(deltaTime)
         character.move(deltaTime)
 
         val isEatenBefore = character.eat
         if (character.isNewFrame()) {
-            character.updateByNewFrame(this)
 
-            if (isEatenBefore) {
-                val tile = character.location.position.posTile
+            character.newFrame(getDirection())
+
+            if (isEatenBefore && character.speed.isMove()) {
+                val tile = character.position.posTile
                 grid.space[tile.y][tile.x].setZero()
                 plusScores(50)
                 val isPathUp = isPathUp(
-                    character.location.position.posTile,
+                    character.position.posTile,
                     getFullCopySpace()
                 )
                 character.setBreath(isPathUp)
             }
+
+            character.setSpeed()
         }
 
         if (character.isEating())
             changeGridDestroyElement()
     }
 
-    private fun getStatusGame(plusScores: (Int) -> Unit): GameViewModel.Companion.StatusUpdateGame {
-        if (isEndGame(plusScores)) {
-            plusScores(0)
-            return GameViewModel.Companion.StatusUpdateGame.End
+
+    private fun getDirection(): List<Character.Companion.Direction> {
+        // Проверяем свободен ли выбранный путь при фиксации фигуры
+        if (isDeleteRow
+            && character.moves == isCanMove(listOf(character.moves))
+        )
+            isDeleteRow = false
+
+        return if (character.moves.isEmpty() || isDeleteRow)
+            getNewDirection()
+        else
+            return character.moves
+    }
+
+    private fun getNewDirection(): List<Character.Companion.Direction> {
+
+        val presetDirection = PresetDirection()
+        isDeleteRow = false
+        // Если двигаемся вправо
+
+        val listDirections = when {
+            character.speed.isStop() || character.move == Character.Companion.Direction.Right -> {
+                character.setLastDirection(Character.Companion.Direction.Right)
+                listOf(presetDirection.RIGHT_DOWN + presetDirection.RIGHT + presetDirection.LEFT).flatten()
+
+            }
+            // Если двигаемся влево
+            character.speed.isStop() || character.move == Character.Companion.Direction.Left -> {
+                character.setLastDirection(Character.Companion.Direction.Left)
+                listOf(presetDirection.LEFT_DOWN + presetDirection.LEFT + presetDirection.RIGHT).flatten()
+            }
+
+            character.lastDirection == Character.Companion.Direction.Left ->
+                listOf(presetDirection._0D) + presetDirection.LEFT + presetDirection.RIGHT
+
+
+            else -> listOf(presetDirection._0D) + presetDirection.RIGHT + presetDirection.LEFT
         }
 
-        return GameViewModel.Companion.StatusUpdateGame.Continue
+        return isCanMove(listDirections)
     }
 
-    fun isCollision(coordinate: Coordinate): Boolean {
-        if (currentFigure.getPositionTile(coordinate).any { point ->
-                (point.x !in 0 until grid.width)
-                        || point.y > grid.height - 1
-            })
-            return true
+    private fun isCanMove(listDirections: List<List<Character.Companion.Direction>>): List<Character.Companion.Direction> {
+        for (directions in listDirections)
+            if (isCanDirectionsAndSetCharacterEat(directions))
+                return directions
+        return listOf(Character.Companion.Direction.Stop)
+    }
 
-        if (currentFigure.getPositionTile(coordinate).any { point ->
-                isInside(point) && grid.space[point.y][point.x].block != 0
+    fun isCanDirectionsAndSetCharacterEat(
+        directions: List<Character.Companion.Direction>,
+        isDestroy: Boolean = (0..100).shuffled().first() < PROBABILITY_EAT_PERCENT,
+    ): Boolean {
+        var result = Vector(0, 0)
+        var currentVector = Vector(0, 0)
+
+        directions.forEach { direction ->
+            currentVector += direction
+            val checkingPosition = character.position.posTile + currentVector
+
+            if (grid.isOutside(checkingPosition))
+                return false
+
+            result += direction
+
+            if (grid.isNotFree(checkingPosition)) {
+                val isCanEatHorizontally = currentVector.y == 0 && isDestroy
+                if (isCanEatHorizontally) {
+                    character.setEat(true)
+                    return true
+                }
+                return false
             }
-        )
-            return true
-
-        return false
+        }
+        character.setEat(false)
+        return true
     }
 
-    private fun isNotCollision(coordinate: Coordinate): Boolean {
-        return !isCollision(coordinate)
+    private fun plusScores(score: Int) {
+        scores += score
+        if (scores > recordRepository.loadRecord())
+            recordRepository.saveRecord(scores)
     }
 
     private fun changeGridDestroyElement() {
-        val offsetX = if (character.movement.move.x == -1)
+        val offsetX = if (character.move == Character.Companion.Direction.Left)
             0
         else
-            character.movement.move.x
+            Character.Companion.Direction.Left.value.x
 
-        val offset = Vector(offsetX, character.movement.move.y)
+        val offset = Vector(offsetX, character.move.value.y)
 
         val tile = Vector(
-            floor(character.location.position.x).toInt() + offset.x,
-            (character.location.position.y.roundToInt() + offset.y),
+            floor(character.position.x).toInt() + offset.x,
+            (character.position.y.roundToInt() + offset.y),
         )
 
-        grid.space[tile.y][tile.x].status[character.getDirectionEat()] =
+        grid.space[tile.y][tile.x].changeStatus(
+            character.move,
             getStatusDestroyElement() + 1
+        )
 
         val isPathUp = isPathUp(
-            character.location.position.posTile,
+            character.position.posTile,
             getFullCopySpace()
         )
         character.setBreath(isPathUp)
     }
 
-    private fun isEndGame(
-        plusScores: (Int) -> Unit
-    ): Boolean {
-        if (isEndGameFigure(plusScores))
-            return true
-
-        if (!character.breath.breath && (isLose() || isCrushedBeetle()))
-            return true
-
-        return false
-    }
-
-    private fun isLose(): Boolean {
-        if (isNotFree(character.location.position.posTile) && !character.eat)
-            return true
-
-        if (character.breath.secondsSupplyForBreath <= 0)
-            return true
-
-        return false
-    }
-
-    private fun isEndGameFigure(
-        plusScores: (Int) -> Unit
-    ): Boolean {
-
-        if ((currentFigure.isStatusLastMovedDownFixation() &&
-                    (currentFigure.getPositionTile()
-                        .any { (it.y - 1) < 0 }
-                            ))// Фигура достигла препятствия
-            || (currentFigure.isStatusLastMovedDownFall() && isCrushedBeetle())
-        )
-        // Стакан заполнен игра окончена
-            return true
-
-
-        if (currentFigure.isStatusLastMovedDownFixation()) {
-            fixation(plusScores)
-            createCurrentFigure()
+    private fun getStatusGame(): StatusGame {
+        if (isEndGame()) {
+            plusScores(0)
+            return StatusGame.End
         }
 
-        return false
+        return StatusGame.Playing
+    }
+
+    private fun isEndGame(): Boolean {
+        return isGridFull()
+                || isCharacterNoBreath()
+                || isCharacterCrushedCurrentFigure()
+    }
+
+    private fun isGridFull(): Boolean {
+        val isCurrentFigureFixation =
+            currentFigure.statusLastMovedDown == CurrentFigure.Companion.StatusMoved.Fixation
+
+        val isCurrentFigureAboveGrid = currentFigure.getPositionTile()
+            .any { (it.y - 1) < 0 }
+
+        return isCurrentFigureFixation && isCurrentFigureAboveGrid
+    }
+
+    private fun isCharacterNoBreath(): Boolean {
+        return character.breath.secondsSupplyForBreath <= 0
+    }
+
+    private fun isCharacterCrushedCurrentFigure(): Boolean {
+        return currentFigure.isStatusLastMovedDownFall && isCrushedCharacter()
+    }
+
+    private fun isCrushedCharacter(): Boolean {
+
+        val isCharacterCollisionCurrentFigure = currentFigure.getPositionTile()
+            .any { tileFigure ->
+                tileFigure == character.positionTile
+            }
+
+        val isCharacterNoEatAndCollisionBlockGrid =
+            !character.eat && grid.isNotFree(character.positionTile)
+
+        return isCharacterCollisionCurrentFigure || isCharacterNoEatAndCollisionBlockGrid
     }
 
     private fun getStatusDestroyElement(): Int {
-        if (character.location.angle.isRight())
-            return floor((character.location.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
+        if (character.angle.isRight())
+            return floor((character.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
                 .toInt()
-        if (character.location.angle.isLeft())
-            return 3 - floor((character.location.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
+        if (character.angle.isLeft())
+            return 3 - floor((character.position.x % 1) * NUMBER_FRAMES_ELEMENTS.toDouble())
                 .toInt()
 
         return 0
     }
 
     private fun createCurrentFigure() {
-        currentFigure = CurrentFigure(
-            nextFigure,
-            Coordinate(
-                (0 until (grid.width - nextFigure.getMaxX())).shuffled().first()
-                    .toDouble(),
-                (0 - nextFigure.getMaxY()).toDouble()
-            )
-        )
+        currentFigure = CurrentFigure.create(grid, nextFigure)
         nextFigure = Figure()
     }
 
-    private fun isCrushedBeetle(): Boolean {
-        val tile = character.location.position.posTile
-
-        for (elem in currentFigure.getPositionTile())
-            if (elem == tile
-                || (isNotFree(tile) && !character.eat)
-            )
-                return true
-
-        return false
-    }
-
-    private fun fixation(
-        plusScores: (Int) -> Unit
-    ) {
+    private fun fixation() {
         val tile = currentFigure.getPositionTile()
         for ((index, value) in tile.withIndex())
-            grid.space[value.y][value.x].block =
-                currentFigure.figure.cells[index].view
-        val countRowFull = getCountRowFull()
+            grid.space[value.y][value.x].apply {
+                block = currentFigure.figure.cells[index].view
+                status = Element.Companion.StatusElement.Whole
+            }
+        val countRowFull = grid.countRowFull
         if (countRowFull != 0)
-            deleteRows()
+            grid.deleteRows()
         val scoresForRow = 100
         for (i in 1..countRowFull) {
-            scores += i * scoresForRow
-            plusScores(scores)
+            plusScores(i * scoresForRow)
         }
 
         currentFigure.updateStepMoveAuto(scores)
 
-        character.movement.deleteRow = 1
+        isDeleteRow = true
         val isPathUp = isPathUp(
-            character.location.position.posTile,
+            character.position.posTile,
             getFullCopySpace()
         )
         character.setBreath(isPathUp)
     }
 
     fun getFullCopySpace(): MutableList<MutableList<Int>> {
-        val result: MutableList<MutableList<Int>> = mutableListOf()
-        grid.space.forEachIndexed { indexY, elements ->
-            result.add(mutableListOf())
-            elements.forEach { element ->
-                result[indexY].add(element.block)
-            }
-        }
-        return result
+        return grid.space.map { it.map { it.block }.toMutableList() }.toMutableList()
     }
 
     private fun isInside(tempSpace: MutableList<MutableList<Int>>, p: Vector): Boolean {
@@ -348,66 +436,29 @@ data class Game(
         return false
     }
 
-    fun isInside(p: Vector): Boolean {
-        return p.x in 0 until grid.width && p.y in 0 until grid.height
+    fun clickPause() {
+        status = if (status == StatusGame.Playing)
+            StatusGame.Pause
+        else
+            StatusGame.Playing
     }
 
-    fun isOutside(p: Vector): Boolean {
-        return p.x !in 0 until grid.width || p.y !in 0 until grid.height
+    fun clickNewGame() {
+        newGame()
     }
 
-    fun isFree(p: Vector): Boolean {
-        return this.grid.space[p.y][p.x].block == 0
-    }
-
-    fun isNotFree(p: Vector): Boolean {
-        return this.grid.space[p.y][p.x].block != 0
-    }
-
-    fun getCountRowFull(): Int {
-        var result = 0
-        for (row in grid.space)
-            if (row.all { it.block != 0 })
-                result += 1
-
-        return result
-    }
-
-    fun deleteRows() {
-        for ((index, value) in grid.space.withIndex())
-            if (value.all { it.block != 0 }) {
-                for (i in index downTo 1)
-                    for (j in 0 until grid.width)
-                        grid.space[i][j].setElement(grid.space[i - 1][j])
-                grid.space[0].forEach { it.setZero() }
-            }
-    }
-
-    fun newGame() {
-        grid.space = List(grid.height) {
-            List(grid.width) {
-                Element(grid.valueFon())
-            }
-        }
-        character = Character(
-            Location(
-                Coordinate(
-                    (0 until grid.width).shuffled().first().toDouble(),
-                    (grid.height - 1).toDouble()
-                )
-            )
-        )
+    private fun newGame() {
+        grid = Grid.create(width, height)
+        character = Character.create(grid)
         nextFigure = Figure()
-        currentFigure = run {
-            val figure = Figure()
-            CurrentFigure(
-                figure,
-                Coordinate(
-                    (0 until (widthGrid - figure.getMaxX())).shuffled().first().toDouble(),
-                    (0 - figure.getMaxY()).toDouble()
-                )
-            )
-        }
+        currentFigure = CurrentFigure.create(grid)
+        scores = 0
+        timeToRestart = SecTimeForRestartForEndGame
     }
 
+    companion object {
+        enum class StatusGame : Serializable {
+            Playing, Pause, End
+        }
+    }
 }

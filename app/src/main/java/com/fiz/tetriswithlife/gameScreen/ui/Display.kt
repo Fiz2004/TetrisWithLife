@@ -2,7 +2,7 @@ package com.fiz.tetriswithlife.gameScreen.ui
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.fiz.tetriswithlife.gameScreen.data.BitmapRepository
+import com.fiz.tetriswithlife.gameScreen.domain.repositories.BitmapRepository
 import com.fiz.tetriswithlife.gameScreen.ui.models.*
 import javax.inject.Inject
 
@@ -11,17 +11,17 @@ class Display @Inject constructor(
 ) {
     private val paint: Paint = Paint()
 
-    fun render(viewState: ViewState, canvas: Canvas, color: Int) {
+    fun render(gameState: GameState, canvas: Canvas, color: Int) {
 
         canvas.drawColor(color)
 
-        drawGridElements(viewState.gameState.backgroundsUi, viewState.gameState.blocksUi, canvas)
-        drawCharacter(viewState.gameState.characterUi, canvas)
-        drawCurrentFigure(viewState.gameState.blocksCurrentFigureUi, canvas)
+        drawGridElements(gameState.backgroundsUi, gameState.blocksUi, canvas)
+        drawCharacter(gameState.characterUi, canvas)
+        drawCurrentFigure(gameState.blocksCurrentFigureUi, canvas)
     }
 
-    fun renderInfo(viewState: ViewState, nextFigureCanvas: Canvas, color: Int) {
-        drawNextFigure(viewState.gameState.blocksNextFigureUi, nextFigureCanvas, color)
+    fun renderInfo(gameState: GameState, nextFigureCanvas: Canvas, color: Int) {
+        drawNextFigure(gameState.blocksNextFigureUi, nextFigureCanvas, color)
     }
 
     private fun drawGridElements(

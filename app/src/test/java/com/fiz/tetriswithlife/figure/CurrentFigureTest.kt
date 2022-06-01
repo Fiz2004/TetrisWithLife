@@ -1,10 +1,11 @@
 package com.fiz.tetriswithlife.figure
 
+import com.fiz.tetriswithlife.gameScreen.domain.repositories.RecordRepository
 import com.fiz.tetriswithlife.gameScreen.game.Coordinate
 import com.fiz.tetriswithlife.gameScreen.game.Game
-import com.fiz.tetriswithlife.gameScreen.game.Grid
 import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
 import com.fiz.tetriswithlife.gameScreen.game.figure.Figure
+import io.mockk.mockk
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -12,14 +13,19 @@ import org.junit.Test
 
 internal class CurrentFigureTest {
     private lateinit var game: Game
-    private lateinit var figure: Figure
     private lateinit var currentFigure: CurrentFigure
 
     @Before
     fun setUp() {
-        game = Game(Grid(5, 10, { 0 }))
-        figure = Figure(getNumberFigure = 0)
-        currentFigure = CurrentFigure(figure, Coordinate(0.0, (0 - figure.getMaxY()).toDouble()))
+        val recordRepository = mockk<RecordRepository>()
+        game = Game(5, 10, recordRepository)
+        val figure = Figure(getNumberFigure = 0)
+        currentFigure =
+            CurrentFigure.create(
+                game.grid,
+                figure,
+                Coordinate(0.0, (0 - figure.getMaxY()).toDouble())
+            )
     }
 
     @Test
