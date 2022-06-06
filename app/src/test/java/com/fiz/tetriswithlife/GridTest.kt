@@ -58,7 +58,7 @@ class GridTest {
 
     @Test
     fun whenPointNotFree_shouldReturnFalse() {
-        game.grid.space[1][1].block = 1
+        game.grid.space[1][1].setBlock(1)
         val result = game.grid.isFree(Vector(1, 1))
 
         assertFalse(result)
@@ -66,7 +66,7 @@ class GridTest {
 
     @Test
     fun whenPointNotFree_shouldReturnTrue() {
-        game.grid.space[1][1].block = 1
+        game.grid.space[1][1].setBlock(1)
         val result = game.grid.isNotFree(Vector(1, 1))
         assertTrue(result)
     }
@@ -80,7 +80,7 @@ class GridTest {
 
     @Test
     fun whenRowNotFull_shouldReturnZero() {
-        val result = game.grid.getCountRowFull()
+        val result = game.grid.countRowFull
 
         assertEquals(0, result)
     }
@@ -88,8 +88,8 @@ class GridTest {
     @Test
     fun whenRowFullOne_shouldReturnOne() {
         for (i in 0 until 5)
-            game.grid.space[9][i].block = 1
-        val result = game.grid.getCountRowFull()
+            game.grid.space[9][i].setBlock(1)
+        val result = game.grid.countRowFull
 
         assertEquals(1, result)
     }
@@ -97,10 +97,10 @@ class GridTest {
     @Test
     fun whenRowFullTwo_shouldReturnTwo() {
         for (i in 0 until 5) {
-            game.grid.space[5][i].block = 1
-            game.grid.space[9][i].block = 1
+            game.grid.space[5][i].setBlock(1)
+            game.grid.space[9][i].setBlock(1)
         }
-        val result = game.grid.getCountRowFull()
+        val result = game.grid.countRowFull
 
         assertEquals(2, result)
     }
@@ -108,8 +108,8 @@ class GridTest {
     @Test
     fun whenRowFull_shouldCheckRowClean() {
         for (i in 0 until 5)
-            game.grid.space[9][i].block = 1
-        game.grid.deleteRows()
+            game.grid.space[9][i].setBlock(1)
+        game.grid.removeRows()
 
         assertEquals(0, game.grid.space[9][0].block)
     }

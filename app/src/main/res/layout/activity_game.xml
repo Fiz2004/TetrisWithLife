@@ -55,34 +55,35 @@
         android:layout_height="0dp"
         android:layout_margin="@dimen/buttonPadding"
         app:layout_constraintBottom_toTopOf="@+id/rotateButton"
-        app:layout_constraintDimensionRatio="w,13:25"
+        app:layout_constraintDimensionRatio="w,10:20"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/infoBreathTextView" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintTop_toBottomOf="@+id/pauseButton" />
 
     <TextView
         android:id="@+id/infoBreathTextView"
         style="@style/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         android:layout_marginTop="@dimen/buttonPadding"
         android:text="@string/infobreath_game_textview"
+        android:textAlignment="center"
         android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@id/nextFigureSurfaceView"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/scoresTextView"
-        app:layout_constraintTop_toBottomOf="@+id/pauseButton" />
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scoresTextView" />
 
     <SurfaceView
         android:id="@+id/nextFigureSurfaceView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/infoBreathTextView"
+        android:layout_marginTop="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         app:layout_constraintDimensionRatio="h,1:1"
-        app:layout_constraintEnd_toStartOf="@+id/recordTextview"
-        app:layout_constraintStart_toEndOf="@+id/infoBreathTextView"
-        app:layout_constraintTop_toTopOf="@+id/infoBreathTextView" />
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/newGameButton" />
 
     <TextView
         android:id="@+id/scoresTextView"
@@ -90,28 +91,25 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/scores_game_textview"
         android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="@+id/infoBreathTextView"
-        app:layout_constraintEnd_toStartOf="@+id/infoBreathTextView"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/newGameButton" />
+        app:layout_constraintTop_toBottomOf="@+id/recordTextview" />
 
     <TextView
         android:id="@+id/recordTextview"
         style="@style/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/buttonPadding"
         android:layout_marginTop="@dimen/buttonPadding"
+        android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/record_game_textview"
-        app:layout_constraintBottom_toBottomOf="@+id/infoBreathTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/nextFigureSurfaceView"
-        app:layout_constraintTop_toBottomOf="@+id/exitButton" />
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nextFigureSurfaceView" />
 
 
     <Button

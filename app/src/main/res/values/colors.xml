@@ -14,7 +14,7 @@
 
     // For Light Theme
     <color name="white_900">#FFEAEAEA</color>
-    <color name="black_800">#BABABF</color>
+    <color name="black_800">#FFBABABF</color>
 
 
     // For Dark Theme
