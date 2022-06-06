@@ -19,6 +19,8 @@ private const val NUMBER_ROWS_IMAGES_FON = 4
 
 private const val NUMBER_FRAMES_CHARACTER_MOVE = 5
 
+private const val NUMBER_FRAMES_ELEMENTS = 4
+
 @Singleton
 class GetGameStateFromGame @Inject constructor(
     private val bitmapRepository: BitmapRepository,
@@ -57,8 +59,8 @@ class GetGameStateFromGame @Inject constructor(
         return GameState(
             backgroundsUi = getBackgroundsUi(game.grid),
             blocksUi = getBlocksUi(game.grid),
-            characterUi = getCharacterUi(game.character),
-            blocksCurrentFigureUi = getCurrentFigure(game.currentFigure),
+            characterUi = getCharacterUi(game.grid.character),
+            blocksCurrentFigureUi = getCurrentFigure(game.grid.currentFigure),
             blocksNextFigureUi = getNextFigureUi(game.nextFigure),
             scores = game.scores,
             status = getStatusUi(game.status),
@@ -70,7 +72,7 @@ class GetGameStateFromGame @Inject constructor(
         return when (status) {
             Game.Companion.StatusGame.Playing -> GameState.Companion.StatusCurrentGame.Playing
             Game.Companion.StatusGame.Pause -> GameState.Companion.StatusCurrentGame.Pause
-            Game.Companion.StatusGame.End -> GameState.Companion.StatusCurrentGame.Playing
+            Game.Companion.StatusGame.NewGame -> GameState.Companion.StatusCurrentGame.Playing
         }
     }
 
@@ -109,17 +111,29 @@ class GetGameStateFromGame @Inject constructor(
         }
 
     private fun getOffset(status: Element.Companion.StatusElement): Vector {
+        val numberSprite = getNumberSprite(status) + 1
+
         return when (status) {
             is Element.Companion.StatusElement.Whole -> Vector(0, 0)
-            is Element.Companion.StatusElement.Right -> Vector(status.damage, 1)
-            is Element.Companion.StatusElement.Left -> Vector(status.damage, 2)
-            is Element.Companion.StatusElement.Up -> Vector(status.damage, 3)
+            is Element.Companion.StatusElement.Right -> Vector(numberSprite, 1)
+            is Element.Companion.StatusElement.Left -> Vector(numberSprite, 2)
+            is Element.Companion.StatusElement.Up -> Vector(numberSprite, 3)
         }
+    }
+
+    private fun getNumberSprite(status: Element.Companion.StatusElement): Int {
+        if (status is Element.Companion.StatusElement.Left)
+            return (status.damage * NUMBER_FRAMES_ELEMENTS).toInt()
+
+        if (status is Element.Companion.StatusElement.Right)
+            return 3 - (status.damage * NUMBER_FRAMES_ELEMENTS).toInt()
+
+        return 0
     }
 
     private fun getCharacterUi(character: Character): CharacterUi {
         val offset = getSprite(character) * tile
-        val screen = globalOffsetScreen + (character.position * newTile).toPoint()
+        val screen = globalOffsetScreen + (character.position * newTile).toPoint
 
         return CharacterUi(
             src = squareToRect(offset, tile),
@@ -134,9 +148,9 @@ class GetGameStateFromGame @Inject constructor(
         val frameX = getFrame(character.position.x)
         val frameY = getFrame(character.position.y)
 
-        if (character.speed.isMove()) {
+        if (character.speed.isMove) {
 
-            if (character.angle.isRight())
+            if (character.angle.isRight)
                 return if (frameX == -1)
                     Vector(2, 0)
                 else
@@ -145,7 +159,7 @@ class GetGameStateFromGame @Inject constructor(
                     else
                         Vector(frameX, 1)
 
-            if (character.angle.isLeft())
+            if (character.angle.isLeft)
                 return if (frameX == -1)
                     Vector(6, 0)
                 else
@@ -156,7 +170,7 @@ class GetGameStateFromGame @Inject constructor(
 
 
 
-            if (character.angle.isDown())
+            if (character.angle.isDown)
                 return if (frameY == -1)
                     Vector(0, 0)
                 else
@@ -166,7 +180,7 @@ class GetGameStateFromGame @Inject constructor(
                         Vector(frameY, 4)
 
 
-            if (character.angle.isUp())
+            if (character.angle.isUp)
                 return if (frameY == -1)
                     Vector(4, 0)
                 else
@@ -176,22 +190,22 @@ class GetGameStateFromGame @Inject constructor(
                         Vector(frameY, 3)
         }
 
-        if (character.speed.isRotated()) {
-            if (character.angle.isRight())
+        if (character.speed.isRotated) {
+            if (character.angle.isRight)
                 return Vector(2, 0)
-            if (character.angle.isRightDown())
+            if (character.angle.isRightDown)
                 return Vector(1, 0)
-            if (character.angle.isDown())
+            if (character.angle.isDown)
                 return Vector(0, 0)
-            if (character.angle.isLeftDown())
+            if (character.angle.isLeftDown)
                 return Vector(7, 0)
-            if (character.angle.isLeft())
+            if (character.angle.isLeft)
                 return Vector(6, 0)
-            if (character.angle.isLeftUp())
+            if (character.angle.isLeftUp)
                 return Vector(5, 0)
-            if (character.angle.isUp())
+            if (character.angle.isUp)
                 return Vector(4, 0)
-            if (character.angle.isRightUp())
+            if (character.angle.isRightUp)
                 return Vector(3, 0)
         }
 
@@ -209,7 +223,7 @@ class GetGameStateFromGame @Inject constructor(
 
     private fun getCurrentFigure(currentFigure: CurrentFigure) = currentFigure.figure.cells
         .mapNotNull { cell ->
-            val cellPosition = ((cell.vector + currentFigure.position) * newTile).toPoint()
+            val cellPosition = ((cell.vector + currentFigure.position) * newTile).toPoint
             if (cellPosition.y < 0 && cellPosition.y + newTile < 0)
                 return@mapNotNull null
 
@@ -222,7 +236,7 @@ class GetGameStateFromGame @Inject constructor(
             val oldStartY = if (cellPosition.y < 0) (newTile - newHeight) * (tile / newTile) else 0
 
             CurrentFigureUi(
-                value = cell.view - 1,
+                value = cell.block - 1,
                 src = Rect(0, oldStartY, tile, tile),
                 dst = Rect(screen.x, newStartY, screen.x + newTile, newStartY + newHeight)
             )
@@ -232,7 +246,7 @@ class GetGameStateFromGame @Inject constructor(
         val screen = cell.vector * newTileInfo
 
         NextFigureUi(
-            value = cell.view - 1,
+            value = cell.block - 1,
             src = squareToRect(Vector(0, 0), tile),
             dst = squareToRect(screen, newTileInfo),
         )

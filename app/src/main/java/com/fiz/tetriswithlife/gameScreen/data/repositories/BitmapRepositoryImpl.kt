@@ -15,19 +15,21 @@ private const val NUMBER_IMAGES_FIGURE = 5
 class BitmapRepositoryImpl @Inject constructor(@ApplicationContext context: Context) :
     BitmapRepository {
 
-    override val bmpFon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.fon)
+    override val bmpFon: Bitmap =
+        BitmapFactory.decodeResource(context.resources, R.drawable.background)
+
     override val bmpCharacter: Bitmap =
         BitmapFactory.decodeResource(context.resources, R.drawable.character)
+
     override val bmpKv: List<Bitmap> by lazy {
-        val result: MutableList<Bitmap> = mutableListOf()
-        for (i in 1..NUMBER_IMAGES_FIGURE)
-            result += BitmapFactory.decodeResource(
+        (1..NUMBER_IMAGES_FIGURE).mapTo(mutableListOf<Bitmap>()) {
+            BitmapFactory.decodeResource(
                 context.resources, context.resources.getIdentifier(
-                    "kvadrat$i",
+                    "block$it",
                     "drawable", context.packageName
                 )
             )
-        result
+        }
     }
 
 }

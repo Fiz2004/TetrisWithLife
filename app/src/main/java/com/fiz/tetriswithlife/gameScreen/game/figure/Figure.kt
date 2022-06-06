@@ -2,6 +2,8 @@ package com.fiz.tetriswithlife.gameScreen.game.figure
 
 import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 private const val NUMBER_IMAGES_FIGURE = 5
 
@@ -61,9 +63,9 @@ val FIGURES: List<List<Vector>> = listOf(
 )
 
 data class Figure(
-    private val getNumberFigure: Int = (FIGURES.indices).shuffled().first(),
+    private val getNumberFigure: Int = Random.nextInt(FIGURES.indices),
     val cells: List<Cell> =
-        FIGURES[getNumberFigure].map { Cell(it, (1..NUMBER_IMAGES_FIGURE).shuffled().first()) }
+        FIGURES[getNumberFigure].map { Cell(it, Random.nextInt(1..NUMBER_IMAGES_FIGURE)) }
 ) : Serializable {
 
     fun getWidth(): Int {
@@ -83,7 +85,7 @@ data class Figure(
     }
 
     fun getCellsRotate(): List<Cell> {
-        return cells.map { it.getCellRotate() }
+        return cells.map { it.cellRotate }
     }
 }
 

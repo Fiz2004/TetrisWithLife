@@ -1,43 +1,36 @@
 package com.fiz.tetriswithlife.gameScreen.game.character
 
+import com.fiz.tetriswithlife.util.componentX
+import com.fiz.tetriswithlife.util.componentY
 import java.io.Serializable
-import kotlin.math.cos
-import kotlin.math.roundToInt
-import kotlin.math.sin
 
 data class Angle(val angle: Double) : Serializable {
 
     val direction: Character.Companion.Direction
         get() = when {
-            directionX == 0 && directionY == 0 -> Character.Companion.Direction.Stop
-            directionX == 1 && directionY == 0 -> Character.Companion.Direction.Right
-            directionX == -1 && directionY == 0 -> Character.Companion.Direction.Left
-            directionX == 0 && directionY == 1 -> Character.Companion.Direction.Down
-            directionX == 0 && directionY == -1 -> Character.Companion.Direction.Up
-            else -> throw Exception("Error: incorrect direction $directionX $directionY")
+            angle.componentX == 0 && angle.componentY == 0 -> Character.Companion.Direction.Stop
+            angle.componentX == 1 && angle.componentY == 0 -> Character.Companion.Direction.Right
+            angle.componentX == -1 && angle.componentY == 0 -> Character.Companion.Direction.Left
+            angle.componentX == 0 && angle.componentY == 1 -> Character.Companion.Direction.Down
+            angle.componentX == 0 && angle.componentY == -1 -> Character.Companion.Direction.Up
+            else -> throw Exception("Error: incorrect direction ${angle.componentX} ${angle.componentY}")
         }
 
-    val directionX
-        get() = cos(angle * (Math.PI / 180)).roundToInt()
+    val isLeftUp = angle == 225.0
 
-    val directionY
-        get() = sin(angle * (Math.PI / 180)).roundToInt()
+    val isLeftDown = angle == 135.0
 
-    fun isLeftUp() = angle == 225.0
+    val isRightUp = angle == 315.0
 
-    fun isLeftDown() = angle == 135.0
+    val isRightDown = angle == 45.0
 
-    fun isRightUp() = angle == 315.0
+    val isLeft = angle == 180.0
 
-    fun isRightDown() = angle == 45.0
+    val isRight = angle == 0.0 || angle == 360.0
 
-    fun isLeft() = angle == 180.0
+    val isUp = angle == 270.0
 
-    fun isRight() = angle == 0.0 || angle == 360.0
-
-    fun isUp() = angle == 270.0
-
-    fun isDown() = angle == 90.0
+    val isDown = angle == 90.0
 
     operator fun plus(angle: Angle): Angle {
         var newAngle = this.angle + angle.angle

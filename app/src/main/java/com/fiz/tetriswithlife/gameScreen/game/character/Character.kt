@@ -2,8 +2,10 @@ package com.fiz.tetriswithlife.gameScreen.game.character
 
 import com.fiz.tetriswithlife.gameScreen.game.Coordinate
 import com.fiz.tetriswithlife.gameScreen.game.Grid
+import com.fiz.tetriswithlife.gameScreen.game.PROBABILITY_EAT_PERCENT
 import com.fiz.tetriswithlife.gameScreen.game.Vector
 import java.io.Serializable
+import kotlin.random.Random
 
 // Время без дыхания для проигрыша
 const val TIMES_BREATH_LOSE = 60.0
@@ -14,119 +16,198 @@ private const val BASE_SPEED_ROTATE_FOR_SECOND = 45.0
 
 class Character private constructor(startPosition: Coordinate) : Serializable {
 
-    val breath: Breath = Breath()
-
-    var position: Coordinate = startPosition
+    var position = startPosition
         private set
 
-    var angle: Angle = Angle(90.0)
+    var angle = Angle(90.0)
         private set
 
-    var eat: Boolean = false
+    var eat = false
         private set
 
-    var speed: Speed = Speed(0.0, 0.0)
+    var speed = Speed(0.0, 0.0)
         private set
 
-    var move: Direction = Direction.Stop
+    var move = Direction.Stop
         private set
 
-    var lastDirection: Direction = Direction.Right
+    var isEatFinish = false
         private set
-
-    var moves: MutableList<Direction> = mutableListOf()
-        private set
-
 
     val positionTile
         get() = position.posTile
 
-    private fun addPosition(value: Double) {
-        position += Coordinate(
-            angle.directionX.toDouble() * value,
-            angle.directionY.toDouble() * value
-        )
-    }
+    val breath: Breath = Breath()
 
-    fun isNewFrame(): Boolean {
-        val deviantLine = 1.0 / 2000.0
-        val deviantAngle = 1.0 / 100.0
+    val isCharacterNoBreath
+        get() = breath.secondsSupplyForBreath <= 0
 
-        val isNewFrameByX =
-            position.x % 1 < deviantLine || position.x % 1 > 1 - deviantLine
+    private var path: MutableList<Direction> = mutableListOf()
 
-        val isNewFrameByY =
-            position.y % 1 < deviantLine || position.y % 1 > 1 - deviantLine
+    private var lastDirection: Direction = Direction.Right
 
-        val isNewFrameByRotate =
-            (angle.angle / 45) % 2 !in (deviantAngle..2 - deviantAngle)
+    private var isDeleteRow: Boolean = false
 
-        return isNewFrameByX && isNewFrameByY && isNewFrameByRotate
-    }
-
-    private fun getCurrentMove() =
-        if (move == moves.first()) {
-            if (angle.direction == move)
-                moves.removeFirst()
-            else
-                move
-        } else {
-            moves.first()
+    private val isNewFrame: Boolean
+        get() {
+            val deviantLine = 1.0 / 2000.0
+            val deviantAngle = 1.0 / 100.0
+            val isNewFrameByX = (position.x % 1) !in deviantLine..(1 - deviantLine)
+            val isNewFrameByY = (position.y % 1) !in deviantLine..(1 - deviantLine)
+            val isNewFrameByRotate = (angle.angle / 45) % 2 !in (deviantAngle..2 - deviantAngle)
+            return isNewFrameByX && isNewFrameByY && isNewFrameByRotate
         }
+
+    private val currentMove: Direction
+        get() = if (move == path.first()) {
+            if (angle.direction == move) path.removeFirst()
+            else move
+        } else {
+            path.first()
+        }
+
+    fun update(
+        deltaTime: Double, isOutside: (Vector) -> Boolean, isNotFree: (Vector) -> Boolean
+    ) {
+        breath.updateBreath(deltaTime)
+        move(deltaTime)
+
+        val isEatenBefore = eat
+        if (isNewFrame) {
+
+            newFrame(getPath(isOutside, isNotFree))
+
+            if (isEatenBefore && speed.isMove) isEatFinish = true
+
+            speed = getSpeed(
+                angle.angle, move
+            )
+        }
+    }
+
+    private fun move(deltaTime: Double) {
+        if (speed.isMove) {
+            position += angle.direction.value * speed.line
+        }
+
+        if (speed.isRotated) angle += Angle(speed.rotate)
+    }
 
     fun setBreath(value: Boolean) {
         this.breath.breath = value
     }
 
     fun isEating(): Boolean {
-        return eat && angle.directionX == move.value.x && angle.directionY == move.value.y
+        return eat && angle.direction == move
     }
 
-    fun move(deltaTime: Double) {
-        if (speed.isMove())
-            addPosition(speed.line)
+    private fun newFrame(newPath: List<Direction>) {
+        path = newPath.toMutableList()
 
-        if (speed.isRotated())
-            angle += Angle(speed.rotate)
-    }
-
-    fun newFrame(newMoves: List<Direction>) {
-        moves = newMoves.toMutableList()
-
-        move = getCurrentMove()
-    }
-
-    fun setSpeed() {
-        speed = getSpeed(
-            angle.angle,
-            move
-        )
+        move = currentMove
     }
 
     private fun getSpeed(currentAngle: Double, needVector: Direction): Speed {
-        val tempAngle = needVector.value.angleInDegrees
+        val needAngle = needVector.value.angleInDegrees
 
         var signAtClockwise = 1
-        if ((currentAngle - tempAngle) in (0.0..180.0))
-            signAtClockwise = -1
+        if ((currentAngle - needAngle) in (0.0..180.0)) signAtClockwise = -1
 
-        if (needVector.value.equalsWith(currentAngle))
-            return Speed(BASE_SPEED_FOR_SECOND, 0.0)
+        if (needVector.value.equalsWith(currentAngle)) return Speed(BASE_SPEED_FOR_SECOND, 0.0)
 
-        if (currentAngle == tempAngle)
-            return Speed(0.0, 0.0)
+        if (currentAngle == needAngle) return Speed(0.0, 0.0)
 
         return Speed(0.0, signAtClockwise * BASE_SPEED_ROTATE_FOR_SECOND)
     }
 
-    fun setEat(value: Boolean) {
-        eat = value
+    private fun getPath(
+        isOutside: (Vector) -> Boolean, isNotFree: (Vector) -> Boolean
+    ): List<Direction> {
+        val isPathFree = if (isDeleteRow) path == isCanMove(listOf(path), isOutside, isNotFree)
+        else true
+
+        if (path.isEmpty() || !isPathFree) return getNewPath(isOutside, isNotFree)
+
+        return path
     }
 
-    fun setLastDirection(value: Direction) {
-        lastDirection = value
+
+    private fun getNewPath(
+        isOutside: (Vector) -> Boolean, isNotFree: (Vector) -> Boolean
+    ): List<Direction> {
+
+        val presetDirection = PresetDirection()
+        isDeleteRow = false
+
+        val allPaths = when {
+            speed.isStop || move == Direction.Right -> {
+                lastDirection = Direction.Right
+                listOf(presetDirection.RIGHT_DOWN + presetDirection.RIGHT + presetDirection.LEFT).flatten()
+
+            }
+            move == Direction.Left -> {
+                lastDirection = Direction.Left
+                listOf(presetDirection.LEFT_DOWN + presetDirection.LEFT + presetDirection.RIGHT).flatten()
+            }
+
+            lastDirection == Direction.Left -> listOf(presetDirection._0D) + presetDirection.LEFT + presetDirection.RIGHT
+
+
+            else -> listOf(presetDirection._0D) + presetDirection.RIGHT + presetDirection.LEFT
+        }
+
+        return isCanMove(allPaths, isOutside, isNotFree)
     }
 
+    private fun isCanMove(
+        allPaths: List<List<Direction>>,
+        isOutside: (Vector) -> Boolean,
+        isNotFree: (Vector) -> Boolean
+    ): List<Direction> {
+        for (paths in allPaths) if (isCanDirectionsAndSetCharacterEat(
+                paths, isOutside = isOutside, isNotFree = isNotFree
+            )
+        ) return paths
+        return listOf(Direction.Stop)
+    }
+
+    private fun isCanDirectionsAndSetCharacterEat(
+        paths: List<Direction>,
+        isCanEat: Boolean = Random.nextInt(100) < PROBABILITY_EAT_PERCENT,
+        isOutside: (Vector) -> Boolean,
+        isNotFree: (Vector) -> Boolean
+    ): Boolean {
+        var result = Vector(0, 0)
+        var currentVector = Vector(0, 0)
+
+        paths.forEach { direction ->
+            currentVector += direction.value
+            val checkingPosition = position.posTile + currentVector
+
+            if (isOutside(checkingPosition)) return false
+
+            result += direction.value
+
+            if (isNotFree(checkingPosition)) {
+                val isCanEatHorizontally = currentVector.y == 0 && isCanEat
+                if (isCanEatHorizontally) {
+                    eat = true
+                    return true
+                }
+                return false
+            }
+        }
+        eat = false
+        return true
+    }
+
+    fun eatenFinish() {
+        isEatFinish = false
+    }
+
+    fun onDeleteRow() {
+        isDeleteRow = true
+    }
 
     companion object {
         fun create(

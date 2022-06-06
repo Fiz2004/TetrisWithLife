@@ -3,11 +3,13 @@ package com.fiz.tetriswithlife.gameScreen.game
 import com.fiz.tetriswithlife.gameScreen.game.character.Character
 import java.io.Serializable
 
-data class Element(
-    val background: Int,
-    var block: Int = 0,
+data class Element(val background: Int) : Serializable {
+
+    var block: Int = 0
+        private set
+
     var status: StatusElement = StatusElement.Whole
-) : Serializable {
+        private set
 
     fun setZero() {
         block = 0
@@ -19,25 +21,31 @@ data class Element(
         status = element.status
     }
 
-    fun changeStatus(move: Character.Companion.Direction, value: Int) {
-        status = when {
-            move == Character.Companion.Direction.Left -> StatusElement.Right(value)
-            move == Character.Companion.Direction.Right -> StatusElement.Left(value)
-            move == Character.Companion.Direction.Down -> StatusElement.Up(value)
+
+    fun setBlock(value: Int) {
+        block = value
+    }
+
+    fun changeStatus(move: Character.Companion.Direction, value: Double) {
+        status = when (move) {
+            Character.Companion.Direction.Left -> StatusElement.Right(value)
+            Character.Companion.Direction.Right -> StatusElement.Left(value)
+            Character.Companion.Direction.Down -> StatusElement.Up(value)
             else -> throw Exception("Error: incorrect value function getDirectionEat ${move.value.x} ${move.value.y}")
         }
     }
 
+    fun fixationCell(block: Int) {
+        this.block = block
+        status = StatusElement.Whole
+    }
+
     companion object {
 
-        // TODO Разнести логику повреждений в игре от ее показа
         sealed class StatusElement : Serializable {
-            class Left(var damage: Int) : StatusElement()
-
-            class Right(var damage: Int) : StatusElement()
-
-            class Up(var damage: Int) : StatusElement()
-
+            class Left(var damage: Double) : StatusElement()
+            class Right(var damage: Double) : StatusElement()
+            class Up(var damage: Double) : StatusElement()
             object Whole : StatusElement()
         }
     }
