@@ -8,7 +8,8 @@ data class Coordinate(val x: Double, val y: Double) : Serializable {
     val posTile
         get() = Vector(posTileX, posTileY)
 
-    val toPoint = Vector(x.toInt(), y.toInt())
+    val toPoint
+        get() = Vector(x.toInt(), y.toInt())
 
     private val posTileX: Int
         get() = x.roundToInt()

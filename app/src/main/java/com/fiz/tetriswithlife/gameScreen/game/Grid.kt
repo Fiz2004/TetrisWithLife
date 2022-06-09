@@ -1,5 +1,6 @@
 package com.fiz.tetriswithlife.gameScreen.game
 
+import android.util.Log
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
 import com.fiz.tetriswithlife.gameScreen.game.character.Character
 import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
@@ -28,17 +29,20 @@ class Grid private constructor(val space: List<List<Element>>) : Serializable {
                 0
         }
 
-    private val isCharacterCrushedCurrentFigure =
-        currentFigure.isStatusLastMovedDownFall && isCrushedCharacter()
+    private val isCharacterCrushedCurrentFigure
+        get() =
+            currentFigure.isStatusLastMovedDownFall && isCrushedCharacter()
 
-    private val isEndGame = isGridFull()
-            || character.isCharacterNoBreath
-            || isCharacterCrushedCurrentFigure
+    private val isEndGame
+        get() = isGridFull()
+                || character.isCharacterNoBreath
+                || isCharacterCrushedCurrentFigure
 
-    private val statusGame = if (isEndGame)
-        Game.Companion.LoopStatusGame.End()
-    else
-        Game.Companion.LoopStatusGame.Continue
+    private val statusGame
+        get() = if (isEndGame)
+            Game.Companion.LoopStatusGame.End()
+        else
+            Game.Companion.LoopStatusGame.Continue
 
     fun update(
         deltaTime: Double,
@@ -152,9 +156,11 @@ class Grid private constructor(val space: List<List<Element>>) : Serializable {
 
     fun fixation(nextFigure: Figure, scores: Int, plusScores: (Int) -> Unit) {
         val tile = currentFigure.getPositionTile()
-        for ((index, value) in tile.withIndex())
+        for ((index, value) in tile.withIndex()) {
+            if (value.y < 0)
+                Log.e("Er", currentFigure.statusLastMovedDown.toString())
             space[value.y][value.x].fixationCell(currentFigure.figure.cells[index].block)
-
+        }
         val countRowFull = countRowFull
         if (countRowFull != 0)
             removeRows()

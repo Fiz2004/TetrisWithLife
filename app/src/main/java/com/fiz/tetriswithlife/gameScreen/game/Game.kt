@@ -8,8 +8,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.min
 
-const val WIDTH_GRID: Int = 13
-const val HEIGHT_GRID: Int = 25
+const val WIDTH_GRID: Int = 10
+const val HEIGHT_GRID: Int = 20
 
 const val PROBABILITY_EAT_PERCENT = 20
 
@@ -70,7 +70,7 @@ class Game @Inject constructor(
         when (loopStatus) {
             LoopStatusGame.Continue -> {
                 loopStatus = grid.update(deltaTime, controller, ::plusScores)
-                if (grid.currentFigure.isStatusLastMovedDownFixation) {
+                if (loopStatus !is LoopStatusGame.End && grid.currentFigure.isStatusLastMovedDownFixation) {
                     grid.fixation(nextFigure, scores, ::plusScores)
                     nextFigure = Figure()
                 }
