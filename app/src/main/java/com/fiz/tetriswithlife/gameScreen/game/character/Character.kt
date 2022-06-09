@@ -98,7 +98,12 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
     }
 
     fun isEating(): Boolean {
-        return eat && angle.direction == move
+        // Если angle не соотвествует основным направлениям, то делаем ошибку и возвращает что не едим
+        return try {
+            eat && angle.direction == move
+        } catch (e: java.lang.Exception) {
+            false
+        }
     }
 
     private fun newFrame(newPath: List<Direction>) {

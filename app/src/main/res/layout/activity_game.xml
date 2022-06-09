@@ -68,6 +68,7 @@
         android:layout_marginEnd="@dimen/buttonPadding"
         android:layout_marginTop="@dimen/buttonPadding"
         android:text="@string/infobreath_game_textview"
+        android:textAlignment="center"
         android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent"
@@ -105,6 +106,7 @@
         android:layout_marginTop="@dimen/buttonPadding"
         android:layout_marginEnd="@dimen/buttonPadding"
         android:text="@string/record_game_textview"
+        android:textAlignment="center"
         app:layout_constraintEnd_toStartOf="@+id/gameSurfaceView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nextFigureSurfaceView" />
