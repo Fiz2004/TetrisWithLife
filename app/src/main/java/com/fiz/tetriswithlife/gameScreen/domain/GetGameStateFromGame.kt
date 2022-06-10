@@ -57,11 +57,11 @@ class GetGameStateFromGame @Inject constructor(
 
     operator fun invoke(game: Game): GameState {
         return GameState(
-            backgroundsUi = getBackgroundsUi(game.grid),
-            blocksUi = getBlocksUi(game.grid),
-            characterUi = getCharacterUi(game.grid.character),
-            blocksCurrentFigureUi = getCurrentFigure(game.grid.currentFigure),
-            blocksNextFigureUi = getNextFigureUi(game.nextFigure),
+            backgroundsUi = getBackgroundsUi(game.actors),
+            blocksUi = getBlocksUi(game.actors),
+            characterUi = getCharacterUi(game.actors.character),
+            blocksCurrentFigureUi = getCurrentFigure(game.actors.currentFigure),
+            blocksNextFigureUi = getNextFigureUi(game.actors.nextFigure),
             scores = game.scores,
             status = getStatusUi(game.status),
             record = recordRepository.loadRecord()
@@ -76,7 +76,7 @@ class GetGameStateFromGame @Inject constructor(
         }
     }
 
-    private fun getBackgroundsUi(grid: Grid) = grid.space
+    private fun getBackgroundsUi(actors: Actors) = actors.grid.space
         .flatMapIndexed { y, elements ->
             elements.mapIndexed { x, element ->
                 val screen = globalOffsetScreen + Vector(x, y) * newTile
@@ -92,7 +92,7 @@ class GetGameStateFromGame @Inject constructor(
             }
         }
 
-    private fun getBlocksUi(grid: Grid) = grid.space
+    private fun getBlocksUi(actors: Actors) = actors.grid.space
         .flatMapIndexed { y, elements ->
             elements.mapIndexedNotNull { x, element ->
                 if (element.block != 0) {

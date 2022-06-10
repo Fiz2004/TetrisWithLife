@@ -176,7 +176,7 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
         return listOf(Direction.Stop)
     }
 
-    private fun isCanDirectionsAndSetCharacterEat(
+    fun isCanDirectionsAndSetCharacterEat(
         paths: List<Direction>,
         isCanEat: Boolean = Random.nextInt(100) < PROBABILITY_EAT_PERCENT,
         isOutside: (Vector) -> Boolean,
@@ -217,7 +217,8 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
     companion object {
         fun create(
             grid: Grid, coordinate: Coordinate = Coordinate(
-                grid.space[grid.space.lastIndex].indices.shuffled().first().toDouble(),
+                grid.space[grid.space.lastIndex].indices.shuffled().first()
+                    .toDouble(),
                 (grid.space.lastIndex).toDouble()
             )
         ): Character {

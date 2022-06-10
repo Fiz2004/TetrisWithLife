@@ -2,25 +2,17 @@ package com.fiz.tetriswithlife.gameScreen.game
 
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
 import com.fiz.tetriswithlife.gameScreen.domain.repositories.RecordRepository
-import com.fiz.tetriswithlife.gameScreen.game.figure.Figure
 import java.io.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.min
-
-const val WIDTH_GRID: Int = 10
-const val HEIGHT_GRID: Int = 20
 
 const val PROBABILITY_EAT_PERCENT = 20
 
 private const val mSEC_FROM_FPS_60 = ((1.0 / 60.0) * 1000.0).toLong()
 
 @Singleton
-class Game @Inject constructor(
-    var width: Int = WIDTH_GRID,
-    var height: Int = HEIGHT_GRID,
-    private val recordRepository: RecordRepository
-) {
+class Game @Inject constructor(private val recordRepository: RecordRepository) {
     var status: StatusGame = StatusGame.Playing
         private set
 
@@ -30,21 +22,8 @@ class Game @Inject constructor(
     var lastTime: Long = System.currentTimeMillis()
         private set
 
-    var grid: Grid = Grid.create(width, height)
+    var actors: Actors = Actors()
         private set
-
-    var nextFigure: Figure = Figure()
-        private set
-
-    private var loopStatus: LoopStatusGame = LoopStatusGame.Continue
-
-    private fun newGame() {
-        grid = Grid.create(width, height)
-        nextFigure = Figure()
-        scores = 0
-        status = StatusGame.Playing
-        loopStatus = LoopStatusGame.Continue
-    }
 
     fun update(controller: Controller) {
         val deltaTime = getDeltaTime()
@@ -67,19 +46,9 @@ class Game @Inject constructor(
     private fun gameLoop(
         deltaTime: Double, controller: Controller
     ) {
-        when (loopStatus) {
-            LoopStatusGame.Continue -> {
-                loopStatus = grid.update(deltaTime, controller, ::plusScores)
-                if (loopStatus !is LoopStatusGame.End && grid.currentFigure.isStatusLastMovedDownFixation) {
-                    grid.fixation(nextFigure, scores, ::plusScores)
-                    nextFigure = Figure()
-                }
-            }
-            is LoopStatusGame.End -> {
-                loopStatus.timeToRestart -= deltaTime
-                if (loopStatus.timeToRestart < 0) newGame()
-            }
-        }
+        actors.update(deltaTime, controller, { scores }, ::plusScores)
+        if (actors.actorsStatus == Actors.Companion.ActorsStatus.NewGame)
+            newGame()
     }
 
     private fun plusScores(score: Int) {
@@ -87,29 +56,31 @@ class Game @Inject constructor(
         if (scores > recordRepository.loadRecord()) recordRepository.saveRecord(scores)
     }
 
-    fun clickPause() {
-        if (status == StatusGame.NewGame) return
-        status = if (status == StatusGame.Playing) StatusGame.Pause
-        else StatusGame.Playing
+    private fun newGame() {
+        actors = Actors()
+        scores = 0
+        status = StatusGame.Playing
     }
 
     fun clickNewGame() {
         status = StatusGame.NewGame
     }
 
+    fun clickPause() {
+        status = when (status) {
+            StatusGame.Playing -> StatusGame.Pause
+            StatusGame.Pause -> StatusGame.Playing
+            StatusGame.NewGame -> return
+        }
+    }
+
     fun loadState(
-        width: Int,
-        height: Int,
-        grid: Grid,
-        nextFigure: Figure,
+        actors: Actors,
         status: StatusGame,
         scores: Int,
         lastTime: Long,
     ) {
-        this.width = width
-        this.height = height
-        this.grid = grid
-        this.nextFigure = nextFigure
+        this.actors = actors
         this.status = status
         this.scores = scores
         this.lastTime = lastTime
@@ -117,16 +88,9 @@ class Game @Inject constructor(
 
     companion object {
 
-        private const val SecTimeForRestartForEndGame = 1.0
-
         enum class StatusGame : Serializable {
             Playing, Pause, NewGame
         }
 
-        sealed class LoopStatusGame(var timeToRestart: Double = SecTimeForRestartForEndGame) :
-            Serializable {
-            object Continue : LoopStatusGame()
-            class End : LoopStatusGame(timeToRestart = SecTimeForRestartForEndGame)
-        }
     }
 }
