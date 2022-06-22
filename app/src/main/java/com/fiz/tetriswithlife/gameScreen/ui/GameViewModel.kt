@@ -79,7 +79,6 @@ class GameViewModel @Inject constructor(
         game.clickPause()
     }
 
-
     fun clickLeftButton(value: Boolean) {
         controller.left = value
     }

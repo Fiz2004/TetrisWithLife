@@ -35,8 +35,7 @@ class GameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val isNewGame = intent.getBooleanExtra(NEW_GAME, false)
-        if (isNewGame)
+        if (savedInstanceState == null)
             gameViewModel.clickNewGameButton()
 
         init(savedInstanceState)
@@ -183,8 +182,5 @@ class GameActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
-    companion object {
-        const val NEW_GAME = "newGame"
-    }
 }
 

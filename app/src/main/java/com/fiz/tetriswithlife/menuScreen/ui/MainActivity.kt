@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     private fun bindListener() {
         binding.newGameButton.setOnClickListener {
             val intent = Intent(this, GameActivity::class.java)
-            intent.putExtra(GameActivity.NEW_GAME, true)
             startActivity(intent)
         }
 
