@@ -47,7 +47,7 @@ class Game @Inject constructor(private val recordRepository: RecordRepository) {
         deltaTime: Double, controller: Controller
     ) {
         actors.update(deltaTime, controller, { scores }, ::plusScores)
-        if (actors.actorsStatus == Actors.Companion.ActorsStatus.NewGame)
+        if (actors.actorsStatus == ActorsStatus.NewGame)
             newGame()
     }
 

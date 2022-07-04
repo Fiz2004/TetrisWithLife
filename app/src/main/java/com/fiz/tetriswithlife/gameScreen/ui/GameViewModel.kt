@@ -18,8 +18,7 @@ class GameViewModel @Inject constructor(
     private val controller: Controller
 ) : ViewModel() {
 
-    var gameState: MutableStateFlow<GameState> =
-        MutableStateFlow(getGameStateFromGame(game))
+    var gameState: MutableStateFlow<GameState> = MutableStateFlow(getGameStateFromGame(game))
         private set
 
     private var gameJob: Job? = null
@@ -57,7 +56,6 @@ class GameViewModel @Inject constructor(
                 while (isActive) {
 
                     game.update(controller)
-
                     gameState.value = getGameStateFromGame(game)
                 }
             }

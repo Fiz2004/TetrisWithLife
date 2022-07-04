@@ -1,6 +1,5 @@
 package com.fiz.tetriswithlife.gameScreen.game
 
-import android.util.Log
 import com.fiz.tetriswithlife.gameScreen.domain.models.Controller
 import com.fiz.tetriswithlife.gameScreen.game.character.Character
 import com.fiz.tetriswithlife.gameScreen.game.figure.CurrentFigure
@@ -40,12 +39,12 @@ class Actors(
         plusScores: (Int) -> Unit
     ) {
         when (actorsStatus) {
-            ActorsStatus.Continue -> {
+            is ActorsStatus.Continue -> {
                 currentFigure.update(deltaTime, controller, grid::isCollisionPoint)
                 characterUpdate(deltaTime, plusScores)
 
                 actorsStatus = if (isEndGame)
-                    ActorsStatus.End()
+                    ActorsStatus.End
                 else
                     ActorsStatus.Continue
 
@@ -147,11 +146,9 @@ class Actors(
 
     fun fixation(nextFigure: Figure, scores: Int, plusScores: (Int) -> Unit) {
         val tile = currentFigure.getPositionTile()
-        for ((index, value) in tile.withIndex()) {
-            if (value.y < 0)
-                Log.e("Er", currentFigure.statusLastMovedDown.toString())
+        for ((index, value) in tile.withIndex())
             grid.space[value.y][value.x].fixationCell(currentFigure.figure.cells[index].block)
-        }
+
         val countRowFull = grid.countRowFull
         if (countRowFull != 0)
             grid.removeRows()
@@ -173,14 +170,14 @@ class Actors(
     }
 
     companion object {
-        private const val SecTimeForRestartForEndGame = 1.0
-
-        sealed class ActorsStatus(var timeToRestart: Double = SecTimeForRestartForEndGame) :
-            Serializable {
-            object Continue : ActorsStatus()
-            class End : ActorsStatus(timeToRestart = SecTimeForRestartForEndGame)
-            object NewGame : ActorsStatus()
-        }
+        const val SecTimeForRestartForEndGame = 1.0
     }
 
+}
+
+sealed class ActorsStatus(var timeToRestart: Double = Actors.SecTimeForRestartForEndGame) :
+    Serializable {
+    object Continue : ActorsStatus()
+    object End : ActorsStatus(timeToRestart = Actors.SecTimeForRestartForEndGame)
+    object NewGame : ActorsStatus()
 }
