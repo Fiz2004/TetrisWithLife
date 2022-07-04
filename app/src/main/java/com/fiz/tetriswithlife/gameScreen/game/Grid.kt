@@ -4,8 +4,8 @@ import java.io.Serializable
 import kotlin.random.Random
 
 private const val NUMBER_IMAGES_BACKGROUND = 16
-const val WIDTH_GRID: Int = 10
-const val HEIGHT_GRID: Int = 20
+const val WIDTH_GRID: Int = 12
+const val HEIGHT_GRID: Int = 25
 
 class Grid(
     width: Int = WIDTH_GRID,

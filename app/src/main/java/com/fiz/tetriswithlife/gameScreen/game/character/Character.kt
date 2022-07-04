@@ -10,7 +10,7 @@ import kotlin.random.Random
 // Время без дыхания для проигрыша
 const val TIMES_BREATH_LOSE = 60.0
 
-private const val BASE_SPEED_FOR_SECOND = 1.0 / 1000.0
+private const val BASE_SPEED_FOR_SECOND = 1.0
 
 private const val BASE_SPEED_ROTATE_FOR_SECOND = 45.0
 
@@ -48,14 +48,18 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
 
     private var isDeleteRow: Boolean = false
 
+    var isLastNewFrame = true
+
     private val isNewFrame: Boolean
         get() {
-            val deviantLine = 1.0 / 2000.0
+            val deviantLine = 1.0 / 60.0 / 2.0
             val deviantAngle = 1.0 / 100.0
             val isNewFrameByX = (position.x % 1) !in deviantLine..(1 - deviantLine)
             val isNewFrameByY = (position.y % 1) !in deviantLine..(1 - deviantLine)
             val isNewFrameByRotate = (angle.angle / 45) % 2 !in (deviantAngle..2 - deviantAngle)
-            return isNewFrameByX && isNewFrameByY && isNewFrameByRotate
+            val result = isNewFrameByX && isNewFrameByY && isNewFrameByRotate
+            isLastNewFrame = result
+            return result
         }
 
     private val currentMove: Direction
@@ -87,10 +91,17 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
 
     private fun move(deltaTime: Double) {
         if (speed.isMove) {
-            position += angle.direction.value * speed.line
+            val step = if (isLastNewFrame) {
+                angle.direction.value * speed.line * (1.0 / 60.0)
+            } else {
+                angle.direction.value * speed.line * deltaTime
+            }
+            position += step
         }
 
-        if (speed.isRotated) angle += Angle(speed.rotate)
+        if (speed.isRotated) {
+            angle += Angle(speed.rotate)
+        }
     }
 
     fun setBreath(value: Boolean) {
@@ -116,11 +127,17 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
         val needAngle = needVector.value.angleInDegrees
 
         var signAtClockwise = 1
-        if ((currentAngle - needAngle) in (0.0..180.0)) signAtClockwise = -1
+        if ((currentAngle - needAngle) in (0.0..180.0)) {
+            signAtClockwise = -1
+        }
 
-        if (needVector.value.equalsWith(currentAngle)) return Speed(BASE_SPEED_FOR_SECOND, 0.0)
+        if (needVector.value.equalsWith(currentAngle)) {
+            return Speed(BASE_SPEED_FOR_SECOND, 0.0)
+        }
 
-        if (currentAngle == needAngle) return Speed(0.0, 0.0)
+        if (currentAngle == needAngle) {
+            return Speed(0.0, 0.0)
+        }
 
         return Speed(0.0, signAtClockwise * BASE_SPEED_ROTATE_FOR_SECOND)
     }
@@ -128,10 +145,15 @@ class Character private constructor(startPosition: Coordinate) : Serializable {
     private fun getPath(
         isOutside: (Vector) -> Boolean, isNotFree: (Vector) -> Boolean
     ): List<Direction> {
-        val isPathFree = if (isDeleteRow) path == isCanMove(listOf(path), isOutside, isNotFree)
-        else true
+        val isPathFree = if (isDeleteRow) {
+            path == isCanMove(listOf(path), isOutside, isNotFree)
+        } else {
+            true
+        }
 
-        if (path.isEmpty() || !isPathFree) return getNewPath(isOutside, isNotFree)
+        if (path.isEmpty() || path[0] == Direction.Stop || !isPathFree) {
+            return getNewPath(isOutside, isNotFree)
+        }
 
         return path
     }
