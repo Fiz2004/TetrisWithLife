@@ -23,4 +23,10 @@
     <string name="name">Имя: %1$s</string>
     <string name="enter_name">Введите имя</string>
     <string name="name_options">Ваше имя</string>
+
+    <string name="game_finish">Игра окончена</string>
+    <string name="game_your_scores">Вы набрали %1$s очков</string>
+    <string name="game_alert_ok">Продолжить</string>
+    <string name="game_alert_cancel">Вернуться в меню</string>
+
 </resources>

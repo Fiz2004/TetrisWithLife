@@ -24,4 +24,9 @@
     <string name="name">Name: %1$s</string>
     <string name="enter_name">Enter name</string>
     <string name="name_options">Your name</string>
+
+    <string name="game_finish">The game is over</string>
+    <string name="game_your_scores">You scored %1$s points</string>
+    <string name="game_alert_ok">Continue</string>
+    <string name="game_alert_cancel">Go back to the menu</string>
 </resources>

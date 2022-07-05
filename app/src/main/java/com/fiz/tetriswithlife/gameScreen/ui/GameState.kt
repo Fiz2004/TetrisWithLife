@@ -18,7 +18,7 @@ data class GameState(
     val blocksNextFigureUi: List<NextFigureUi>,
     val scores: Int,
     val status: StatusCurrentGame,
-    val record: Int
+    val record: Int,
 ) {
 
     val textForScores: String = getScore(scores)

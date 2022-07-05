@@ -144,7 +144,7 @@ class Actors(
         return isCharacterCollisionCurrentFigure || isCharacterNoEatAndCollisionBlockGrid
     }
 
-    fun fixation(nextFigure: Figure, scores: Int, plusScores: (Int) -> Unit) {
+    private fun fixation(nextFigure: Figure, scores: Int, plusScores: (Int) -> Unit) {
         val tile = currentFigure.getPositionTile()
         for ((index, value) in tile.withIndex())
             grid.space[value.y][value.x].fixationCell(currentFigure.figure.cells[index].block)

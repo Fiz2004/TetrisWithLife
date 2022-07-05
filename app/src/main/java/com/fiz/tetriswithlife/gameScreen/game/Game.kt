@@ -25,12 +25,12 @@ class Game @Inject constructor(private val recordRepository: RecordRepository) {
     var actors: Actors = Actors()
         private set
 
-    fun update(controller: Controller) {
+    fun update(controller: Controller, infoGame: (Int) -> Unit) {
         val deltaTime = getDeltaTime()
         if (deltaTime == 0.0) return
 
         when (status) {
-            StatusGame.Playing -> gameLoop(deltaTime, controller)
+            StatusGame.Playing -> gameLoop(deltaTime, controller,infoGame)
             StatusGame.NewGame -> newGame()
             StatusGame.Pause -> return
         }
@@ -44,11 +44,13 @@ class Game @Inject constructor(private val recordRepository: RecordRepository) {
     }
 
     private fun gameLoop(
-        deltaTime: Double, controller: Controller
+        deltaTime: Double, controller: Controller, infoGame: (Int) -> Unit
     ) {
         actors.update(deltaTime, controller, { scores }, ::plusScores)
-        if (actors.actorsStatus == ActorsStatus.NewGame)
+        if (actors.actorsStatus == ActorsStatus.NewGame) {
+            infoGame(scores)
             newGame()
+        }
     }
 
     private fun plusScores(score: Int) {

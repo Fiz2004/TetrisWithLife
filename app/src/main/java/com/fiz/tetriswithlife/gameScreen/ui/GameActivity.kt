@@ -1,11 +1,15 @@
 package com.fiz.tetriswithlife.gameScreen.ui
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.View
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.fiz.tetriswithlife.R
 import com.fiz.tetriswithlife.databinding.ActivityGameBinding
@@ -164,6 +168,27 @@ class GameActivity : AppCompatActivity() {
                         }
                     }
 
+                }
+            }
+        }
+
+        launchAndRepeatWithViewLifecycleWithMain {
+            gameViewModel.gameEffect.collect {
+                if (it is GameEffect.ShowAlertDialog) {
+                    AlertDialog.Builder(this@GameActivity)
+                        .setTitle(getString(R.string.game_finish))
+                        .setMessage(getString(R.string.game_your_scores, it.scores.toString()))
+                        .setPositiveButton(getString(R.string.game_alert_ok)) { dialog, _ ->
+                            dialog.dismiss()
+                            gameViewModel.continueGame()
+                        }
+                        .setNegativeButton(getString(R.string.game_alert_cancel)) { dialog, _ ->
+                            dialog.dismiss()
+                            finish()
+                        }
+                        .create()
+                        .show()
+                    gameViewModel.showedDialog()
                 }
             }
         }

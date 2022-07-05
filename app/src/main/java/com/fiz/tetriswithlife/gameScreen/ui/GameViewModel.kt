@@ -8,8 +8,13 @@ import com.fiz.tetriswithlife.gameScreen.game.Game
 import com.fiz.tetriswithlife.gameScreen.ui.models.GameForSaveInstanceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
+
+sealed class GameEffect {
+    data class ShowAlertDialog (val scores:Int) : GameEffect()
+}
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -21,9 +26,14 @@ class GameViewModel @Inject constructor(
     var gameState: MutableStateFlow<GameState> = MutableStateFlow(getGameStateFromGame(game))
         private set
 
+    var gameEffect: MutableSharedFlow<GameEffect> = MutableSharedFlow()
+        private set
+
     private var gameJob: Job? = null
 
     private var surfaceReady = mutableListOf(false, false)
+
+    private var pause = false
 
     fun loadGame(gameForSaveInstanceState: GameForSaveInstanceState?) {
         game = gameForSaveInstanceState?.toGame(game) ?: return
@@ -54,11 +64,18 @@ class GameViewModel @Inject constructor(
             gameJob?.cancelAndJoin()
             gameJob = viewModelScope.launch(Dispatchers.Default) {
                 while (isActive) {
-
-                    game.update(controller)
-                    gameState.value = getGameStateFromGame(game)
+                    if (!pause) {
+                        game.update(controller, ::infoGame)
+                        gameState.value = getGameStateFromGame(game)
+                    }
                 }
             }
+        }
+    }
+
+    fun infoGame(scores:Int) {
+        viewModelScope.launch {
+            gameEffect.emit(GameEffect.ShowAlertDialog(scores))
         }
     }
 
@@ -91,6 +108,14 @@ class GameViewModel @Inject constructor(
 
     fun clickRotateButton(value: Boolean) {
         controller.up = value
+    }
+
+    fun showedDialog() {
+        pause = true
+    }
+
+    fun continueGame() {
+        pause=false
     }
 }
 
